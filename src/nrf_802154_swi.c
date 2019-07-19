@@ -231,12 +231,12 @@ typedef struct
 } nrf_802154_req_data_t;
 
 static nrf_802154_ntf_data_t m_ntf_queue[NTF_QUEUE_SIZE]; ///< Notification queue.
-static uint8_t               m_ntf_r_ptr;                 ///< Notification queue read index.
-static uint8_t               m_ntf_w_ptr;                 ///< Notification queue write index.
+static volatile uint8_t      m_ntf_r_ptr;                 ///< Notification queue read index.
+static volatile uint8_t      m_ntf_w_ptr;                 ///< Notification queue write index.
 
 static nrf_802154_req_data_t m_req_queue[REQ_QUEUE_SIZE]; ///< Request queue.
-static uint8_t               m_req_r_ptr;                 ///< Request queue read index.
-static uint8_t               m_req_w_ptr;                 ///< Request queue write index.
+static volatile uint8_t      m_req_r_ptr;                 ///< Request queue read index.
+static volatile uint8_t      m_req_w_ptr;                 ///< Request queue write index.
 
 /**
  * Increment given index for any queue.
@@ -244,12 +244,16 @@ static uint8_t               m_req_w_ptr;                 ///< Request queue wri
  * @param[inout]  p_ptr       Index to increment.
  * @param[in]     queue_size  Number of elements in the queue.
  */
-static void queue_ptr_increment(uint8_t * p_ptr, uint8_t queue_size)
+static void queue_ptr_increment(volatile uint8_t * p_ptr, uint8_t queue_size)
 {
-    if (++(*p_ptr) >= queue_size)
+    uint8_t tmp;
+    tmp = *p_ptr;
+    tmp++;
+    if (tmp >= queue_size)
     {
-        *p_ptr = 0;
+        tmp = 0U;
     }
+    *p_ptr = tmp;
 }
 
 /**
@@ -296,7 +300,7 @@ static bool queue_is_empty(uint8_t r_ptr, uint8_t w_ptr)
  *
  * @param[inout]  p_ptr  Pointer to the index to increment.
  */
-static void ntf_queue_ptr_increment(uint8_t * p_ptr)
+static void ntf_queue_ptr_increment(volatile uint8_t * p_ptr)
 {
     queue_ptr_increment(p_ptr, NTF_QUEUE_SIZE);
 }
@@ -363,7 +367,7 @@ static void ntf_exit(void)
  *
  * @param[inout]  p_ptr  Pointer to the index to increment.
  */
-static void req_queue_ptr_increment(uint8_t * p_ptr)
+static void req_queue_ptr_increment(volatile uint8_t * p_ptr)
 {
     queue_ptr_increment(p_ptr, REQ_QUEUE_SIZE);
 }
@@ -735,7 +739,9 @@ void SWI_IRQHandler(void)
                     assert(false);
             }
 
+            __disable_irq();
             ntf_queue_ptr_increment(&m_ntf_r_ptr);
+            __enable_irq();
         }
     }
 
@@ -813,7 +819,9 @@ void SWI_IRQHandler(void)
                     assert(false);
             }
 
+            __disable_irq();
             req_queue_ptr_increment(&m_req_r_ptr);
+            __enable_irq();
         }
     }
 }
