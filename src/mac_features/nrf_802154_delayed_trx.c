@@ -102,6 +102,11 @@ static volatile delayed_trx_op_state_t m_dly_op_state[RSCH_DLY_TS_NUM];
  */
 static volatile delayed_rx_frame_data_t m_dly_rx_frame;
 
+bool bughunt_dtxstate_is_stopped(void)
+{
+    return (m_dly_op_state[RSCH_DLY_TX] == DELAYED_TRX_OP_STATE_STOPPED);
+}
+
 /**
  * Set state of a delayed operation.
  *
