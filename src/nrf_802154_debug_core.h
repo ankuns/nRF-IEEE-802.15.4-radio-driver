@@ -42,7 +42,11 @@
 extern "C" {
 #endif
 
+#ifdef NRF52840_XXAA
 #define NRF_802154_DEBUG_LOG_BUFFER_LEN 16384
+#else
+#define NRF_802154_DEBUG_LOG_BUFFER_LEN 1024
+#endif
 
 #define EVENT_TRACE_ENTER               0x0001UL
 #define EVENT_TRACE_EXIT                0x0002UL
