@@ -2790,9 +2790,7 @@ bool nrf_802154_core_sleep(nrf_802154_term_t term_lvl)
             }
             else
             {
-                nrf_radio_reset();
-                state_set(RADIO_STATE_SLEEP);
-                sleep_init();
+                result = false;
             }
         }
 
