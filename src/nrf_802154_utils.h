@@ -67,7 +67,6 @@
 #define NRF_IS_IRQ_PRIORITY_ALLOWED(priority) \
     (((priority) >= 0) && ((priority) < (1U << (__NVIC_PRIO_BITS))))
 
-
 /**@brief Macro to get the number of elements in an array.
  *
  * @param[in] X   Array.
