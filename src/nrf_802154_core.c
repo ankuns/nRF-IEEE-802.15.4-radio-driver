@@ -54,6 +54,7 @@
 #include "nrf_802154_rx_buffer.h"
 #include "nrf_802154_timer_coord.h"
 #include "nrf_802154_types.h"
+#include "nrf_802154_utils.h"
 #include "nrf_egu.h"
 #include "nrf_ppi.h"
 #include "nrf_radio.h"
@@ -567,6 +568,9 @@ static void nrf_radio_reset(void)
 /** Initialize interrupts for radio peripheral. */
 static void irq_init(void)
 {
+#if !NRF_IS_IRQ_PRIORITY_ALLOWED(NRF_802154_IRQ_PRIORITY)
+#error NRF_802154_IRQ_PRIORITY value out of allowed range
+#endif
     NVIC_SetPriority(RADIO_IRQn, NRF_802154_IRQ_PRIORITY);
     NVIC_ClearPendingIRQ(RADIO_IRQn);
 }
