@@ -588,7 +588,7 @@ static void nrf_radio_reset(void)
 static void irq_init(void)
 {
 #if !NRF_IS_IRQ_PRIORITY_ALLOWED(NRF_802154_IRQ_PRIORITY)
-#error NRF_802154_IRQ_PRIORITY value out of allowed range
+#error NRF_802154_IRQ_PRIORITY value out of the allowed range.
 #endif
     NVIC_SetPriority(RADIO_IRQn, NRF_802154_IRQ_PRIORITY);
     NVIC_ClearPendingIRQ(RADIO_IRQn);

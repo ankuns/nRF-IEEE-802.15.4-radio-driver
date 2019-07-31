@@ -449,7 +449,7 @@ void nrf_802154_swi_init(void)
     nrf_egu_int_enable(SWI_EGU, NTF_INT | HFCLK_STOP_INT | REQ_INT);
 
 #if !NRF_IS_IRQ_PRIORITY_ALLOWED(NRF_802154_SWI_PRIORITY)
-#error NRF_802154_SWI_PRIORITY value out of allowed range
+#error NRF_802154_SWI_PRIORITY value out of the allowed range.
 #endif
     NVIC_SetPriority(SWI_IRQn, NRF_802154_SWI_PRIORITY);
     NVIC_ClearPendingIRQ(SWI_IRQn);
