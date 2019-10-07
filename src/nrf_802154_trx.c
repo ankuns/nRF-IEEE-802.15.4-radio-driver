@@ -518,12 +518,12 @@ static void fem_power_down_now(void)
 {
     nrf_802154_fal_deactivate_now(NRF_802154_FAL_ALL);
 
-    if (nrf_fem_prepare_powerdown(NRF_802154_COUNTER_TIMER_INSTANCE, NRF_TIMER_CC_CHANNEL0, PPI_EGU_TIMER_START))
+    if (nrf_fem_prepare_powerdown(NRF_802154_TIMER_INSTANCE, NRF_TIMER_CC_CHANNEL0, PPI_EGU_TIMER_START))
     {
         // FEM requires timer to run to perform powering down operation
-        nrf_timer_event_clear(NRF_802154_COUNTER_TIMER_INSTANCE, NRF_TIMER_EVENT_COMPARE0);
+        nrf_timer_event_clear(NRF_802154_TIMER_INSTANCE, NRF_TIMER_EVENT_COMPARE0);
 
-        nrf_timer_task_trigger(NRF_802154_COUNTER_TIMER_INSTANCE, NRF_TIMER_TASK_START);
+        nrf_timer_task_trigger(NRF_802154_TIMER_INSTANCE, NRF_TIMER_TASK_START);
 
         while (!nrf_timer_event_check(NRF_802154_TIMER_INSTANCE, NRF_TIMER_EVENT_COMPARE0))
         {
@@ -557,7 +557,7 @@ void nrf_802154_trx_disable(void)
         /* Stop & deconfigure timer */
         nrf_timer_shorts_disable(NRF_802154_TIMER_INSTANCE,
                                  NRF_TIMER_SHORT_COMPARE0_STOP_MASK | NRF_TIMER_SHORT_COMPARE1_STOP_MASK);
-        nrf_timer_task_trigger(NRF_802154_COUNTER_TIMER_INSTANCE, NRF_TIMER_TASK_SHUTDOWN);
+        nrf_timer_task_trigger(NRF_802154_TIMER_INSTANCE, NRF_TIMER_TASK_SHUTDOWN);
 
         nrf_radio_power_set(true);
 
@@ -571,7 +571,11 @@ void nrf_802154_trx_disable(void)
             fem_power_down_now();
         }
 
-#if !NRF_802154_DISABLE_BCC_MATCHING
+#if NRF_802154_DISABLE_BCC_MATCHING
+        // Anomaly 78: use SHUTDOWN instead of STOP and CLEAR.
+        nrf_timer_task_trigger(NRF_802154_COUNTER_TIMER_INSTANCE, NRF_TIMER_TASK_SHUTDOWN);
+        nrf_timer_shorts_disable(NRF_802154_COUNTER_TIMER_INSTANCE, NRF_TIMER_SHORT_COMPARE1_STOP_MASK);
+#else
         m_flags.psdu_being_received = false;
 #endif
         m_flags.missing_receive_buffer = false;
