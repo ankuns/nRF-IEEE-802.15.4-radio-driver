@@ -233,14 +233,6 @@ void nrf_802154_deinit(void)
     nrf_802154_core_deinit();
 }
 
-#if !NRF_802154_INTERNAL_RADIO_IRQ_HANDLING
-void nrf_802154_radio_irq_handler(void)
-{
-    nrf_802154_core_irq_handler();
-}
-
-#endif // !NRF_802154_INTERNAL_RADIO_IRQ_HANDLING
-
 #if ENABLE_FEM
 void nrf_802154_fem_control_cfg_set(nrf_802154_fem_control_cfg_t const * const p_cfg)
 {

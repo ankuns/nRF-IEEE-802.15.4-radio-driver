@@ -1893,7 +1893,7 @@ static void irq_handler_edend(void)
     nrf_802154_trx_energy_detection_finished(ed_sample);
 }
 
-static void irq_handler(void)
+void nrf_802154_radio_irq_handler(void)
 {
     nrf_802154_log(EVENT_TRACE_ENTER, FUNCTION_IRQ_HANDLER);
 
@@ -2012,9 +2012,8 @@ static void irq_handler(void)
 
 #if NRF_802154_INTERNAL_RADIO_IRQ_HANDLING
 void RADIO_IRQHandler(void)
-#else // NRF_802154_INTERNAL_RADIO_IRQ_HANDLING
-void nrf_802154_core_irq_handler(void)
-#endif  // NRF_802154_INTERNAL_RADIO_IRQ_HANDLING
 {
-    irq_handler();
+    nrf_802154_radio_irq_handler();
 }
+
+#endif  // NRF_802154_INTERNAL_RADIO_IRQ_HANDLING
