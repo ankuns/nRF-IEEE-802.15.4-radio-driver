@@ -725,9 +725,6 @@ static void rx_init(bool disabled_was_triggered)
 
     nrf_802154_trx_receive_frame(BCC_INIT / 8U);
 
-    // TODO: This is UGLY looking into radio's internal, should be wrapped by trx.
-    // TODO: This is done also after triggering receive. There is possibility that frame will be received before
-    // we connect event crcok to timer coord
     // Configure the timer coordinator to get a timestamp of the CRCOK event.
     nrf_802154_timer_coord_timestamp_prepare(
         (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_CRCOK));
@@ -912,7 +909,6 @@ static void on_preconditions_denied(radio_state_t state)
         case RADIO_STATE_RX:
             if (receiving_psdu_now)
             {
-                // TODO: Add new status code
                 receive_failed_notify(NRF_802154_RX_ERROR_ABORTED);
             }
 
@@ -1072,7 +1068,7 @@ uint8_t nrf_802154_trx_receive_on_bcmatch(uint8_t bcc)
             else
             {
                 m_flags.frame_filtered = true;
-                // TODO request higher preconditions (RX active)
+
                 nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
             }
         }
@@ -1452,7 +1448,6 @@ static bool ack_match_check_version_2(const uint8_t * p_tx_data, const uint8_t *
     assert(parse_result);
     parse_result = nrf_802154_frame_parser_mhr_parse(p_ack_data, &ack_mhr_data);
 
-    // TOOD: Check PHR (frame length), may be complicated
     if (!parse_result ||
         (tx_mhr_data.p_src_addr == NULL) ||
         (ack_mhr_data.p_dst_addr == NULL) ||
@@ -1865,7 +1860,6 @@ bool nrf_802154_core_cca_cfg_update(void)
     {
         if (timeslot_is_granted())
         {
-            // TODO: rewrite this function to use trx
             nrf_802154_trx_cca_configuration_update();
         }
 
