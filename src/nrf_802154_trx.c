@@ -35,15 +35,15 @@
 #include "nrf_802154_const.h"
 #include "nrf_802154_types.h"
 #include "nrf_802154_peripherals.h"
-#include "nrf_802154_pib.h"  // Unwanted dependency, but required yet
-#include "nrf_802154_rssi.h" // Unwanted dependency, but required yet
+#include "nrf_802154_pib.h"
+#include "nrf_802154_rssi.h"
 #include "nrf_802154_utils.h"
 
 #include "nrf_egu.h"
 #include "nrf_radio.h"
 
-#include "nrf_802154_procedures_duration.h" // Because of RX_RAMP_UP_TIME/TX_RAMP_UP_TIME
-#include "nrf_802154_critical_section.h"    // do we really want to have this dependency
+#include "nrf_802154_procedures_duration.h"
+#include "nrf_802154_critical_section.h"
 #include "fem/nrf_fem_protocol_api.h"
 
 #include "nrf_802154_trx.h"
@@ -293,17 +293,6 @@ static void irq_init(void)
 #endif
     NVIC_SetPriority(RADIO_IRQn, NRF_802154_IRQ_PRIORITY);
     NVIC_ClearPendingIRQ(RADIO_IRQn);
-}
-
-/** Deinitialize interrupts for radio peripheral. */
-/*static*/ void irq_deinit(void)
-{
-    NVIC_DisableIRQ(RADIO_IRQn);
-    NVIC_ClearPendingIRQ(RADIO_IRQn);
-    NVIC_SetPriority(RADIO_IRQn, 0);
-
-    __DSB();
-    __ISB();
 }
 
 /** Wait time needed to propagate event through PPI to EGU.
