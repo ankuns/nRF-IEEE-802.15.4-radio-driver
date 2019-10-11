@@ -1178,7 +1178,7 @@ void nrf_802154_trx_receive_frame_received(void)
     {
         // Frame is destined to this node but there is no timeslot to transmit ACK.
         // Just disable receiver and wait for a new timeslot.
-        nrf_802154_trx_receive_frame_abort();
+        nrf_802154_trx_abort();
 
         rx_flags_clear();
 
