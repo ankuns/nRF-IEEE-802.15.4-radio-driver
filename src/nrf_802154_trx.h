@@ -227,15 +227,6 @@ void nrf_802154_trx_energy_detection(uint32_t ed_count);
 
 void nrf_802154_trx_abort(void);
 
-void nrf_802154_trx_go_idle_abort(void);
-void nrf_802154_trx_receive_frame_abort(void);
-void nrf_802154_trx_receive_ack_abort(void);
-void nrf_802154_trx_transmit_frame_abort(void);
-void nrf_802154_trx_transmit_ack_abort(void);
-void nrf_802154_trx_standalone_cca_abort(void);
-void nrf_802154_trx_continuous_carrier_abort(void);
-void nrf_802154_trx_energy_detection_abort(void);
-
 /**@brief   Handler called from isr at the beginning of a frame reception (just after synchronization header is received).
  * @note Proper implementation of this function is out of scope of the trx module.
  */

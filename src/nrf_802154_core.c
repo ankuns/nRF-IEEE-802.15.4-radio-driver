@@ -1075,7 +1075,7 @@ uint8_t nrf_802154_trx_receive_on_bcmatch(uint8_t bcc)
         else if ((filter_result == NRF_802154_RX_ERROR_INVALID_LENGTH) ||
                  (!nrf_802154_pib_promiscuous_get()))
         {
-            nrf_802154_trx_receive_frame_abort();
+            nrf_802154_trx_abort();
             rx_init(true);
 
             frame_accepted = false;
@@ -1105,7 +1105,7 @@ uint8_t nrf_802154_trx_receive_on_bcmatch(uint8_t bcc)
         else
         {
             // Disable receiver and wait for a new timeslot.
-            nrf_802154_trx_receive_frame_abort();
+            nrf_802154_trx_abort();
 
             // We should not leave trx in temporary state, let's receive then.
             // We avoid hard reset of radio during TX ACK phase due to timeslot end,
