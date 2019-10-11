@@ -49,11 +49,45 @@ extern "C" {
 
 /**@brief Initializes trx module.
  *
- * This function must be called exactly once, before any other API call.
+ * This function must be called exactly once, before any other API call. This function sets internal state
+ * of trx module into @c DISABLED. It initializes also those peripherals that are used exclusively
+ * by trx module and are not shared when trx module is in @c DISABLED state.
  */
 void nrf_802154_trx_init(void);
 
+/**@brief Enables trx module.
+ *
+ * Effects of call to this function:
+ * - The RADIO peripheral is fully reset and configured into 802.15.4 mode.
+ * - FEM module state is set to powered off.
+ * - PPIs used by trx module are disabled.
+ * - TIMER used by trx module is shutdown.
+ * - Trx module is in @c IDLE state
+ *
+ * @warning This function may be called when:
+ * - Trx module was in @c DISABLED state (after @ref nrf_802154_trx_init or after @ref nrf_802154_trx_disable).
+ * - HFCLK clock is activated.
+ * - Access to the @ref RADIO peripheral is granted (applicable when the RADIO is shared with other drivers).
+ *
+ * @note When trx was in @c DISABLED state, the RADIO might have been controlled by other drivers. Thus
+ * full reset of the RADIO peripheral is performed.
+ */
 void nrf_802154_trx_enable(void);
+
+/**@brief Disables trx module.
+ *
+ * This function has no effects when the trx module is in @c DISABLED state.
+ * Otherwise following effects apply:
+ * - The RADIO peripheral is fully reset.
+ * - FEM module state is set to powered off.
+ * - all PPSs used by trx module are disabled and cleared.
+ * - TIMER used by trx module is shutdown.
+ * - Trx module is in @c DISABLED state
+ *
+ * @note On call to this function any activity of trx module is stopped. If any operation was executing, it
+ * will be stopped and no handler will be called. After call HFCLK may be deactivated and cto
+ * the @ref RADIO peripheral may be passed
+ */
 void nrf_802154_trx_disable(void);
 
 /**@brief Sets radio channel to use.
@@ -62,33 +96,36 @@ void nrf_802154_trx_disable(void);
  */
 void nrf_802154_trx_channel_set(uint8_t channel);
 
+/**@brief Updates CCA configuration in the RADIO peripheral according to PIB. */
 void nrf_802154_trx_cca_configuration_update(void);
 
-/**@brief Puts the trx module into receive frame (non-ack) mode.
+/**@brief Puts the trx module into receive frame mode.
  *
  * The frame will be received into buffer set by @ref nrf_802154_trx_receive_buffer_set.
  *
  * When NRF_802154_DISABLE_BCC_MATCHING == 0
- * - during receive @ref nrf_802154_trx_receive_on_bcmatch handler (from ISR) is called when
- *   bcc octets is received.
- * - when a frame is received with correct crc, @ref nrf_802154_trx_receive_received is called (from ISR)
- * - when a frame is received with incorrect crc, @ref nrf_802154_trx_receive_crcerror is called (from ISR)
+ * - during receive @ref nrf_802154_trx_receive_frame_bcmatched handler is called when
+ *   bcc octets are received.
+ * - when a frame is received with correct crc, @ref nrf_802154_trx_receive_frame_received is called
+ * - when a frame is received with incorrect crc, @ref nrf_802154_trx_receive_frame_crcerror is called
  *
  * When NRF_802154_DISABLE_BCC_MATCHING != 0
  * - during receive no handlers (no ISRs) are called
- * - after the frame is received with correct crc, @ref nrf_802154_trx_receive_received is called (from ISR)
+ * - after the frame is received with correct crc, @ref nrf_802154_trx_receive_frame_received is called
  * - after the frame is received with incorrect crc:
  *     - when NRF_802154_NOTIFY_CRCERROR == 0:
+ *         - the hardware restarts receive automatically
  *         - no handler is called
- *         - the hardware restarts receive automatically
  *     - when NRF_802154_NOTIFY_CRCERROR != 0:
- *         - @ref nrf_802154_trx_receive_crcerror is called
  *         - the hardware restarts receive automatically
+ *         - @ref nrf_802154_trx_receive_frame_crcerror is called
  *
- * When in @ref nrf_802154_trx_receive_received TIMER is running allowing sending respone (e.g. ACK frame)
+ * When in @ref nrf_802154_trx_receive_frame_received, the TIMER is running allowing sending response (e.g. ACK frame)
  * in time regime by a call to nrf_802154_trx_transmit_after_frame_received.
  *
- * @param[in] bcc   Number of received bytes after which @ref nrf_802154_trx_receive_on_bcmatch will be called.
+ * @note To receive ACK use @ref @ref nrf_802154_trx_receive_ack
+ *
+ * @param[in] bcc   Number of received bytes after which @ref nrf_802154_trx_receive_frame_bcmatched will be called.
  *                  This must not be zero if @ref NRF_802154_DISABLE_BCC_MATCHING == 0.
  *                  When @ref NRF_802154_DISABLE_BCC_MATCHING != 0, this value must be zero.
  *
@@ -97,18 +134,19 @@ void nrf_802154_trx_receive_frame(uint8_t bcc);
 
 /**@brief Puts the trx module into receive ACK mode.
  *
- * The ack frame will be received into buffer set by @ref nrf_802154_trx_receive_buffer_set
+ * The ack frame will be received into buffer set by @ref nrf_802154_trx_receive_buffer_set.
  *
- * During receive of a frame:
- * - @ref nrf_802154_trx_receive_on_framestart is called when a frame has just started being received.
- * - when a frame is received with correct crc, @ref nrf_802154_trx_receive_received is called (from ISR)
- * - when a frame is received with incorrect crc, @ref nrf_802154_trx_receive_crcerror is called (from ISR)
+ * During receive of an ack:
+ * - @ref nrf_802154_trx_receive_ack_started is called when a frame has just started being received.
+ * - when a frame is received with correct crc, @ref nrf_802154_trx_receive_ack_received is called.
+ * - when a frame is received with incorrect crc, @ref nrf_802154_trx_receive_ack_crcerror is called.
+ * - no bcmatch events are generated.
  */
 void nrf_802154_trx_receive_ack(void);
 
 /**@brief Starts RSSI measurement.
  *
- * @note This function succeeds when TRX module is in receive frame state only.
+ * @note This function succeeds when TRX module is in receive frame state only (started with @ref nrf_802154_trx_receive_frame)
  *
  * @retval true     When RSSI measurement has been started.
  * @retval false    When TRX state didn't allow start of RSSI measurement.
@@ -138,29 +176,96 @@ uint8_t nrf_802154_trx_rssi_last_sample_get(void);
 
 /**@brief Check if PSDU is currently being received.
  *
- * @retval true     If trx is in receive mode triggered by nrf_802154_trx_receive_frame and
- *                  a frame receive has been started but not finished yet.
+ * @retval true     If trx is in receive mode triggered by @ref nrf_802154_trx_receive_frame and
+ *                  a frame receive on air has been started but not finished yet.
  * @retval false    Otherwise.
  *
- * @note This function returns false when receive has been triggered by nrf_802154_trx_receive_ack
+ * @note This function returns false when receive has been triggered by @ref nrf_802154_trx_receive_ack
  *       regardless of the fact if the frame on air has been started or not.
  */
 bool nrf_802154_trx_psdu_is_being_received(void);
 
+/**@brief Checks if current receive operation was started without providing receive buffer.
+ *
+ * It may happen that @ref nrf_802154_trx_receive_frame or @ref nrf_802154_trx_receive_ack have been started
+ * when there was no receive buffer set. The RADIO peripheral will start ramping up, but it will remain
+ * in @c RXIDLE state, because of missing receive buffer. This function allows to check if such situation
+ * occurred.
+ *
+ * Usually this function may be called by buffer management subsystem when buffer becomes available.
+ * Consider following code snippet:
+ * @code
+ * void buffer_is_available_callback(void * p_buffer)
+ * {
+ *     if (nrf_802154_trx_receive_is_buffer_missing())
+ *     {
+ *         nrf_802154_trx_receive_buffer_set(p_buffer);
+ *     }
+ * }
+ * @endcode
+ *
+ * @retval true When in receive mode and receive buffer is missing
+ * @retval false Otherwise.
+ */
 bool nrf_802154_trx_receive_is_buffer_missing(void);
 
+/**@brief Sets pointer to a receive buffer.
+ *
+ * @param p_receive_buffer If NULL the next call to @ref nrf_802154_trx_receive_frame or
+ *                         @ref nrf_802154_trx_receive_ack will not be able to receive.
+ *                         If not NULL it must point to MAX_PACKET_SIZE + 1 (see nrf_802154_const.h)
+ *                         buffer where received frame will be stored.
+ *
+ * @retval true  If operation solved missing buffer condition (see @ref nrf_802154_trx_receive_is_buffer_missing)
+ *               and provided buffer will be used in current receive operation.
+ * @retval false If operation didn't solve missing buffer condition (either no missing buffer or currently
+ *               not in receive mode). Provided buffer will be used in next receive operation.
+ */
 bool nrf_802154_trx_receive_buffer_set(void * p_receive_buffer);
 
+/**@brief Begins frame transmit operation.
+ *
+ * This operation performs differently according to cca parameter.
+ * When cca==false:
+ * - The RADIO starts ramp up in transmit mode.
+ * - The RADIO starts sending synchronization header (SHR).
+ * - @ref nrf_802154_trx_transmit_frame_started handler is called from an ISR just after SHR is sent
+ *   (only when @ref NRF_802154_TX_STARTED_NOTIFY_ENABLED == 1).
+ * - @ref nrf_802154_trx_transmit_frame_transmitted handler is called from an ISR after full frame is sent on air.
+ *
+ * When cca==true:
+ * - The radio starts ramp up in receive mode, then it starts cca procedure.
+ * - If cca succeded (channel was idle):
+ *     - The RADIO switches to transmit mode (disables receive mode, starts ramp up in transmit mode).
+ *     - The RADIO starts sending sending synchronization header (SHR).
+ *     - @ref nrf_802154_trx_transmit_frame_started handler is called from an ISR just after SHR is sent
+ *       (only when @ref NRF_802154_TX_STARTED_NOTIFY_ENABLED == 1).
+ *     - @ref nrf_802154_trx_transmit_frame_transmitted handler is called from an ISR after full frame is sent on air.
+ * - If cca failed (channel was busy):
+ *     - The RADIO disables receive mode
+ *     - @ref nrf_802154_trx_transmit_frame_ccabusy from an ISR handler is called
+ *
+ * @param p_transmit_buffer Pointer to a buffer containing frame to transmit.
+ *                          Must not be NULL. p_transmit_buffer[0] is the number of
+ *                          bytes following p_transmit_buffer[0] to send.
+ *                          The number of bytes pointed by p_transmit buffer must
+ *                          be at least 1 and not less than p_transmit_buffer[0] + 1.
+ *
+ * @param cca               Selects if CCA procedure should be performed prior to
+ *                          real transmission. If false no cca will be performed.
+ *                          If true, cca will be performed.
+ *
+ * @note To transmit ack after frame is received use @ref nrf_802154_trx_transmit_ack.
+ */
 void nrf_802154_trx_transmit_frame(const void * p_transmit_buffer, bool cca);
 
 /**@brief Puts the trx module into transmit ACK mode.
  *
- *
- * @note This function may be called from @ref nrf_802154_trx_receive_received handler
- *       with state == TRX_STATE_RXFRAME passed only. This is because in this condition only
- *       the TIMER peripheral is running and allows timed transmission.
+ * @note This function may be called from @ref nrf_802154_trx_receive_received handler only.
+ *       This is because in this condition only the TIMER peripheral is running and allows timed transmission.
  *
  * @param[in] p_transmit_buffer     Pointer to a buffer containing ACK frame to be transmitted.
+ *                                  Caller is responsible for preparing an ACK frame according to the 802.15.4 protocol.
  * @param[in] delay_us              Delay (in microseconds)
  *
  * @retval true     If the function was called in time and ACK frame is scheduled for transmission.
@@ -171,70 +276,320 @@ void nrf_802154_trx_transmit_frame(const void * p_transmit_buffer, bool cca);
  * @retval false    If the function was called too late and given delay_us time gap
  *                  between received frame and ACK frame transmission could not be hold.
  *                  The TIMER peripheral is stopped and it is not possible to trigger @ref nrf_802154_trx_transmit_ack
- *                  again without receiving another frame again. No callbacks will be called.
+ *                  again without receiving another frame again. No handlers will be called.
  */
 bool nrf_802154_trx_transmit_ack(const void * p_transmit_buffer, uint32_t delay_us);
 
+/**@brief Puts trx module into IDLE mode.
+ *
+ * @retval true     If entering into IDLE mode started, @ref nrf_802154_trx_go_idle_finished will be called
+ *                  (if not aborted by call to @ref nrf_802154_trx_abort or nrf_802154_trx_disable).
+ * @retval false    If already in IDLE mode or just requested @ref nrf_802154_trx_go_idle. There will be
+ *                  no @ref nrf_802154_trx_go_idle_finished handler being result of this function.
+ */
 bool nrf_802154_trx_go_idle(void);
 
+/**@brief Starts standalone cca operation.
+ *
+ * Operation ends with a call to @ref nrf_802154_trx_standalone_cca_finished handler from an ISR.
+ */
 void nrf_802154_trx_standalone_cca(void);
 
+/**@brief Starts generating continuous carrier.
+ *
+ * Generation of a continuous carrier generates no handlers. It may be terminated by a call to
+ * @ref nrf_802154_trx_abort or @ref nrf_802154_trx_disable.
+ */
 void nrf_802154_trx_continuous_carrier(void);
+
+/**@brief Restarts generating continuous carrier
+ *
+ * When continuous carrier was being generated and channel change was requested by a call to @ref nrf_802154_trx_channel_set.
+ * The frequency is not changed automatically. Use @ref nrf_802154_trx_continuous_carrier_restart to
+ * stop generating continuous carrier on old frequency and start this operation on a new frequency.
+ * @ref nrf_802154_trx_continuous_carrier_restart is usually faster than
+ * call to @ref nrf_802154_trx_abort @ref nrf_802154_trx_continuous_carrier
+ */
 void nrf_802154_trx_continuous_carrier_restart(void);
 
 /**@brief Puts trx module into energy detection mode.
  *
- * Operation ends up with a call to ref nrf_802154_trx_energy_detection_finished
+ * Operation ends up with a call to @ref nrf_802154_trx_energy_detection_finished handler.
  *
- * Operation can be terminated with a call to @ref nrf_802154_trx_energy_detection_abort,
- * @ref nrf_802154_trx_abort or @ref nrf_802154_trx_disable. In this case no callback is called.
+ * Operation can be terminated with a call to @ref nrf_802154_trx_abort or @ref nrf_802154_trx_disable.
+ * In this case no handler is called.
  *
- * @param ed_count  Number of iterations to perform. Must be in range 1..2097152 (TODO: where define it)
- *                  One iteration takes (TODO: define, in procedures_duration.h?) 128us
+ * @param ed_count  Number of iterations to perform. Must be in range 1..2097152.
+ *                  One iteration takes 128 microseconds.
  */
 void nrf_802154_trx_energy_detection(uint32_t ed_count);
 
+/**@brief Aborts currently performed operation.
+ *
+ * When trx module is in @c DISABLED, @c IDLE or @c FINISHED state, this function has no effect.
+ * Otherwise current operation is terminated and no handler will be generated by the operation
+ * regardless of its state. In this case trx module will be in @c FINISHED state allowing
+ * commencement of a next operation.
+ */
 void nrf_802154_trx_abort(void);
 
-/**@brief   Handler called from isr at the beginning of a ACK reception (just after synchronization header is received).
- * @note Proper implementation of this function is out of scope of the trx module.
+/**@brief Handler called at the beginning of a ACK reception.
+ *
+ * This handler is called from an ISR when receive of an ack has been started, and
+ * the RADIO received synchronization header (SHR).
  */
 extern void nrf_802154_trx_receive_ack_started(void);
 
-/**@brief  Handler called from isr during reception of a frame, when given number of bytes is received.
+/**@brief  Handler called during reception of a frame, when given number of bytes is received.
  *
- * @note Proper implementation of this function is out of scope of the trx module.
+ * This handler is called from an ISR when given number of bytes (see @ref nrf_802154_trx_receive)
+ * have been just received.
  *
- * @note If the handler decides to abort receive by a call to (TODO) @ref nrf_802154_trx_receive_abort
- * it must return value equal to original bcc parameter passed.
+ * @note If the handler decides to abort receive by a call to @ref nrf_802154_trx_receive_abort or
+ *       @ref nrf_802154_trx_disable it must return value equal to original bcc parameter passed.
  *
  * @param[in]   bcc   Number of bytes that have been already received.
  *
  * @return  Value greater than original value of bcc parameter will cause @ref nrf_802154_trx_receive_frame_bcmatched
  *          to be called again when further data arrive. Value less than or equal to original bcc value will not cause this
  *          behavior.
- *
  */
 extern uint8_t nrf_802154_trx_receive_frame_bcmatched(uint8_t bcc);
 
+/**@brief Handler called when a frame is received with correct crc.
+ *
+ * This handler is called from an ISR when:
+ * - receive operation has been started with a call to @ref nrf_802154_trx_receive_frame
+ * - the RADIO received a frame on air with correct crc
+ *
+ * When this handler is called following holds:
+ * - trx module is in @c RXFRAME_FINISHED state.
+ * - the RADIO peripheral started ramping down (or it ramped down already)
+ * - TIMER peripheral started counting allowing @ref nrf_802154_trx_transmit_ack
+ *
+ * Implementation of @ref nrf_802154_trx_receive_frame_received is responsible for
+ * leaving @c RXFRAME_FINISHED state. It may do this by call to:
+ * - @ref nrf_802154_trx_transmit_ack,
+ * - @ref nrf_802154_trx_receive_frame,
+ * - @ref nrf_802154_trx_transmit_frame,
+ * - @ref nrf_802154_trx_go_idle,
+ * - @ref nrf_802154_trx_disable.
+ */
 extern void nrf_802154_trx_receive_frame_received(void);
+
+/**@brief Handler called when a frame is received with incorrect crc.
+ *
+ * This handler is called from an ISR when:
+ * - receive operation has been started with a call to @ref nrf_802154_trx_receive_frame
+ * - the RADIO received a frame on air with incorrect crc
+ *
+ * If NRF_802154_DISABLE_BCC_MATCHING == 0:
+ * When this handler is called following holds:
+ * - the RADIO peripheral started ramping down (or it ramped down already)
+ * - trx module is in @c FINISHED state.
+ *
+ * Implementation of @ref nrf_802154_trx_receive_frame_crcerror is responsible for
+ * leaving @c FINISHED state. It may do this by call to:
+ * - @ref nrf_802154_trx_receive_frame,
+ * - @ref nrf_802154_trx_transmit_frame,
+ * - @ref nrf_802154_trx_go_idle,
+ * - @ref nrf_802154_trx_disable.
+ *
+ * If NRF_802154_DISABLE_BCC_MATCHING != 0:
+ * - the RADIO peripheral is restarted automatically (by hardware) in receive mode
+ * - trx module stays in @c RXFRAME state
+ * Implementation of @ref nrf_802154_trx_receive_frame_crcerror should not call
+ * @ref nrf_802154_trx_receive_frame as receive is restarted automatically by the hardware.
+ * If the implementation wishes to change state it should call
+ * @ref nrf_802154_trx_abort first.
+ */
 extern void nrf_802154_trx_receive_frame_crcerror(void);
 
+/**@brief Handler called when an ack is received with correct crc.
+ *
+ * This handler is called from an ISR when:
+ * - receive ack operation has been started with a call to @ref nrf_802154_trx_receive_ack
+ * - the RADIO received a frame on air with correct crc
+ *
+ * When this handler is called following holds:
+ * - the RADIO peripheral started ramping down (or it ramped down already)
+ * - trx module is in @c FINISHED state.
+ *
+ * Implementation is responsible for:
+ * - checking if received frame is an ack and matches previously transmitted frame.
+ * - leaving @c FINISHED state. It may do this by call to:
+ *     - @ref nrf_802154_trx_receive_frame,
+ *     - @ref nrf_802154_trx_transmit_frame,
+ *     - @ref nrf_802154_trx_go_idle,
+ *     - @ref nrf_802154_trx_disable.
+ */
 extern void nrf_802154_trx_receive_ack_received(void);
+
+/**@brief Handler called when an ack is received with incorrect crc.
+ *
+ * This handler is called from an ISR when:
+ * - receive ack operation has been started with a call to @ref nrf_802154_trx_receive_ack
+ * - the RADIO received a frame on air with incorrect crc
+ *
+ * When this handler is called following holds:
+ * - the RADIO peripheral started ramping down (or it ramped down already)
+ * - trx module is in @c FINISHED state.
+ *
+ * Implementation is responsible for:
+ * - leaving @c FINISHED state. It may do this by call to:
+ *     - @ref nrf_802154_trx_receive_frame,
+ *     - @ref nrf_802154_trx_transmit_frame,
+ *     - @ref nrf_802154_trx_go_idle,
+ *     - @ref nrf_802154_trx_disable.
+ */
 extern void nrf_802154_trx_receive_ack_crcerror(void);
 
+/**@brief Handler called when a cca operation during transmit attempt failed.
+ *
+ * This handler is called from an ISR when:
+ * - transmit operation with cca has been started with a call to @ref nrf_802154_transmit_frame(cca=true).
+ * - the RADIO detected that channel was busy.
+ *
+ * When this handler is called following holds:
+ * - the RADIO peripheral started ramping down (or it ramped down already)
+ * - trx module is in @c FINISHED state.
+ *
+ * Implementation is responsible for:
+ * - leaving @c FINISHED state. It may do this by call to:
+ *     - @ref nrf_802154_trx_receive_frame,
+ *     - @ref nrf_802154_trx_transmit_frame,
+ *     - @ref nrf_802154_trx_go_idle,
+ *     - @ref nrf_802154_trx_disable.
+ */
 extern void nrf_802154_trx_transmit_frame_ccabusy(void);
 
+/**@brief Handler called when frame transmission has just started.
+ *
+ * This handler is called from an ISR when:
+ * - @ref NRF_802154_TX_STARTED_NOTIFY_ENABLED == 1 (see nrf_802154_config.h)
+ * - transmit operation was started by a call to @ref nrf_802154_trx_transmit_frame.
+ * - the RADIO peripheral sent synchronization header
+ *
+ * When this handler is called following holds:
+ * - trx module is in @c TXFRAME state
+ *
+ * Implementation may (but does not need to) terminate transmission if it wishes by a call to:
+ * - @ref nrf_802154_trx_abort,
+ * - @ref nrf_802154_trx_disable.
+ */
 extern void nrf_802154_trx_transmit_frame_started(void);
+
+/**@brief Handler called when frame transmission has just been finished.
+ *
+ * This handler is called from an ISR when:
+ * - transmit operation was started by a call to @ref nrf_802154_trx_transmit_frame.
+ * - the RADIO peripheral sent whole frame on air
+ *
+ * When this handler is called following holds:
+ * - the RADIO peripheral started ramping down (or it ramped down already)
+ * - trx module is in @c FINISHED state
+ *
+ * Implementation is responsible for leaving @c FINISHED state by a call to:
+ * - @ref nrf_802154_trx_receive_frame,
+ * - @ref nrf_802154_trx_transmit_frame,
+ * - @ref nrf_802154_trx_go_idle,
+ * - @ref nrf_802154_trx_disable.
+ */
 extern void nrf_802154_trx_transmit_frame_transmitted(void);
 
+/**@brief Handler called when ack transmission has just been started.
+ *
+ * This handler is called from an ISR when:
+ * - transmit operation was started by a call to @ref nrf_802154_trx_transmit_ack.
+ * - the RADIO peripheral sent synchronization header
+ *
+ * When this handler is called following holds:
+ * - trx module is in @c TXACK state
+ *
+ * Implementation may (but does not need to) terminate transmission if it wishes by a call to:
+ * - @ref nrf_802154_trx_abort,
+ * - @ref nrf_802154_trx_disable.
+ */
 extern void nrf_802154_trx_transmit_ack_started(void);
+
+/**@brief Handler called when ack transmission has just been finished.
+ *
+ * This handler is called from an ISR when:
+ * - transmit operation was started by a call to @ref nrf_802154_trx_transmit_ack.
+ * - the RADIO peripheral sent whole ack frame on air
+ *
+ * When this handler is called following holds:
+ * - the RADIO peripheral started ramping down (or it ramped down already)
+ * - trx module is in @c FINISHED state
+ *
+ * Implementation is responsible for leaving @c FINISHED state by a call to:
+ * - @ref nrf_802154_trx_receive_frame,
+ * - @ref nrf_802154_trx_transmit_frame,
+ * - @ref nrf_802154_trx_go_idle,
+ * - @ref nrf_802154_trx_disable.
+ */
 extern void nrf_802154_trx_transmit_ack_transmitted(void);
 
+/**@brief Handler called when trx module reached @c IDLE state.
+ *
+ * This handler is called from an ISR when:
+ * - transition to idle state was successfully requested by a call to @ref nrf_802154_trx_go_idle.
+ * - the RADIO peripheral reached DISABLED state
+ * - the FEM module has been powered off
+ *
+ * When this handler is called following holds:
+ * - the RADIO is in @c DISABLED state
+ * - the FEM is powered off
+ * - trx module is in @c IDLE state
+ *
+ * Implementation may leave trx in @c IDLE state or it may request:
+ * - @ref nrf_802154_trx_receive_frame,
+ * - @ref nrf_802154_trx_transmit_frame,
+ * - @ref nrf_802154_trx_go_idle,
+ * - @ref nrf_802154_trx_disable.
+ */
 extern void nrf_802154_trx_go_idle_finished(void);
 
+/**@brief Handler called when standalone cca operaion has been just finished.
+ *
+ *  This handler is called from an ISR when:
+ *  - standalone cca operation was requested by a call to @ref nrf_802154_trx_standalone_cca
+ *  - the RADIO peripheral finished cca operation
+ *
+ * When this handler is called following holds:
+ * - the RADIO peripheral started ramping down (or it ramped down already)
+ * - trx module is in @c FINISHED state
+ *
+ * Implementation is responsible for leaving @c FINISHED state by a call to:
+ * - @ref nrf_802154_trx_receive_frame,
+ * - @ref nrf_802154_trx_transmit_frame,
+ * - @ref nrf_802154_trx_go_idle,
+ * - @ref nrf_802154_trx_disable.
+ *
+ * @param channel_was_idle  Informs implementation of the handler if channel was idle.
+ *                          true means the channel was idle, false means the channel was busy.
+ */
 extern void nrf_802154_trx_standalone_cca_finished(bool channel_was_idle);
 
+/**@brief Handler called when energy detection operation has been just finished.
+ *
+ *  This handler is called from an ISR when:
+ *  - energy detection operation was requested by a call to @ref nrf_802154_trx_energy_detection
+ *  - the RADIO peripheral finished the operation
+ *
+ * When this handler is called following holds:
+ * - the RADIO peripheral started ramping down (or it ramped down already)
+ * - trx module is in @c FINISHED state
+ *
+ * Implementation is responsible for leaving @c FINISHED state by a call to:
+ * - @ref nrf_802154_trx_receive_frame,
+ * - @ref nrf_802154_trx_transmit_frame,
+ * - @ref nrf_802154_trx_go_idle,
+ * - @ref nrf_802154_trx_disable.
+ *
+ * @param channel_was_idle  Informs implementation of the handler if channel was idle.
+ *                          true means the channel was idle, false means the channel was busy.
+ */
 extern void nrf_802154_trx_energy_detection_finished(uint8_t ed_sample);
 
 #ifdef __cplusplus
