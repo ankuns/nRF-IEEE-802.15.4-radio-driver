@@ -2047,4 +2047,4 @@ void RADIO_IRQHandler(void)
     nrf_802154_radio_irq_handler();
 }
 
-#endif  // NRF_802154_INTERNAL_RADIO_IRQ_HANDLING
+#endif // NRF_802154_INTERNAL_RADIO_IRQ_HANDLING

@@ -231,7 +231,6 @@ extern void nrf_802154_trx_transmit_frame_transmitted(void);
 extern void nrf_802154_trx_transmit_ack_started(void);
 extern void nrf_802154_trx_transmit_ack_transmitted(void);
 
-
 extern void nrf_802154_trx_go_idle_finished(void);
 
 extern void nrf_802154_trx_standalone_cca_finished(bool channel_was_idle);
