@@ -270,9 +270,9 @@ void nrf_802154_trx_transmit_frame(const void * p_transmit_buffer, bool cca);
  *
  * @retval true     If the function was called in time and ACK frame is scheduled for transmission.
  *                  When transmission starts and @ref NRF_802154_TX_STARTED_NOTIFY_ENABLED != 0
- *                  the function @ref nrf_802154_trx_transmit_started(@ref TRX_STATE_TXACK) will be called.
- *                  When transmission is finished the function @ref nrf_802154_trx_transmit_transmitted(@ref TRX_STATE_TXACK)
- *                  function will be called.
+ *                  the function @ref nrf_802154_trx_transmit_ack_started will be called.
+ *                  When transmission is finished the function @ref nrf_802154_trx_transmit_ack_transmitted
+ *                  will be called.
  * @retval false    If the function was called too late and given delay_us time gap
  *                  between received frame and ACK frame transmission could not be hold.
  *                  The TIMER peripheral is stopped and it is not possible to trigger @ref nrf_802154_trx_transmit_ack
@@ -500,6 +500,7 @@ extern void nrf_802154_trx_transmit_frame_transmitted(void);
 /**@brief Handler called when ack transmission has just been started.
  *
  * This handler is called from an ISR when:
+ * - @ref NRF_802154_TX_STARTED_NOTIFY_ENABLED == 1 (see nrf_802154_config.h)
  * - transmit operation was started by a call to @ref nrf_802154_trx_transmit_ack.
  * - the RADIO peripheral sent synchronization header
  *
