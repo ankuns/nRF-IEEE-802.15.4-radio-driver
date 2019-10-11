@@ -47,37 +47,6 @@
 extern "C" {
 #endif
 
-typedef enum
-{
-    TRX_STATE_DISABLED = 0,
-    TRX_STATE_IDLE,
-    TRX_STATE_GOING_IDLE,
-    TRX_STATE_RXFRAME,
-
-    /* PPIS disabled deconfigured
-     * RADIO is DISABLED, RXDISABLE
-     * RADIO shorts are 0
-     * TIMER is running
-     * FEM is going to powered or is powered depending if RADIO reached DISABLED
-     */
-    TRX_STATE_RXFRAME_FINISHED,
-
-    TRX_STATE_RXACK,
-    TRX_STATE_TXFRAME,
-    TRX_STATE_TXACK,
-    TRX_STATE_STANDALONE_CCA,
-    TRX_STATE_CONTINUOUS_CARRIER,
-    TRX_STATE_ENERGY_DETECTION,
-
-    /* PPIS disabled deconfigured
-     * RADIO is DISABLED, TXDISABLE, RXDISABLE
-     * RADIO shorts are 0
-     * TIMER is stopped
-     * FEM is going to powered or is powered depending if RADIO reached DISABLED
-     */
-    TRX_STATE_FINISHED
-} trx_state_t;
-
 /**@brief Initializes trx module.
  *
  * This function must be called exactly once, before any other API call.
@@ -227,10 +196,10 @@ void nrf_802154_trx_energy_detection(uint32_t ed_count);
 
 void nrf_802154_trx_abort(void);
 
-/**@brief   Handler called from isr at the beginning of a frame reception (just after synchronization header is received).
+/**@brief   Handler called from isr at the beginning of a ACK reception (just after synchronization header is received).
  * @note Proper implementation of this function is out of scope of the trx module.
  */
-extern void nrf_802154_trx_receive_on_shr(trx_state_t state);
+extern void nrf_802154_trx_receive_ack_started(void);
 
 /**@brief  Handler called from isr during reception of a frame, when given number of bytes is received.
  *
@@ -241,21 +210,29 @@ extern void nrf_802154_trx_receive_on_shr(trx_state_t state);
  *
  * @param[in]   bcc   Number of bytes that have been already received.
  *
- * @return  Value greater than original value of bcc parameter will cause @ref nrf_802154_trx_receive_on_bcmatch
+ * @return  Value greater than original value of bcc parameter will cause @ref nrf_802154_trx_receive_frame_bcmatched
  *          to be called again when further data arrive. Value less than or equal to original bcc value will not cause this
  *          behavior.
  *
  */
-extern uint8_t nrf_802154_trx_receive_on_bcmatch(uint8_t bcc);
+extern uint8_t nrf_802154_trx_receive_frame_bcmatched(uint8_t bcc);
 
-extern void nrf_802154_trx_receive_received(trx_state_t state);
-extern void nrf_802154_trx_receive_crcerror(trx_state_t state);
+extern void nrf_802154_trx_receive_frame_received(void);
+extern void nrf_802154_trx_receive_frame_crcerror(void);
 
-extern void nrf_802154_trx_transmit_ccabusy(void);
-extern void nrf_802154_trx_transmit_started(trx_state_t state); // TODO change name nrf_802154_trx_transmit_on_shr
-extern void nrf_802154_trx_transmit_transmitted(trx_state_t state);
+extern void nrf_802154_trx_receive_ack_received(void);
+extern void nrf_802154_trx_receive_ack_crcerror(void);
 
-extern void nrf_802154_trx_in_idle(void);
+extern void nrf_802154_trx_transmit_frame_ccabusy(void);
+
+extern void nrf_802154_trx_transmit_frame_started(void);
+extern void nrf_802154_trx_transmit_frame_transmitted(void);
+
+extern void nrf_802154_trx_transmit_ack_started(void);
+extern void nrf_802154_trx_transmit_ack_transmitted(void);
+
+
+extern void nrf_802154_trx_go_idle_finished(void);
 
 extern void nrf_802154_trx_standalone_cca_finished(bool channel_was_idle);
 

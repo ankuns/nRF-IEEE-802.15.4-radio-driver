@@ -123,6 +123,37 @@
 #define TXRU_TIME             40       ///< Transmitter ramp up time [us]
 #define EVENT_LAT             23       ///< END event latency [us]
 
+typedef enum
+{
+    TRX_STATE_DISABLED = 0,
+    TRX_STATE_IDLE,
+    TRX_STATE_GOING_IDLE,
+    TRX_STATE_RXFRAME,
+
+    /* PPIS disabled deconfigured
+     * RADIO is DISABLED, RXDISABLE
+     * RADIO shorts are 0
+     * TIMER is running
+     * FEM is going to powered or is powered depending if RADIO reached DISABLED
+     */
+    TRX_STATE_RXFRAME_FINISHED,
+
+    TRX_STATE_RXACK,
+    TRX_STATE_TXFRAME,
+    TRX_STATE_TXACK,
+    TRX_STATE_STANDALONE_CCA,
+    TRX_STATE_CONTINUOUS_CARRIER,
+    TRX_STATE_ENERGY_DETECTION,
+
+    /* PPIS disabled deconfigured
+     * RADIO is DISABLED, TXDISABLE, RXDISABLE
+     * RADIO shorts are 0
+     * TIMER is stopped
+     * FEM is going to powered or is powered depending if RADIO reached DISABLED
+     */
+    TRX_STATE_FINISHED
+} trx_state_t;
+
 /// Common parameters for the FAL handling.
 static const nrf_802154_fal_event_t m_deactivate_on_disable =
 {
@@ -1560,21 +1591,21 @@ static void irq_handler_address(void)
     {
         case TRX_STATE_RXACK:
             m_flags.rssi_started = true;
-            nrf_802154_trx_receive_on_shr(TRX_STATE_RXACK);
+            nrf_802154_trx_receive_ack_started();
             break;
 
 #if NRF_802154_TX_STARTED_NOTIFY_ENABLED
         case TRX_STATE_TXFRAME:
             nrf_radio_int_disable(NRF_RADIO_INT_ADDRESS_MASK);
             m_flags.tx_started = true;
-            nrf_802154_trx_transmit_started(TRX_STATE_TXFRAME);
+            nrf_802154_trx_transmit_frame_started();
             break;
 #endif // NRF_802154_TX_STARTED_NOTIFY_ENABLED
 
 #if NRF_802154_TX_STARTED_NOTIFY_ENABLED
         case TRX_STATE_TXACK:
             nrf_radio_int_disable(NRF_RADIO_INT_ADDRESS_MASK);
-            nrf_802154_trx_transmit_started(TRX_STATE_TXACK);
+            nrf_802154_trx_transmit_ack_started();
             break;
 #endif
 
@@ -1602,7 +1633,7 @@ static void irq_handler_bcmatch(void)
 
     current_bcc = nrf_radio_bcc_get() / 8U;
 
-    next_bcc = nrf_802154_trx_receive_on_bcmatch(current_bcc);
+    next_bcc = nrf_802154_trx_receive_frame_bcmatched(current_bcc);
 
     if (next_bcc > current_bcc)
     {
@@ -1633,13 +1664,13 @@ static void irq_handler_crcerror(void)
             nrf_timer_task_trigger(NRF_802154_TIMER_INSTANCE, NRF_TIMER_TASK_SHUTDOWN);
             m_trx_state = TRX_STATE_FINISHED;
 #endif
-            nrf_802154_trx_receive_crcerror(TRX_STATE_RXFRAME);
+            nrf_802154_trx_receive_frame_crcerror();
             break;
 
         case TRX_STATE_RXACK:
             rxack_finish();
             m_trx_state = TRX_STATE_FINISHED;
-            nrf_802154_trx_receive_crcerror(TRX_STATE_RXACK);
+            nrf_802154_trx_receive_ack_crcerror();
             break;
 
         default:
@@ -1657,13 +1688,13 @@ static void irq_handler_crcok(void)
             m_flags.rssi_started = true;
             rxframe_finish();
             m_trx_state = TRX_STATE_RXFRAME_FINISHED;
-            nrf_802154_trx_receive_received(TRX_STATE_RXFRAME);
+            nrf_802154_trx_receive_frame_received();
             break;
 
         case TRX_STATE_RXACK:
             rxack_finish();
             m_trx_state = TRX_STATE_FINISHED;
-            nrf_802154_trx_receive_received(TRX_STATE_RXACK);
+            nrf_802154_trx_receive_ack_received();
             break;
 
         default:
@@ -1806,13 +1837,13 @@ static void irq_handler_phyend(void)
         case TRX_STATE_TXFRAME:
             txframe_finish();
             m_trx_state = TRX_STATE_FINISHED;
-            nrf_802154_trx_transmit_transmitted(TRX_STATE_TXFRAME);
+            nrf_802154_trx_transmit_frame_transmitted();
             break;
 
         case TRX_STATE_TXACK:
             txack_finish();
             m_trx_state = TRX_STATE_FINISHED;
-            nrf_802154_trx_transmit_transmitted(TRX_STATE_TXACK);
+            nrf_802154_trx_transmit_ack_transmitted();
             break;
 
         default:
@@ -1828,7 +1859,7 @@ static void go_idle_finish(void)
 
     m_trx_state = TRX_STATE_IDLE;
 
-    nrf_802154_trx_in_idle();
+    nrf_802154_trx_go_idle_finished();
 }
 
 static void irq_handler_disabled(void)
@@ -1867,7 +1898,7 @@ static void irq_handler_ccabusy(void)
             assert(m_transmit_with_cca);
             txframe_finish();
             m_trx_state = TRX_STATE_FINISHED;
-            nrf_802154_trx_transmit_ccabusy();
+            nrf_802154_trx_transmit_frame_ccabusy();
             break;
 
         case TRX_STATE_STANDALONE_CCA:
