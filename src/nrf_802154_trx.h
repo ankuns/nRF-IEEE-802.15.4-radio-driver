@@ -123,7 +123,7 @@ void nrf_802154_trx_cca_configuration_update(void);
  * When in @ref nrf_802154_trx_receive_frame_received, the TIMER is running allowing sending response (e.g. ACK frame)
  * in time regime by a call to nrf_802154_trx_transmit_after_frame_received.
  *
- * @note To receive ACK use @ref @ref nrf_802154_trx_receive_ack
+ * @note To receive ACK use @ref nrf_802154_trx_receive_ack
  *
  * @param[in] bcc   Number of received bytes after which @ref nrf_802154_trx_receive_frame_bcmatched will be called.
  *                  This must not be zero if @ref NRF_802154_DISABLE_BCC_MATCHING == 0.
@@ -546,7 +546,6 @@ extern void nrf_802154_trx_transmit_ack_transmitted(void);
  * Implementation may leave trx in @c IDLE state or it may request:
  * - @ref nrf_802154_trx_receive_frame,
  * - @ref nrf_802154_trx_transmit_frame,
- * - @ref nrf_802154_trx_go_idle,
  * - @ref nrf_802154_trx_disable.
  */
 extern void nrf_802154_trx_go_idle_finished(void);
