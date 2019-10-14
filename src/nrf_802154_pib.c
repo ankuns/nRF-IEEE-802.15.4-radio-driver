@@ -48,7 +48,7 @@
 
 typedef struct
 {
-    nrf_802154_coex_rx_request_mode_t rx_request_mode;          ///< Coex request mode in receive operation.
+    nrf_802154_coex_rx_request_mode_t rx_request_mode; ///< Coex request mode in receive operation.
 } nrf_802154_pib_coex_t;
 
 typedef struct
