@@ -57,6 +57,7 @@ typedef struct
     bool                 auto_ack    : 1;                      ///< Indicating if auto ACK procedure is enabled.
     bool                 pan_coord   : 1;                      ///< Indicating if radio is configured as the PAN coordinator.
     uint8_t              channel     : 5;                      ///< Channel on which the node receives messages.
+    nrf_802154_coex_rx_request_mode_t coex_rx_request_mode;    ///< Coex request mode for received frames.
 } nrf_802154_pib_data_t;
 
 // Static variables.
@@ -136,6 +137,8 @@ void nrf_802154_pib_init(void)
     m_data.cca.ed_threshold   = NRF_802154_CCA_ED_THRESHOLD_DEFAULT;
     m_data.cca.corr_threshold = NRF_802154_CCA_CORR_THRESHOLD_DEFAULT;
     m_data.cca.corr_limit     = NRF_802154_CCA_CORR_LIMIT_DEFAULT;
+
+    m_data.coex_rx_request_mode = NRF_802154_COEX_RX_REQUEST_MODE_DESTINED;
 }
 
 bool nrf_802154_pib_promiscuous_get(void)
@@ -248,4 +251,14 @@ void nrf_802154_pib_cca_cfg_set(const nrf_802154_cca_cfg_t * p_cca_cfg)
 void nrf_802154_pib_cca_cfg_get(nrf_802154_cca_cfg_t * p_cca_cfg)
 {
     memcpy(p_cca_cfg, &m_data.cca, sizeof(m_data.cca));
+}
+
+void nrf_802154_pib_coex_rx_request_mode_set(nrf_802154_coex_rx_request_mode_t mode)
+{
+    m_data.coex_rx_request_mode = mode;
+}
+
+nrf_802154_coex_rx_request_mode_t nrf_802154_pib_rx_coex_request_mode_get(void)
+{
+    return m_data.coex_rx_request_mode;
 }
