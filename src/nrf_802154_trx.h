@@ -67,7 +67,7 @@ void nrf_802154_trx_init(void);
  * @warning This function may be called when:
  * - Trx module was in @c DISABLED state (after @ref nrf_802154_trx_init or after @ref nrf_802154_trx_disable).
  * - HFCLK clock is activated.
- * - Access to the @ref RADIO peripheral is granted (applicable when the RADIO is shared with other drivers).
+ * - Access to the RADIO peripheral is granted (applicable when the RADIO is shared with other drivers).
  *
  * @note When trx was in @c DISABLED state, the RADIO might have been controlled by other drivers. Thus
  * full reset of the RADIO peripheral is performed.
@@ -85,8 +85,8 @@ void nrf_802154_trx_enable(void);
  * - Trx module is in @c DISABLED state
  *
  * @note On call to this function any activity of trx module is stopped. If any operation was executing, it
- * will be stopped and no handler will be called. After call HFCLK may be deactivated and cto
- * the @ref RADIO peripheral may be passed
+ * will be stopped and no handler will be called. After call HFCLK may be deactivated and
+ * the RADIO peripheral may be passed to other driver.
  */
 void nrf_802154_trx_disable(void);
 
@@ -105,7 +105,7 @@ void nrf_802154_trx_cca_configuration_update(void);
  *
  * When NRF_802154_DISABLE_BCC_MATCHING == 0
  * - during receive @ref nrf_802154_trx_receive_frame_bcmatched handler is called when
- *   bcc octets are received.
+ *   @p bcc octets are received.
  * - when a frame is received with correct crc, @ref nrf_802154_trx_receive_frame_received is called
  * - when a frame is received with incorrect crc, @ref nrf_802154_trx_receive_frame_crcerror is called
  *
@@ -345,7 +345,7 @@ extern void nrf_802154_trx_receive_ack_started(void);
  * This handler is called from an ISR when given number of bytes (see @ref nrf_802154_trx_receive)
  * have been just received.
  *
- * @note If the handler decides to abort receive by a call to @ref nrf_802154_trx_receive_abort or
+ * @note If the handler decides to abort receive by a call to @ref nrf_802154_trx_abort or
  *       @ref nrf_802154_trx_disable it must return value equal to original bcc parameter passed.
  *
  * @param[in]   bcc   Number of bytes that have been already received.

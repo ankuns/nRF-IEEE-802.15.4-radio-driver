@@ -165,26 +165,22 @@ static const nrf_802154_fal_event_t m_deactivate_on_disable =
 
 static const nrf_802154_fal_event_t m_activate_rx_cc0 =
 {
-    .type                         = NRF_802154_FAL_EVENT_TYPE_TIMER,
-    .override_ppi                 = false,
-    .event.timer.p_timer_instance =
-        NRF_802154_TIMER_INSTANCE,
+    .type                             = NRF_802154_FAL_EVENT_TYPE_TIMER,
+    .override_ppi                     = false,
+    .event.timer.p_timer_instance     = NRF_802154_TIMER_INSTANCE,
     .event.timer.compare_channel_mask =
         ((1 << NRF_TIMER_CC_CHANNEL0) | (1 << NRF_TIMER_CC_CHANNEL2)),
-    .event.timer.counter_value =
-        RX_RAMP_UP_TIME
+    .event.timer.counter_value = RX_RAMP_UP_TIME
 };
 
 static const nrf_802154_fal_event_t m_activate_tx_cc0 =
 {
-    .type                         = NRF_802154_FAL_EVENT_TYPE_TIMER,
-    .override_ppi                 = false,
-    .event.timer.p_timer_instance =
-        NRF_802154_TIMER_INSTANCE,
+    .type                             = NRF_802154_FAL_EVENT_TYPE_TIMER,
+    .override_ppi                     = false,
+    .event.timer.p_timer_instance     = NRF_802154_TIMER_INSTANCE,
     .event.timer.compare_channel_mask =
         ((1 << NRF_TIMER_CC_CHANNEL0) | (1 << NRF_TIMER_CC_CHANNEL2)),
-    .event.timer.counter_value =
-        TX_RAMP_UP_TIME
+    .event.timer.counter_value = TX_RAMP_UP_TIME
 };
 
 static const nrf_802154_fal_event_t m_ccaidle =
@@ -192,8 +188,7 @@ static const nrf_802154_fal_event_t m_ccaidle =
     .type                           = NRF_802154_FAL_EVENT_TYPE_GENERIC,
     .override_ppi                   = true,
     .ppi_ch_id                      = PPI_CCAIDLE_FEM,
-    .event.generic.register_address =
-        ((uint32_t)NRF_RADIO_BASE + (uint32_t)NRF_RADIO_EVENT_CCAIDLE)
+    .event.generic.register_address = ((uint32_t)NRF_RADIO_BASE + (uint32_t)NRF_RADIO_EVENT_CCAIDLE)
 };
 
 /**@brief Fal event used by @ref nrf_802154_trx_transmit_ack and @ref txack_finish */
@@ -224,14 +219,14 @@ static nrf_802154_flags_t m_flags; ///< Flags used to store the current driver s
 static volatile uint32_t m_timer_value_on_radio_end_event;
 static volatile bool     m_transmit_with_cca;
 
-static void nrf_802154_trx_go_idle_abort(void);
-static void nrf_802154_trx_receive_frame_abort(void);
-static void nrf_802154_trx_receive_ack_abort(void);
-static void nrf_802154_trx_transmit_frame_abort(void);
-static void nrf_802154_trx_transmit_ack_abort(void);
-static void nrf_802154_trx_standalone_cca_abort(void);
-static void nrf_802154_trx_continuous_carrier_abort(void);
-static void nrf_802154_trx_energy_detection_abort(void);
+static void go_idle_abort(void);
+static void receive_frame_abort(void);
+static void receive_ack_abort(void);
+static void transmit_frame_abort(void);
+static void transmit_ack_abort(void);
+static void standalone_cca_abort(void);
+static void continuous_carrier_abort(void);
+static void energy_detection_abort(void);
 
 /** Clear flags describing frame being received. */
 void rx_flags_clear(void)
@@ -1266,11 +1261,11 @@ void nrf_802154_trx_abort(void)
             break;
 
         case TRX_STATE_GOING_IDLE:
-            nrf_802154_trx_go_idle_abort();
+            go_idle_abort();
             break;
 
         case TRX_STATE_RXFRAME:
-            nrf_802154_trx_receive_frame_abort();
+            receive_frame_abort();
             break;
 
         case TRX_STATE_RXFRAME_FINISHED:
@@ -1279,27 +1274,27 @@ void nrf_802154_trx_abort(void)
             break;
 
         case TRX_STATE_RXACK:
-            nrf_802154_trx_receive_ack_abort();
+            receive_ack_abort();
             break;
 
         case TRX_STATE_TXFRAME:
-            nrf_802154_trx_transmit_frame_abort();
+            transmit_frame_abort();
             break;
 
         case TRX_STATE_TXACK:
-            nrf_802154_trx_transmit_ack_abort();
+            transmit_ack_abort();
             break;
 
         case TRX_STATE_STANDALONE_CCA:
-            nrf_802154_trx_standalone_cca_abort();
+            standalone_cca_abort();
             break;
 
         case TRX_STATE_CONTINUOUS_CARRIER:
-            nrf_802154_trx_continuous_carrier_abort();
+            continuous_carrier_abort();
             break;
 
         case TRX_STATE_ENERGY_DETECTION:
-            nrf_802154_trx_energy_detection_abort();
+            energy_detection_abort();
             break;
 
         default:
@@ -1348,13 +1343,13 @@ bool nrf_802154_trx_go_idle(void)
     return false;
 }
 
-static void nrf_802154_trx_go_idle_abort(void)
+static void go_idle_abort(void)
 {
     nrf_radio_int_disable(NRF_RADIO_INT_DISABLED_MASK);
     m_trx_state = TRX_STATE_FINISHED;
 }
 
-static void nrf_802154_trx_receive_frame_abort(void)
+static void receive_frame_abort(void)
 {
     rxframe_finish_disable_ppis();
     rxframe_finish_disable_fem_activation();
@@ -1413,7 +1408,7 @@ static void rxack_finish(void)
      */
 }
 
-static void nrf_802154_trx_receive_ack_abort(void)
+static void receive_ack_abort(void)
 {
     rxack_finish_disable_ppis();
     rxack_finish_disable_ints();
@@ -1470,7 +1465,7 @@ static void standalone_cca_finish(void)
     nrf_radio_task_trigger(NRF_RADIO_TASK_DISABLE);
 }
 
-static void nrf_802154_trx_standalone_cca_abort(void)
+static void standalone_cca_abort(void)
 {
     standalone_cca_finish();
 
@@ -1509,7 +1504,7 @@ void nrf_802154_trx_continuous_carrier_restart(void)
     nrf_radio_task_trigger(NRF_RADIO_TASK_DISABLE);
 }
 
-static void nrf_802154_trx_continuous_carrier_abort(void)
+static void continuous_carrier_abort(void)
 {
     nrf_ppi_channel_disable(PPI_DISABLED_EGU);
     nrf_ppi_channel_disable(PPI_EGU_RAMP_UP);
@@ -1568,7 +1563,7 @@ static void energy_detection_finish(void)
     nrf_radio_task_trigger(NRF_RADIO_TASK_DISABLE);
 }
 
-static void nrf_802154_trx_energy_detection_abort(void)
+static void energy_detection_abort(void)
 {
     energy_detection_finish();
     m_trx_state = TRX_STATE_FINISHED;
@@ -1740,7 +1735,7 @@ static void txframe_finish(void)
      */
 }
 
-static void nrf_802154_trx_transmit_frame_abort(void)
+static void transmit_frame_abort(void)
 {
     txframe_finish_disable_ppis();
     nrf_radio_shorts_set(SHORTS_IDLE);
@@ -1797,7 +1792,7 @@ static void txack_finish(void)
      */
 }
 
-static void nrf_802154_trx_transmit_ack_abort(void)
+static void transmit_ack_abort(void)
 {
     nrf_ppi_channel_disable(PPI_TIMER_TX_ACK);
 

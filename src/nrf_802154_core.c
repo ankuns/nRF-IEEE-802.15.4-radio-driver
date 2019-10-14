@@ -139,9 +139,6 @@ static void state_set(radio_state_t state)
 
     nrf_802154_log(EVENT_SET_STATE, (uint32_t)state);
 
-    /* We should request preconditions according to desired state, currently we
-     * request preconditions only for non-sleep and drop preconditions for sleep */
-
     request_preconditions_for_state(state);
 }
 
@@ -1123,6 +1120,8 @@ static void on_bad_ack(void);
 
 void nrf_802154_trx_receive_frame_crcerror(void)
 {
+    assert(m_state == RADIO_STATE_RX);
+
     // We don't change receive buffer, receive will go to the same that was already used
 #if !NRF_802154_DISABLE_BCC_MATCHING
     request_preconditions_for_state(m_state);
@@ -1450,7 +1449,6 @@ void nrf_802154_trx_receive_ack_received(void)
         transmitted_frame_notify(p_ack_buffer->data,           // phr + psdu
                                  rssi_last_measurement_get(),  // rssi
                                  lqi_get(p_ack_buffer->data)); // lqi;
-
     }
     else
     {
@@ -1493,8 +1491,7 @@ void nrf_802154_trx_energy_detection_finished(uint8_t ed_sample)
         else
         {
             /* There is too little time in current timeslot, just wait for timeslot end.
-             * Operation will be resumed in next timeslot
-             */
+             * Operation will be resumed in next timeslot */
         }
     }
     else
