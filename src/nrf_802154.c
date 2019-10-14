@@ -161,35 +161,9 @@ int8_t nrf_802154_tx_power_get(void)
     return nrf_802154_pib_tx_power_get();
 }
 
-static bool is_rx_request_mode_supported(nrf_802154_coex_rx_request_mode_t mode)
-{
-    bool result = false;
-    switch (mode)
-    {
-        case NRF_802154_COEX_RX_REQUEST_MODE_DISABLED:
-        case NRF_802154_COEX_RX_REQUEST_MODE_ENERGY_DETECTION:
-        case NRF_802154_COEX_RX_REQUEST_MODE_PREAMBLE:
-        case NRF_802154_COEX_RX_REQUEST_MODE_DESTINED:
-            result = true;
-            break;
-
-        default:
-            break;
-    }
-    return result;
-}
-
 bool nrf_802154_coex_rx_request_mode_set(nrf_802154_coex_rx_request_mode_t mode)
 {
-    bool result = false;
-
-    if (is_rx_request_mode_supported(mode))
-    {
-        nrf_802154_pib_coex_rx_request_mode_set(mode);
-        result = true;
-    }
-
-    return result;
+    return nrf_802154_pib_coex_rx_request_mode_set(mode);
 }
 
 nrf_802154_coex_rx_request_mode_t nrf_802154_coex_rx_request_mode_get(void)

@@ -187,11 +187,24 @@ void nrf_802154_pib_cca_cfg_set(const nrf_802154_cca_cfg_t * p_cca_cfg);
 void nrf_802154_pib_cca_cfg_get(nrf_802154_cca_cfg_t * p_cca_cfg);
 
 /**
+ * @brief Checks if provided coex receive request mode is supported
+ *
+ * @param[in] mode  Value to check
+ *
+ * @retval true     When value provided by @p mode param is supported.
+ * @retval false    Otherwise.
+ */
+bool nrf_802154_pib_coex_rx_request_mode_is_supported(nrf_802154_coex_rx_request_mode_t mode);
+
+/**
  * @brief Sets Coex request mode used in receive operations.
  *
  * @param[in] mode  Coex receive request mode.
+ *
+ * @retval true     When value provided by @p mode param is supported.
+ * @retval false    Otherwise.
  */
-void nrf_802154_pib_coex_rx_request_mode_set(nrf_802154_coex_rx_request_mode_t mode);
+bool nrf_802154_pib_coex_rx_request_mode_set(nrf_802154_coex_rx_request_mode_t mode);
 
 /**
  * @brief Gets Coex request mode used in receive operations.
