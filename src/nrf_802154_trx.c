@@ -715,7 +715,7 @@ bool nrf_802154_trx_receive_buffer_set(void * p_receive_buffer)
     return result;
 }
 
-void nrf_802154_trx_receive_frame(uint8_t bcc)
+void nrf_802154_trx_receive_frame(uint8_t bcc, nrf_802154_trx_receive_notifications_t notifications_mask)
 {
     uint32_t ints_to_enable = 0U;
     uint32_t shorts         = SHORTS_RX;
@@ -766,6 +766,16 @@ void nrf_802154_trx_receive_frame(uint8_t bcc)
 #endif // !NRF_802154_DISABLE_BCC_MATCHING
     nrf_radio_event_clear(NRF_RADIO_EVENT_CRCOK);
     ints_to_enable |= NRF_RADIO_INT_CRCOK_MASK;
+    if ((notifications_mask & TRX_RECEIVE_NOTIFICATION_STARTED) != 0U)
+    {
+        nrf_radio_event_clear(NRF_RADIO_EVENT_ADDRESS);
+        ints_to_enable |= NRF_RADIO_EVENT_ADDRESS;
+    }
+    if ((notifications_mask & TRX_RECEIVE_NOTIFICATION_PRESTARTED) != 0U)
+    {
+        // TODO: Enable interrupt for "prestarted"
+        // TODO: configure additional PPI connecting "prestarted" to egu
+    }
     nrf_radio_int_enable(ints_to_enable);
 
     // Set FEM
@@ -1185,7 +1195,7 @@ static void rxframe_finish_disable_fem_activation(void)
 
 static void rxframe_finish_disable_ints(void)
 {
-    uint32_t ints_to_disable = NRF_RADIO_INT_CRCOK_MASK;
+    uint32_t ints_to_disable = NRF_RADIO_INT_CRCOK_MASK | NRF_RADIO_INT_ADDRESS_MASK;
 
 #if !NRF_802154_DISABLE_BCC_MATCHING || NRF_802154_NOTIFY_CRCERROR
     ints_to_disable |= NRF_RADIO_INT_CRCERROR_MASK;
@@ -1573,6 +1583,10 @@ static void irq_handler_address(void)
 {
     switch (m_trx_state)
     {
+        case TRX_STATE_RXFRAME:
+            nrf_802154_trx_receive_frame_started();
+            break;
+
         case TRX_STATE_RXACK:
             m_flags.rssi_started = true;
             nrf_802154_trx_receive_ack_started();
