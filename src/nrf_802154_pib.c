@@ -290,7 +290,7 @@ bool nrf_802154_pib_coex_rx_request_mode_set(nrf_802154_coex_rx_request_mode_t m
     return result;
 }
 
-nrf_802154_coex_rx_request_mode_t nrf_802154_pib_rx_coex_request_mode_get(void)
+nrf_802154_coex_rx_request_mode_t nrf_802154_pib_coex_rx_request_mode_get(void)
 {
     return m_data.coex.rx_request_mode;
 }
