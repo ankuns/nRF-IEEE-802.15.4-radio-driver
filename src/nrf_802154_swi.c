@@ -698,85 +698,168 @@ void nrf_802154_swi_rssi_measurement_get(int8_t * p_rssi, bool * p_result)
     req_exit();
 }
 
+static void irq_handler_ntf_event(void)
+{
+    while (!ntf_queue_is_empty())
+    {
+        nrf_802154_ntf_data_t * p_slot = &m_ntf_queue[m_ntf_r_ptr];
+
+        switch (p_slot->type)
+        {
+            case NTF_TYPE_RECEIVED:
+#if NRF_802154_USE_RAW_API
+                nrf_802154_received_raw(p_slot->data.received.p_data,
+                                        p_slot->data.received.power,
+                                        p_slot->data.received.lqi);
+#else // NRF_802154_USE_RAW_API
+                nrf_802154_received(p_slot->data.received.p_data + RAW_PAYLOAD_OFFSET,
+                                    p_slot->data.received.p_data[RAW_LENGTH_OFFSET],
+                                    p_slot->data.received.power,
+                                    p_slot->data.received.lqi);
+#endif
+                break;
+
+            case NTF_TYPE_RECEIVE_FAILED:
+                nrf_802154_receive_failed(p_slot->data.receive_failed.error);
+                break;
+
+            case NTF_TYPE_TRANSMITTED:
+#if NRF_802154_USE_RAW_API
+                nrf_802154_transmitted_raw(p_slot->data.transmitted.p_frame,
+                                           p_slot->data.transmitted.p_data,
+                                           p_slot->data.transmitted.power,
+                                           p_slot->data.transmitted.lqi);
+#else // NRF_802154_USE_RAW_API
+                nrf_802154_transmitted(p_slot->data.transmitted.p_frame + RAW_PAYLOAD_OFFSET,
+                                       p_slot->data.transmitted.p_data == NULL ? NULL :
+                                       p_slot->data.transmitted.p_data + RAW_PAYLOAD_OFFSET,
+                                       p_slot->data.transmitted.p_data[RAW_LENGTH_OFFSET],
+                                       p_slot->data.transmitted.power,
+                                       p_slot->data.transmitted.lqi);
+#endif
+                break;
+
+            case NTF_TYPE_TRANSMIT_FAILED:
+#if NRF_802154_USE_RAW_API
+                nrf_802154_transmit_failed(p_slot->data.transmit_failed.p_frame,
+                                           p_slot->data.transmit_failed.error);
+#else // NRF_802154_USE_RAW_API
+                nrf_802154_transmit_failed(
+                    p_slot->data.transmit_failed.p_frame + RAW_PAYLOAD_OFFSET,
+                    p_slot->data.transmit_failed.error);
+#endif
+                break;
+
+            case NTF_TYPE_ENERGY_DETECTED:
+                nrf_802154_energy_detected(p_slot->data.energy_detected.result);
+                break;
+
+            case NTF_TYPE_ENERGY_DETECTION_FAILED:
+                nrf_802154_energy_detection_failed(
+                    p_slot->data.energy_detection_failed.error);
+                break;
+
+            case NTF_TYPE_CCA:
+                nrf_802154_cca_done(p_slot->data.cca.result);
+                break;
+
+            case NTF_TYPE_CCA_FAILED:
+                nrf_802154_cca_failed(p_slot->data.cca_failed.error);
+                break;
+
+            default:
+                assert(false);
+        }
+
+        ntf_queue_ptr_increment(&m_ntf_r_ptr);
+    }
+}
+
+static void irq_handler_req_event(void)
+{
+    while (!req_queue_is_empty())
+    {
+        nrf_802154_req_data_t * p_slot = &m_req_queue[m_req_r_ptr];
+
+        switch (p_slot->type)
+        {
+            case REQ_TYPE_SLEEP:
+                *(p_slot->data.sleep.p_result) =
+                    nrf_802154_core_sleep(p_slot->data.sleep.term_lvl);
+                break;
+
+            case REQ_TYPE_RECEIVE:
+                *(p_slot->data.receive.p_result) =
+                    nrf_802154_core_receive(p_slot->data.receive.term_lvl,
+                                            p_slot->data.receive.req_orig,
+                                            p_slot->data.receive.notif_func,
+                                            p_slot->data.receive.notif_abort);
+                break;
+
+            case REQ_TYPE_TRANSMIT:
+                *(p_slot->data.transmit.p_result) =
+                    nrf_802154_core_transmit(p_slot->data.transmit.term_lvl,
+                                             p_slot->data.transmit.req_orig,
+                                             p_slot->data.transmit.p_data,
+                                             p_slot->data.transmit.cca,
+                                             p_slot->data.transmit.immediate,
+                                             p_slot->data.transmit.notif_func);
+                break;
+
+            case REQ_TYPE_ENERGY_DETECTION:
+                *(p_slot->data.energy_detection.p_result) =
+                    nrf_802154_core_energy_detection(
+                        p_slot->data.energy_detection.term_lvl,
+                        p_slot->data.energy_detection.time_us);
+                break;
+
+            case REQ_TYPE_CCA:
+                *(p_slot->data.cca.p_result) = nrf_802154_core_cca(p_slot->data.cca.term_lvl);
+                break;
+
+            case REQ_TYPE_CONTINUOUS_CARRIER:
+                *(p_slot->data.continuous_carrier.p_result) =
+                    nrf_802154_core_continuous_carrier(
+                        p_slot->data.continuous_carrier.term_lvl);
+                break;
+
+            case REQ_TYPE_BUFFER_FREE:
+                *(p_slot->data.buffer_free.p_result) =
+                    nrf_802154_core_notify_buffer_free(p_slot->data.buffer_free.p_data);
+                break;
+
+            case REQ_TYPE_CHANNEL_UPDATE:
+                *(p_slot->data.channel_update.p_result) = nrf_802154_core_channel_update();
+                break;
+
+            case REQ_TYPE_CCA_CFG_UPDATE:
+                *(p_slot->data.cca_cfg_update.p_result) = nrf_802154_core_cca_cfg_update();
+                break;
+
+            case REQ_TYPE_RSSI_MEASURE:
+                *(p_slot->data.rssi_measure.p_result) = nrf_802154_core_rssi_measure();
+                break;
+
+            case REQ_TYPE_RSSI_GET:
+                *(p_slot->data.rssi_get.p_result) =
+                    nrf_802154_core_last_rssi_measurement_get(p_slot->data.rssi_get.p_rssi);
+                break;
+
+            default:
+                assert(false);
+        }
+
+        req_queue_ptr_increment(&m_req_r_ptr);
+    }
+}
+
 void SWI_IRQHandler(void)
 {
     if (nrf_egu_event_check(SWI_EGU, NTF_EVENT))
     {
         nrf_egu_event_clear(SWI_EGU, NTF_EVENT);
 
-        while (!ntf_queue_is_empty())
-        {
-            nrf_802154_ntf_data_t * p_slot = &m_ntf_queue[m_ntf_r_ptr];
-
-            switch (p_slot->type)
-            {
-                case NTF_TYPE_RECEIVED:
-#if NRF_802154_USE_RAW_API
-                    nrf_802154_received_raw(p_slot->data.received.p_data,
-                                            p_slot->data.received.power,
-                                            p_slot->data.received.lqi);
-#else // NRF_802154_USE_RAW_API
-                    nrf_802154_received(p_slot->data.received.p_data + RAW_PAYLOAD_OFFSET,
-                                        p_slot->data.received.p_data[RAW_LENGTH_OFFSET],
-                                        p_slot->data.received.power,
-                                        p_slot->data.received.lqi);
-#endif
-                    break;
-
-                case NTF_TYPE_RECEIVE_FAILED:
-                    nrf_802154_receive_failed(p_slot->data.receive_failed.error);
-                    break;
-
-                case NTF_TYPE_TRANSMITTED:
-#if NRF_802154_USE_RAW_API
-                    nrf_802154_transmitted_raw(p_slot->data.transmitted.p_frame,
-                                               p_slot->data.transmitted.p_data,
-                                               p_slot->data.transmitted.power,
-                                               p_slot->data.transmitted.lqi);
-#else // NRF_802154_USE_RAW_API
-                    nrf_802154_transmitted(p_slot->data.transmitted.p_frame + RAW_PAYLOAD_OFFSET,
-                                           p_slot->data.transmitted.p_data == NULL ? NULL :
-                                           p_slot->data.transmitted.p_data + RAW_PAYLOAD_OFFSET,
-                                           p_slot->data.transmitted.p_data[RAW_LENGTH_OFFSET],
-                                           p_slot->data.transmitted.power,
-                                           p_slot->data.transmitted.lqi);
-#endif
-                    break;
-
-                case NTF_TYPE_TRANSMIT_FAILED:
-#if NRF_802154_USE_RAW_API
-                    nrf_802154_transmit_failed(p_slot->data.transmit_failed.p_frame,
-                                               p_slot->data.transmit_failed.error);
-#else // NRF_802154_USE_RAW_API
-                    nrf_802154_transmit_failed(
-                        p_slot->data.transmit_failed.p_frame + RAW_PAYLOAD_OFFSET,
-                        p_slot->data.transmit_failed.error);
-#endif
-                    break;
-
-                case NTF_TYPE_ENERGY_DETECTED:
-                    nrf_802154_energy_detected(p_slot->data.energy_detected.result);
-                    break;
-
-                case NTF_TYPE_ENERGY_DETECTION_FAILED:
-                    nrf_802154_energy_detection_failed(
-                        p_slot->data.energy_detection_failed.error);
-                    break;
-
-                case NTF_TYPE_CCA:
-                    nrf_802154_cca_done(p_slot->data.cca.result);
-                    break;
-
-                case NTF_TYPE_CCA_FAILED:
-                    nrf_802154_cca_failed(p_slot->data.cca_failed.error);
-                    break;
-
-                default:
-                    assert(false);
-            }
-
-            ntf_queue_ptr_increment(&m_ntf_r_ptr);
-        }
+        irq_handler_ntf_event();
     }
 
     if (nrf_egu_event_check(SWI_EGU, HFCLK_STOP_EVENT))
@@ -790,79 +873,6 @@ void SWI_IRQHandler(void)
     {
         nrf_egu_event_clear(SWI_EGU, REQ_EVENT);
 
-        while (!req_queue_is_empty())
-        {
-            nrf_802154_req_data_t * p_slot = &m_req_queue[m_req_r_ptr];
-
-            switch (p_slot->type)
-            {
-                case REQ_TYPE_SLEEP:
-                    *(p_slot->data.sleep.p_result) =
-                        nrf_802154_core_sleep(p_slot->data.sleep.term_lvl);
-                    break;
-
-                case REQ_TYPE_RECEIVE:
-                    *(p_slot->data.receive.p_result) =
-                        nrf_802154_core_receive(p_slot->data.receive.term_lvl,
-                                                p_slot->data.receive.req_orig,
-                                                p_slot->data.receive.notif_func,
-                                                p_slot->data.receive.notif_abort);
-                    break;
-
-                case REQ_TYPE_TRANSMIT:
-                    *(p_slot->data.transmit.p_result) =
-                        nrf_802154_core_transmit(p_slot->data.transmit.term_lvl,
-                                                 p_slot->data.transmit.req_orig,
-                                                 p_slot->data.transmit.p_data,
-                                                 p_slot->data.transmit.cca,
-                                                 p_slot->data.transmit.immediate,
-                                                 p_slot->data.transmit.notif_func);
-                    break;
-
-                case REQ_TYPE_ENERGY_DETECTION:
-                    *(p_slot->data.energy_detection.p_result) =
-                        nrf_802154_core_energy_detection(
-                            p_slot->data.energy_detection.term_lvl,
-                            p_slot->data.energy_detection.time_us);
-                    break;
-
-                case REQ_TYPE_CCA:
-                    *(p_slot->data.cca.p_result) = nrf_802154_core_cca(p_slot->data.cca.term_lvl);
-                    break;
-
-                case REQ_TYPE_CONTINUOUS_CARRIER:
-                    *(p_slot->data.continuous_carrier.p_result) =
-                        nrf_802154_core_continuous_carrier(
-                            p_slot->data.continuous_carrier.term_lvl);
-                    break;
-
-                case REQ_TYPE_BUFFER_FREE:
-                    *(p_slot->data.buffer_free.p_result) =
-                        nrf_802154_core_notify_buffer_free(p_slot->data.buffer_free.p_data);
-                    break;
-
-                case REQ_TYPE_CHANNEL_UPDATE:
-                    *(p_slot->data.channel_update.p_result) = nrf_802154_core_channel_update();
-                    break;
-
-                case REQ_TYPE_CCA_CFG_UPDATE:
-                    *(p_slot->data.cca_cfg_update.p_result) = nrf_802154_core_cca_cfg_update();
-                    break;
-
-                case REQ_TYPE_RSSI_MEASURE:
-                    *(p_slot->data.rssi_measure.p_result) = nrf_802154_core_rssi_measure();
-                    break;
-
-                case REQ_TYPE_RSSI_GET:
-                    *(p_slot->data.rssi_get.p_result) =
-                        nrf_802154_core_last_rssi_measurement_get(p_slot->data.rssi_get.p_rssi);
-                    break;
-
-                default:
-                    assert(false);
-            }
-
-            req_queue_ptr_increment(&m_req_r_ptr);
-        }
+        irq_handler_req_event();
     }
 }
