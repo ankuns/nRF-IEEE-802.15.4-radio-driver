@@ -47,18 +47,18 @@
 #include "nrf_802154_swi.h"
 #include "nrf_egu.h"
 
-#define SWI_EGU            NRF_802154_SWI_EGU_INSTANCE ///< Label of SWI peripheral.
+#define SWI_EGU        NRF_802154_SWI_EGU_INSTANCE ///< Label of SWI peripheral.
 
 /** Size of notification queue.
  *
  * One slot for each receive buffer, one for transmission, one for busy channel and one for energy
  * detection.
  */
-#define NTF_QUEUE_SIZE     (NRF_802154_RX_BUFFERS + 3)
+#define NTF_QUEUE_SIZE (NRF_802154_RX_BUFFERS + 3)
 
-#define NTF_INT            NRF_EGU_INT_TRIGGERED0      ///< Label of notification interrupt.
-#define NTF_TASK           NRF_EGU_TASK_TRIGGER0       ///< Label of notification task.
-#define NTF_EVENT          NRF_EGU_EVENT_TRIGGERED0    ///< Label of notification event.
+#define NTF_INT        NRF_EGU_INT_TRIGGERED0   ///< Label of notification interrupt.
+#define NTF_TASK       NRF_EGU_TASK_TRIGGER0    ///< Label of notification task.
+#define NTF_EVENT      NRF_EGU_EVENT_TRIGGERED0 ///< Label of notification event.
 
 /// Types of notifications in notification queue.
 typedef enum
@@ -213,9 +213,9 @@ void swi_notify_receive_failed(nrf_802154_rx_error_t error)
  * @param[in]  lqi      LQI of the received frame, or 0 if ACK was not requested.
  */
 void swi_notify_transmitted(const uint8_t * p_frame,
-                                       uint8_t       * p_data,
-                                       int8_t          power,
-                                       uint8_t         lqi)
+                            uint8_t       * p_data,
+                            int8_t          power,
+                            uint8_t         lqi)
 {
     nrf_802154_ntf_data_t * p_slot = ntf_enter();
 
@@ -316,7 +316,8 @@ void swi_notify_cca_failed(nrf_802154_cca_error_t error)
 void nrf_802154_notification_init(void)
 {
     nrf_802154_queue_init(&m_notifications_queue, m_notifications_queue_memory,
-            sizeof(m_notifications_queue_memory), sizeof(m_notifications_queue_memory[0]));
+                          sizeof(m_notifications_queue_memory),
+                          sizeof(m_notifications_queue_memory[0]));
 
     nrf_egu_int_enable(SWI_EGU, NTF_INT);
 
@@ -372,7 +373,7 @@ static void irq_handler_ntf_event(void)
     while (!nrf_802154_queue_is_empty(&m_notifications_queue))
     {
         nrf_802154_ntf_data_t * p_slot =
-                (nrf_802154_ntf_data_t *)nrf_802154_queue_pop_begin(&m_notifications_queue);
+            (nrf_802154_ntf_data_t *)nrf_802154_queue_pop_begin(&m_notifications_queue);
 
         switch (p_slot->type)
         {

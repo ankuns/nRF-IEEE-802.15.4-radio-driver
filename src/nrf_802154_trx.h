@@ -150,7 +150,8 @@ void nrf_802154_trx_cca_configuration_update(void);
  *                  It is bitwise combination of @ref nrf_802154_trx_receive_notifications_t values.
  *                  When NRF_802154_DISABLE_BCC_MATCHING != 0, flag @ref TRX_RECEIVE_NOTIFICATION_PRESTARTED is forbidden.
  */
-void nrf_802154_trx_receive_frame(uint8_t bcc, nrf_802154_trx_receive_notifications_t notifications_mask);
+void nrf_802154_trx_receive_frame(uint8_t                                bcc,
+                                  nrf_802154_trx_receive_notifications_t notifications_mask);
 
 /**@brief Puts the trx module into receive ACK mode.
  *
@@ -383,7 +384,7 @@ extern void nrf_802154_trx_receive_ack_started(void);
  *       activity that must be terminated by a further call, it must implement
  *       its own timeout feature.
  */
-extern void nrf_802154_trx_receive_frame_prestarted(void);  // TODO: is this name meaningful?
+extern void nrf_802154_trx_receive_frame_prestarted(void); // TODO: is this name meaningful?
 
 /**@brief Handler called at the beginning of frame reception.
  *

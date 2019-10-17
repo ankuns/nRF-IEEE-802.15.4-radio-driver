@@ -54,17 +54,17 @@
 
 #include <nrf.h>
 
-#define SWI_EGU            NRF_802154_SWI_EGU_INSTANCE ///< Label of SWI peripheral.
+#define SWI_EGU        NRF_802154_SWI_EGU_INSTANCE ///< Label of SWI peripheral.
 
 /** Size of requests queue.
  *
  * Two is minimal queue size. It is not expected in current implementation to queue a few requests.
  */
-#define REQ_QUEUE_SIZE     2
+#define REQ_QUEUE_SIZE 2
 
-#define REQ_INT            NRF_EGU_INT_TRIGGERED2      ///< Label of request interrupt.
-#define REQ_TASK           NRF_EGU_TASK_TRIGGER2       ///< Label of request task.
-#define REQ_EVENT          NRF_EGU_EVENT_TRIGGERED2    ///< Label of request event.
+#define REQ_INT        NRF_EGU_INT_TRIGGERED2   ///< Label of request interrupt.
+#define REQ_TASK       NRF_EGU_TASK_TRIGGER2    ///< Label of request task.
+#define REQ_EVENT      NRF_EGU_EVENT_TRIGGERED2 ///< Label of request event.
 
 /// Type of requests in request queue.
 typedef enum
@@ -157,14 +157,14 @@ typedef struct
 
         struct
         {
-            int8_t * p_rssi;                              ///< RSSI measurement result.
-            bool   * p_result;                            ///< RSSI measurement status.
-        } rssi_get;                                       ///< Details of the getter that retrieves the RSSI measurement result.
-    } data;                                               ///< Request data depending on its type.
+            int8_t * p_rssi;   ///< RSSI measurement result.
+            bool   * p_result; ///< RSSI measurement status.
+        } rssi_get;            ///< Details of the getter that retrieves the RSSI measurement result.
+    } data;                    ///< Request data depending on its type.
 } nrf_802154_req_data_t;
 
 /**@brief Instance of a requests queue */
-static nrf_802154_queue_t    m_requests_queue;
+static nrf_802154_queue_t m_requests_queue;
 
 /**@brief Memory holding requests queue items */
 static nrf_802154_req_data_t m_requests_queue_memory[REQ_QUEUE_SIZE];
@@ -279,10 +279,10 @@ static void swi_sleep(nrf_802154_term_t term_lvl, bool * p_result)
  * @param[out]  p_result         Result of entering the receive state.
  */
 static void swi_receive(nrf_802154_term_t              term_lvl,
-                            req_originator_t               req_orig,
-                            nrf_802154_notification_func_t notify_function,
-                            bool                           notify_abort,
-                            bool                         * p_result)
+                        req_originator_t               req_orig,
+                        nrf_802154_notification_func_t notify_function,
+                        bool                           notify_abort,
+                        bool                         * p_result)
 {
     nrf_802154_req_data_t * p_slot = req_enter();
 
@@ -313,12 +313,12 @@ static void swi_receive(nrf_802154_term_t              term_lvl,
  * @param[out]  p_result         Result of entering the transmit state.
  */
 static void swi_transmit(nrf_802154_term_t              term_lvl,
-                             req_originator_t               req_orig,
-                             const uint8_t                * p_data,
-                             bool                           cca,
-                             bool                           immediate,
-                             nrf_802154_notification_func_t notify_function,
-                             bool                         * p_result)
+                         req_originator_t               req_orig,
+                         const uint8_t                * p_data,
+                         bool                           cca,
+                         bool                           immediate,
+                         nrf_802154_notification_func_t notify_function,
+                         bool                         * p_result)
 {
     nrf_802154_req_data_t * p_slot = req_enter();
 
@@ -342,8 +342,8 @@ static void swi_transmit(nrf_802154_term_t              term_lvl,
  * @param[out]  p_result  Result of entering the energy detection state.
  */
 static void swi_energy_detection(nrf_802154_term_t term_lvl,
-                                     uint32_t          time_us,
-                                     bool            * p_result)
+                                 uint32_t          time_us,
+                                 bool            * p_result)
 {
     nrf_802154_req_data_t * p_slot = req_enter();
 
@@ -462,7 +462,7 @@ static void swi_rssi_measurement_get(int8_t * p_rssi, bool * p_result)
 void nrf_802154_request_init(void)
 {
     nrf_802154_queue_init(&m_requests_queue, m_requests_queue_memory,
-            sizeof(m_requests_queue_memory), sizeof(m_requests_queue_memory[0]));
+                          sizeof(m_requests_queue_memory), sizeof(m_requests_queue_memory[0]));
 
     nrf_egu_int_enable(SWI_EGU, REQ_INT);
 
@@ -557,7 +557,7 @@ static void irq_handler_req_event(void)
     while (!nrf_802154_queue_is_empty(&m_requests_queue))
     {
         nrf_802154_req_data_t * p_slot =
-                (nrf_802154_req_data_t *)nrf_802154_queue_pop_begin(&m_requests_queue);
+            (nrf_802154_req_data_t *)nrf_802154_queue_pop_begin(&m_requests_queue);
 
         switch (p_slot->type)
         {
@@ -640,4 +640,3 @@ void nrf_802154_request_swi_irq_handler(void)
         irq_handler_req_event();
     }
 }
-

@@ -53,7 +53,10 @@ static inline void * idx2ptr(const nrf_802154_queue_t * p_queue, size_t idx)
     return ((uint8_t *)(p_queue->p_memory)) + idx * p_queue->item_size;
 }
 
-void nrf_802154_queue_init(nrf_802154_queue_t * p_queue, void * p_memory, size_t memory_size, size_t item_size)
+void nrf_802154_queue_init(nrf_802154_queue_t * p_queue,
+                           void               * p_memory,
+                           size_t               memory_size,
+                           size_t               item_size)
 {
     assert(p_queue != NULL);
     assert(p_memory != NULL);
@@ -71,11 +74,11 @@ void nrf_802154_queue_init(nrf_802154_queue_t * p_queue, void * p_memory, size_t
     /* Due uint8_t type of nrf_802154_queue_t::capacity */
     assert(capacity <= 255U);
 
-    p_queue->p_memory = p_memory;
-    p_queue->capacity = capacity;
+    p_queue->p_memory  = p_memory;
+    p_queue->capacity  = capacity;
     p_queue->item_size = item_size;
-    p_queue->wridx = 0U;
-    p_queue->rdidx = 0U;
+    p_queue->wridx     = 0U;
+    p_queue->rdidx     = 0U;
 }
 
 void * nrf_802154_queue_push_begin(const nrf_802154_queue_t * p_queue)
@@ -106,4 +109,3 @@ bool nrf_802154_queue_is_full(const nrf_802154_queue_t * p_queue)
 
     return (p_queue->rdidx == wridx);
 }
-

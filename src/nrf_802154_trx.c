@@ -76,18 +76,18 @@
                                        (1U << PPI_ADDRESS_COUNTER_COUNT) | \
                                        (1U << PPI_CRCERROR_COUNTER_CLEAR))
 #else
-#define PPI_RADIO_HELPER1_EGU_HELPER1 NRF_802154_PPI_RADIO_HELPER1_TO_EGU_HELPER1   ///!< PPI that connects RADIO HELPER1 event with EGU task for HELPER1 channel
+#define PPI_RADIO_HELPER1_EGU_HELPER1 NRF_802154_PPI_RADIO_HELPER1_TO_EGU_HELPER1 ///!< PPI that connects RADIO HELPER1 event with EGU task for HELPER1 channel
 
 #define PPI_NO_BCC_MATCHING_USED_MASK (1 << PPI_RADIO_HELPER1_EGU_HELPER1)
-#endif // NRF_802154_DISABLE_BCC_MATCHING
+#endif  // NRF_802154_DISABLE_BCC_MATCHING
 
 /**@brief Mask of all PPI channels used directly by trx module. */
-#define PPI_ALL_USED_MASK     ((1U << PPI_DISABLED_EGU) |    \
-                               (1U << PPI_EGU_RAMP_UP) |     \
-                               (1U << PPI_EGU_TIMER_START) | \
-                               (1U << PPI_CCAIDLE_FEM) |     \
-                               (1U << PPI_TIMER_TX_ACK) |    \
-                               PPI_NO_BCC_MATCHING_USED_MASK)
+#define PPI_ALL_USED_MASK ((1U << PPI_DISABLED_EGU) |    \
+                           (1U << PPI_EGU_RAMP_UP) |     \
+                           (1U << PPI_EGU_TIMER_START) | \
+                           (1U << PPI_CCAIDLE_FEM) |     \
+                           (1U << PPI_TIMER_TX_ACK) |    \
+                           PPI_NO_BCC_MATCHING_USED_MASK)
 
 #if ((PPI_ALL_USED_MASK & NRF_802154_PPI_CHANNELS_USED_MASK) != PPI_ALL_USED_MASK)
 #error Some channels in PPI_ALL_USED_MASK not found in NRF_802154_PPI_CHANNELS_USED_MASK
@@ -734,7 +734,8 @@ bool nrf_802154_trx_receive_buffer_set(void * p_receive_buffer)
     return result;
 }
 
-void nrf_802154_trx_receive_frame(uint8_t bcc, nrf_802154_trx_receive_notifications_t notifications_mask)
+void nrf_802154_trx_receive_frame(uint8_t                                bcc,
+                                  nrf_802154_trx_receive_notifications_t notifications_mask)
 {
     uint32_t ints_to_enable = 0U;
     uint32_t shorts         = SHORTS_RX;
@@ -801,8 +802,10 @@ void nrf_802154_trx_receive_frame(uint8_t bcc, nrf_802154_trx_receive_notificati
         // RADIO.EVENTS_HELPER1 -> PPI_RADIO_HELPER1_EGU_HELPER1 -> EGU.TASK_HELPER1 -> EGU.EVENT_HELPER1 ->
         // SWI_IRQHandler (in nrf_802154_swi.c), calls nrf_802154_trx_swi_irq_handler
         nrf_ppi_channel_endpoint_setup(PPI_RADIO_HELPER1_EGU_HELPER1,
-                (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_HELPER1),
-                (uint32_t)nrf_egu_task_address_get(NRF_802154_SWI_EGU_INSTANCE, EGU_HELPER1_TASK));
+                                       (uint32_t)nrf_radio_event_address_get(
+                                           NRF_RADIO_EVENT_HELPER1),
+                                       (uint32_t)nrf_egu_task_address_get(
+                                           NRF_802154_SWI_EGU_INSTANCE, EGU_HELPER1_TASK));
         nrf_ppi_channel_enable(PPI_RADIO_HELPER1_EGU_HELPER1);
 
         nrf_radio_event_clear(NRF_RADIO_EVENT_HELPER1);
@@ -1972,6 +1975,7 @@ static void irq_handler_helper1(void)
 
     nrf_802154_trx_receive_frame_prestarted();
 }
+
 #endif
 
 void nrf_802154_radio_irq_handler(void)
@@ -2124,14 +2128,15 @@ void nrf_802154_trx_swi_irq_handler(void)
         // We are in SWI_IRQHandler, which priority is usually lower than RADIO_IRQHandler.
         // To avoid problems with critical sections, trigger RADIO_IRQ manually.
         // - If we are not in critical section, RADIO_IRQ will start shortly (calling
-        //   nrf_802154_radio_irq_handler) preempting current SWI_IRQHandler. From
-        //   nrf_802154_radio_irq_handler we acquire critical section and
-        //   process helper1 event.
+        // nrf_802154_radio_irq_handler) preempting current SWI_IRQHandler. From
+        // nrf_802154_radio_irq_handler we acquire critical section and
+        // process helper1 event.
         // If we are in critical section, the RADIO_IRQ is disabled on NVIC.
-        //   Following will make it pending, and processing of RADIO_IRQ will start
-        //   when critical section is left.
+        // Following will make it pending, and processing of RADIO_IRQ will start
+        // when critical section is left.
 
         NVIC_SetPendingIRQ(RADIO_IRQn);
     }
 }
+
 #endif

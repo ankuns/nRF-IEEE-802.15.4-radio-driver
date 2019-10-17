@@ -44,13 +44,13 @@ typedef struct
 {
     /**@brief Pointer to items memory of the queue.
      * @details Memory pointed by this pointer has size @c item_size * @c capacity. */
-    void * p_memory;
+    void           * p_memory;
 
     /**@brief Size of an item in the queue. */
-    uint8_t item_size;
+    uint8_t          item_size;
 
     /**@brief Maximum number of items that can be stored in the memory of the queue */
-    uint8_t capacity;
+    uint8_t          capacity;
 
     /**@brief Index in the items memory of the queue where next item is written. */
     volatile uint8_t wridx;
@@ -68,7 +68,10 @@ typedef struct
  *                          This parameter must be no less than 2 * @p item_size
  * @param[in] item_size     Size of an item of the queue. Must not be 0.
  */
-void nrf_802154_queue_init(nrf_802154_queue_t * p_queue, void * p_memory, size_t memory_size, size_t item_size);
+void nrf_802154_queue_init(nrf_802154_queue_t * p_queue,
+                           void               * p_memory,
+                           size_t               memory_size,
+                           size_t               item_size);
 
 /**@brief Returns pointer to the next item to be written to the queue.
  *

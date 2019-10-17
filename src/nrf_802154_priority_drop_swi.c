@@ -45,11 +45,11 @@
 #include "nrf_egu.h"
 #include "platform/clock/nrf_802154_clock.h"
 
-#define SWI_EGU            NRF_802154_SWI_EGU_INSTANCE ///< Label of SWI peripheral.
+#define SWI_EGU          NRF_802154_SWI_EGU_INSTANCE ///< Label of SWI peripheral.
 
-#define HFCLK_STOP_INT     NRF_EGU_INT_TRIGGERED1      ///< Label of HFClk stop interrupt.
-#define HFCLK_STOP_TASK    NRF_EGU_TASK_TRIGGER1       ///< Label of HFClk stop task.
-#define HFCLK_STOP_EVENT   NRF_EGU_EVENT_TRIGGERED1    ///< Label of HFClk stop event.
+#define HFCLK_STOP_INT   NRF_EGU_INT_TRIGGERED1      ///< Label of HFClk stop interrupt.
+#define HFCLK_STOP_TASK  NRF_EGU_TASK_TRIGGER1       ///< Label of HFClk stop task.
+#define HFCLK_STOP_EVENT NRF_EGU_EVENT_TRIGGERED1    ///< Label of HFClk stop event.
 
 /**
  * @brief Requests a stop of the HF clock.

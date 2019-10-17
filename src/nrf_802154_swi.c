@@ -45,9 +45,9 @@
 #include "nrf_802154_peripherals.h"
 #include "nrf_802154_utils.h"
 
-#define SWI_EGU            NRF_802154_SWI_EGU_INSTANCE ///< Label of SWI peripheral.
-#define SWI_IRQn           NRF_802154_SWI_IRQN         ///< Symbol of SWI IRQ number.
-#define SWI_IRQHandler     NRF_802154_SWI_IRQ_HANDLER  ///< Symbol of SWI IRQ handler.
+#define SWI_EGU        NRF_802154_SWI_EGU_INSTANCE ///< Label of SWI peripheral.
+#define SWI_IRQn       NRF_802154_SWI_IRQN         ///< Symbol of SWI IRQ number.
+#define SWI_IRQHandler NRF_802154_SWI_IRQ_HANDLER  ///< Symbol of SWI IRQ handler.
 
 void nrf_802154_swi_init(void)
 {

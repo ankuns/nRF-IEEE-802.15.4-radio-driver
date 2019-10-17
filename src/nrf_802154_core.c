@@ -1624,7 +1624,8 @@ bool nrf_802154_core_receive(nrf_802154_term_t              term_lvl,
 
                 if (result)
                 {
-                    m_trx_receive_frame_notifications_mask = make_trx_frame_receive_notification_mask();
+                    m_trx_receive_frame_notifications_mask =
+                        make_trx_frame_receive_notification_mask();
                     state_set(RADIO_STATE_RX);
                     rx_init(true);
                 }
