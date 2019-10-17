@@ -517,7 +517,9 @@ void nrf_802154_trx_init(void)
     m_trx_state = TRX_STATE_DISABLED;
 
     nrf_timer_init();
+#if defined(NRF_RADIO_EVENT_HELPER1)
     nrf_802154_swi_init();
+#endif
 }
 
 void nrf_802154_trx_enable(void)
@@ -596,7 +598,9 @@ void nrf_802154_trx_disable(void)
 #if !NRF_802154_DISABLE_BCC_MATCHING
         nrf_ppi_fork_endpoint_setup(PPI_EGU_RAMP_UP, 0);
 
+#if defined(NRF_RADIO_EVENT_HELPER1)
         nrf_egu_int_disable(NRF_802154_SWI_EGU_INSTANCE, EGU_HELPER1_INTMASK);
+#endif
 #else
         nrf_ppi_fork_endpoint_setup(PPI_EGU_TIMER_START, 0);
 #endif // NRF_802154_DISABLE_BCC_MATCHING
@@ -790,7 +794,7 @@ void nrf_802154_trx_receive_frame(uint8_t bcc, nrf_802154_trx_receive_notificati
 
     if ((notifications_mask & TRX_RECEIVE_NOTIFICATION_PRESTARTED) != 0U)
     {
-#if NRF_802154_DISABLE_BCC_MATCHING
+#if NRF_802154_DISABLE_BCC_MATCHING || !defined(NRF_RADIO_EVENT_HELPER1)
         assert(false);
 #else
         // The RADIO can't generate interrupt on EVENTS_HELPER1. Path to generate interrupt:
@@ -1200,7 +1204,7 @@ static void rxframe_finish_disable_ppis(void)
     nrf_ppi_fork_endpoint_setup(PPI_EGU_RAMP_UP, 0);
 #endif // NRF_802154_DISABLE_BCC_MATCHING
 
-#if !NRF_802154_DISABLE_BCC_MATCHING
+#if !NRF_802154_DISABLE_BCC_MATCHING && defined(NRF_RADIO_EVENT_HELPER1)
     nrf_ppi_channel_disable(PPI_RADIO_HELPER1_EGU_HELPER1);
 #endif
 
@@ -1240,7 +1244,7 @@ static void rxframe_finish_disable_ints(void)
 #endif // !NRF_802154_DISABLE_BCC_MATCHING
     nrf_radio_int_disable(ints_to_disable);
 
-#if !NRF_802154_DISABLE_BCC_MATCHING
+#if !NRF_802154_DISABLE_BCC_MATCHING && defined(NRF_RADIO_EVENT_HELPER1)
     nrf_egu_int_disable(NRF_802154_SWI_EGU_INSTANCE, EGU_HELPER1_INTMASK);
 #endif
 }
@@ -1961,12 +1965,14 @@ static void irq_handler_edend(void)
     nrf_802154_trx_energy_detection_finished(ed_sample);
 }
 
+#if defined(NRF_RADIO_EVENT_HELPER1)
 static void irq_handler_helper1(void)
 {
     assert(m_trx_state == TRX_STATE_RXFRAME);
 
     nrf_802154_trx_receive_frame_prestarted();
 }
+#endif
 
 void nrf_802154_radio_irq_handler(void)
 {
@@ -1975,6 +1981,7 @@ void nrf_802154_radio_irq_handler(void)
     // Prevent interrupting of this handler by requests from higher priority code.
     nrf_802154_critical_section_forcefully_enter();
 
+#if defined(NRF_RADIO_EVENT_HELPER1)
     // Note: For NRF_RADIO_EVENT_HELPER1 we enable interrupt through EGU.
     // That's why we check here EGU's EGU_HELPER1_INTMASK.
     // The RADIO does not have interrupt from HELPER1 event.
@@ -1986,6 +1993,7 @@ void nrf_802154_radio_irq_handler(void)
 
         irq_handler_helper1();
     }
+#endif
 
     if (nrf_radio_int_enable_check(NRF_RADIO_INT_ADDRESS_MASK) &&
         nrf_radio_event_check(NRF_RADIO_EVENT_ADDRESS))
@@ -2105,6 +2113,7 @@ void RADIO_IRQHandler(void)
 
 #endif // NRF_802154_INTERNAL_RADIO_IRQ_HANDLING
 
+#if defined(NRF_RADIO_EVENT_HELPER1)
 void nrf_802154_trx_swi_irq_handler(void)
 {
     if (nrf_egu_int_enable_check(NRF_802154_SWI_EGU_INSTANCE, EGU_HELPER1_INTMASK) &&
@@ -2125,3 +2134,4 @@ void nrf_802154_trx_swi_irq_handler(void)
         NVIC_SetPendingIRQ(RADIO_IRQn);
     }
 }
+#endif

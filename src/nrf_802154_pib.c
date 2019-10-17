@@ -269,7 +269,7 @@ bool nrf_802154_pib_coex_rx_request_mode_is_supported(nrf_802154_coex_rx_request
     switch (mode)
     {
         case NRF_802154_COEX_RX_REQUEST_MODE_DISABLED:
-#if !NRF_802154_DISABLE_BCC_MATCHING
+#if !NRF_802154_DISABLE_BCC_MATCHING && defined(NRF_RADIO_EVENT_HELPER1)
         case NRF_802154_COEX_RX_REQUEST_MODE_ENERGY_DETECTION:
 #endif
         case NRF_802154_COEX_RX_REQUEST_MODE_PREAMBLE:
