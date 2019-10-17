@@ -59,6 +59,11 @@ void nrf_802154_swi_init(void)
     NVIC_EnableIRQ(SWI_IRQn);
 }
 
+__WEAK void nrf_802154_trx_swi_irq_handler(void)
+{
+    /* Implementation provided by other module if necessary */
+}
+
 __WEAK void nrf_802154_notification_swi_irq_handler(void)
 {
     /* Implementation provided by other module if necessary */
@@ -76,6 +81,7 @@ __WEAK void nrf_802154_request_swi_irq_handler(void)
 
 void SWI_IRQHandler(void)
 {
+    nrf_802154_trx_swi_irq_handler();
     nrf_802154_notification_swi_irq_handler();
     nrf_802154_priority_drop_swi_irq_handler();
     nrf_802154_request_swi_irq_handler();

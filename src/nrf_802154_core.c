@@ -717,7 +717,9 @@ static nrf_802154_trx_receive_notifications_t make_trx_frame_receive_notificatio
             break;
 
         case NRF_802154_COEX_RX_REQUEST_MODE_ENERGY_DETECTION:
-            result |= TRX_RECEIVE_NOTIFICATION_PRESTARTED;
+            result |= TRX_RECEIVE_NOTIFICATION_PRESTARTED | TRX_RECEIVE_NOTIFICATION_STARTED;
+            // Note: TRX_RECEIVE_NOTIFICATION_STARTED is required for stopping counting timeout for
+            // activity triggered by nrf_802154_trx_receive_frame_prestarted.
             break;
 
         case NRF_802154_COEX_RX_REQUEST_MODE_PREAMBLE:
@@ -1061,6 +1063,12 @@ void nrf_802154_trx_receive_ack_started(void)
 {
     assert(m_state == RADIO_STATE_RX_ACK);
     nrf_802154_core_hooks_rx_ack_started();
+}
+
+void nrf_802154_trx_receive_frame_prestarted(void)
+{
+    assert(m_state == RADIO_STATE_RX);
+    // TODO: Implement coex requesting behavior
 }
 
 void nrf_802154_trx_receive_frame_started(void)

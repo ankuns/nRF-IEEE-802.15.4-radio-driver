@@ -167,7 +167,8 @@
                     "src/timer_scheduler/nrf_802154_timer_sched.c",
                     "src/nrf_802154_notification_direct.c",
                     "src/nrf_802154_priority_drop_direct.c",
-                    "src/nrf_802154_request_direct.c"
+                    "src/nrf_802154_request_direct.c",
+                    "src/nrf_802154_swi.c"
                 ],
                 "_links": [
                     "nrfx_hal",
