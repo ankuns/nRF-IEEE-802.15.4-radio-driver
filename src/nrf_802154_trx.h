@@ -384,7 +384,7 @@ extern void nrf_802154_trx_receive_ack_started(void);
  *       activity that must be terminated by a further call, it must implement
  *       its own timeout feature.
  */
-extern void nrf_802154_trx_receive_frame_prestarted(void); // TODO: is this name meaningful?
+extern void nrf_802154_trx_receive_frame_prestarted(void);
 
 /**@brief Handler called at the beginning of frame reception.
  *

@@ -53,8 +53,10 @@
  *
  * One slot for each receive buffer, one for transmission, one for busy channel and one for energy
  * detection.
+ *
+ * One slot is lost due to simplified queue implementation.
  */
-#define NTF_QUEUE_SIZE (NRF_802154_RX_BUFFERS + 3)
+#define NTF_QUEUE_SIZE ((NRF_802154_RX_BUFFERS + 3) + 1)
 
 #define NTF_INT        NRF_EGU_INT_TRIGGERED0   ///< Label of notification interrupt.
 #define NTF_TASK       NRF_EGU_TASK_TRIGGER0    ///< Label of notification task.
@@ -95,7 +97,7 @@ typedef struct
         struct
         {
             const uint8_t * p_frame; ///< Pointer to frame that was transmitted.
-            uint8_t       * p_data;  ///< Pointer to a buffer containing PHR and PSDU of the received ACK or NULL.
+            uint8_t       * p_ack;   ///< Pointer to a buffer containing PHR and PSDU of the received ACK or NULL.
             int8_t          power;   ///< RSSI of received ACK or 0.
             uint8_t         lqi;     ///< LQI of received ACK or 0.
         } transmitted;               ///< Transmitted frame details.
@@ -213,7 +215,7 @@ void swi_notify_receive_failed(nrf_802154_rx_error_t error)
  * @param[in]  lqi      LQI of the received frame, or 0 if ACK was not requested.
  */
 void swi_notify_transmitted(const uint8_t * p_frame,
-                            uint8_t       * p_data,
+                            uint8_t       * p_ack,
                             int8_t          power,
                             uint8_t         lqi)
 {
@@ -221,7 +223,7 @@ void swi_notify_transmitted(const uint8_t * p_frame,
 
     p_slot->type                     = NTF_TYPE_TRANSMITTED;
     p_slot->data.transmitted.p_frame = p_frame;
-    p_slot->data.transmitted.p_data  = p_data;
+    p_slot->data.transmitted.p_ack   = p_ack;
     p_slot->data.transmitted.power   = power;
     p_slot->data.transmitted.lqi     = lqi;
 
@@ -397,14 +399,14 @@ static void irq_handler_ntf_event(void)
             case NTF_TYPE_TRANSMITTED:
 #if NRF_802154_USE_RAW_API
                 nrf_802154_transmitted_raw(p_slot->data.transmitted.p_frame,
-                                           p_slot->data.transmitted.p_data,
+                                           p_slot->data.transmitted.p_ack,
                                            p_slot->data.transmitted.power,
                                            p_slot->data.transmitted.lqi);
 #else // NRF_802154_USE_RAW_API
                 nrf_802154_transmitted(p_slot->data.transmitted.p_frame + RAW_PAYLOAD_OFFSET,
-                                       p_slot->data.transmitted.p_data == NULL ? NULL :
-                                       p_slot->data.transmitted.p_data + RAW_PAYLOAD_OFFSET,
-                                       p_slot->data.transmitted.p_data[RAW_LENGTH_OFFSET],
+                                       p_slot->data.transmitted.p_ack == NULL ? NULL :
+                                       p_slot->data.transmitted.p_ack + RAW_PAYLOAD_OFFSET,
+                                       p_slot->data.transmitted.p_ack[RAW_LENGTH_OFFSET],
                                        p_slot->data.transmitted.power,
                                        p_slot->data.transmitted.lqi);
 #endif

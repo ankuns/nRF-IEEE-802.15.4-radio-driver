@@ -201,8 +201,6 @@ static void req_exit(void)
     nrf_egu_task_trigger(SWI_EGU, REQ_TASK);
 
     __enable_irq();
-    __DSB();
-    __ISB();
 }
 
 /** Assert if SWI interrupt is disabled. */
@@ -392,7 +390,9 @@ static void swi_continuous_carrier(nrf_802154_term_t term_lvl, bool * p_result)
 /**
  * @brief Notifies the core module that the given buffer is not used anymore and can be freed.
  *
- * @param[in]  p_data  Pointer to the buffer to be freed.
+ * @param[in]  p_data   Pointer to the buffer to be freed.
+ * @param[out] p_result Pointer where the result to be returned by
+ *                      nrf_802154_request_buffer_free should be written by the swi handler.
  */
 static void swi_buffer_free(uint8_t * p_data, bool * p_result)
 {
@@ -407,6 +407,9 @@ static void swi_buffer_free(uint8_t * p_data, bool * p_result)
 
 /**
  * @brief Notifies the core module that the next higher layer has requested a channel change.
+ *
+ * @param[out] p_result Pointer where the result to be returned by
+ *                      nrf_802154_request_channel_update should be written by the swi handler.
  */
 static void swi_channel_update(bool * p_result)
 {
@@ -421,6 +424,8 @@ static void swi_channel_update(bool * p_result)
 /**
  * @brief Notifies the core module that the next higher layer has requested a CCA configuration
  * change.
+ * @param[out] p_result Pointer where the result to be returned by
+ *                      nrf_802154_request_cca_cfg_update should be written by the swi handler.
  */
 static void swi_cca_cfg_update(bool * p_result)
 {
@@ -434,6 +439,9 @@ static void swi_cca_cfg_update(bool * p_result)
 
 /**
  * @brief Notifies the core module that the next higher layer requested the RSSI measurement.
+ *
+ * @param[out] p_result Pointer where the result to be returned by
+ *                      nrf_802154_request_rssi_measure should be written by the swi handler.
  */
 static void swi_rssi_measure(bool * p_result)
 {
@@ -447,6 +455,9 @@ static void swi_rssi_measure(bool * p_result)
 
 /**
  * @brief Gets the last RSSI measurement result from the core module.
+ *
+ * @param[out] p_result Pointer where the result to be returned by
+ *                      nrf_802154_request_rssi_measurement_get should be written by the swi handler.
  */
 static void swi_rssi_measurement_get(int8_t * p_rssi, bool * p_result)
 {

@@ -93,7 +93,7 @@ void nrf_802154_queue_init(nrf_802154_queue_t * p_queue,
  *
  * @param[in] p_queue        Pointer to the queue instance.
  *
- * @return Pointer pointer to the next item to be written.
+ * @return Pointer to the next item to be written.
  */
 void * nrf_802154_queue_push_begin(const nrf_802154_queue_t * p_queue);
 

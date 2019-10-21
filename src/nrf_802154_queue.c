@@ -63,7 +63,7 @@ void nrf_802154_queue_init(nrf_802154_queue_t * p_queue,
     assert(item_size != 0U);
 
     /* Due uint8_t type of nrf_802154_queue_t::item_size */
-    assert(item_size <= 255U);
+    assert(item_size <= UINT8_MAX);
 
     size_t capacity = memory_size / item_size;
 
@@ -72,7 +72,7 @@ void nrf_802154_queue_init(nrf_802154_queue_t * p_queue,
     assert(capacity >= 2U);
 
     /* Due uint8_t type of nrf_802154_queue_t::capacity */
-    assert(capacity <= 255U);
+    assert(capacity <= UINT8_MAX);
 
     p_queue->p_memory  = p_memory;
     p_queue->capacity  = capacity;
