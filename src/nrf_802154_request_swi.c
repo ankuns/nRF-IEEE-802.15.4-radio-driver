@@ -456,6 +456,7 @@ static void swi_rssi_measure(bool * p_result)
 /**
  * @brief Gets the last RSSI measurement result from the core module.
  *
+ * @param[out] p_rssi   Pointer where RSSI measurement value will be stored.
  * @param[out] p_result Pointer where the result to be returned by
  *                      nrf_802154_request_rssi_measurement_get should be written by the swi handler.
  */
