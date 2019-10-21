@@ -397,20 +397,29 @@ static void irq_handler_ntf_event(void)
                 break;
 
             case NTF_TYPE_TRANSMITTED:
+            {
 #if NRF_802154_USE_RAW_API
                 nrf_802154_transmitted_raw(p_slot->data.transmitted.p_frame,
                                            p_slot->data.transmitted.p_ack,
                                            p_slot->data.transmitted.power,
                                            p_slot->data.transmitted.lqi);
 #else // NRF_802154_USE_RAW_API
+                uint8_t * p_ack  = NULL;
+                uint8_t   length = 0;
+
+                if (p_slot->data.transmitted.p_ack != NULL)
+                {
+                    p_ack  = p_slot->data.transmitted.p_ack + RAW_PAYLOAD_OFFSET;
+                    length = p_slot->data.transmitted.p_ack[RAW_LENGTH_OFFSET];
+                }
                 nrf_802154_transmitted(p_slot->data.transmitted.p_frame + RAW_PAYLOAD_OFFSET,
-                                       p_slot->data.transmitted.p_ack == NULL ? NULL :
-                                       p_slot->data.transmitted.p_ack + RAW_PAYLOAD_OFFSET,
-                                       p_slot->data.transmitted.p_ack[RAW_LENGTH_OFFSET],
+                                       p_ack,
+                                       length,
                                        p_slot->data.transmitted.power,
                                        p_slot->data.transmitted.lqi);
 #endif
-                break;
+            }
+            break;
 
             case NTF_TYPE_TRANSMIT_FAILED:
 #if NRF_802154_USE_RAW_API
