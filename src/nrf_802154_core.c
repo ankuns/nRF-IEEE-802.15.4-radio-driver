@@ -637,7 +637,14 @@ static bool current_operation_terminate(nrf_802154_term_t term_lvl,
 
             if (m_state == RADIO_STATE_RX)
             {
+                /* When in rx mode, nrf_802154_trx_receive_frame_prestarted handler might
+                 * have already been called. We need to stop counting timeout. */
                 nrf_802154_timer_sched_remove(&m_rx_prestarted_timer, NULL);
+
+                /* We might have boosted preconditions (to support coex) above level
+                 * normally requested for current state by request_preconditions_for_state(m_state).
+                 * When current operation is terminated we request preconditions back
+                 * thus ceasing to request to coex. */
                 request_preconditions_for_state(m_state);
             }
 
@@ -1074,7 +1081,7 @@ static void on_rx_prestarted_timeout(void * p_context)
      * and nrf_802154_critical_section_enter must succeed.
      * Justification:
      * - If higher priority interrupt preempts this handler before it takes critical section, that
-     * interrupt may enter/exit critical section, but when it returns to this this handler
+     * interrupt may enter/exit critical section, but when it returns to this handler
      * entering critical section will succeed.
      * - If we entered critical section here the higher priority interrupt from radio
      * will not occur.
@@ -1100,7 +1107,7 @@ void nrf_802154_trx_receive_frame_prestarted(void)
     assert((m_trx_receive_frame_notifications_mask & TRX_RECEIVE_NOTIFICATION_PRESTARTED) != 0U);
 
     /* This handler serves one main purpose: boosting preconditions for receive.
-     * This handler may be not followed by nrf_802154_trx_receive_frame_started.
+     * This handler might not be followed by nrf_802154_trx_receive_frame_started.
      * That's why we need to revert boosted precondition if nrf_802154_trx_receive_frame_started
      * doesn't come. We use timer for this purpose.
      */
@@ -1109,7 +1116,7 @@ void nrf_802154_trx_receive_frame_prestarted(void)
 
     nrf_802154_timer_sched_remove(&m_rx_prestarted_timer, NULL);
 
-    /* Request boosted preceonditions */
+    /* Request boosted preconditions */
     nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
 
     m_rx_prestarted_timer.t0       = now;
@@ -1126,7 +1133,7 @@ void nrf_802154_trx_receive_frame_started(void)
 
     nrf_802154_timer_sched_remove(&m_rx_prestarted_timer, NULL);
 
-    /* Request boosted preceonditions */
+    /* Request boosted preconditions */
     nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
 }
 
@@ -1159,7 +1166,7 @@ uint8_t nrf_802154_trx_receive_frame_bcmatched(uint8_t bcc)
             {
                 m_flags.frame_filtered = true;
 
-                /* Request boosted preceonditions */
+                /* Request boosted preconditions */
                 nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
             }
         }
