@@ -72,26 +72,26 @@
 #include "nrf_802154_core_hooks.h"
 
 /// Delay before first check of received frame: 24 bits is PHY header and MAC Frame Control field.
-#define BCC_INIT           (3 * 8)
+#define BCC_INIT                 (3 * 8)
 
 /// Duration of single iteration of Energy Detection procedure
-#define ED_ITER_DURATION   128U
+#define ED_ITER_DURATION         128U
 /// Overhead of hardware preparation for ED procedure (aTurnaroundTime) [number of iterations]
-#define ED_ITERS_OVERHEAD  2U
+#define ED_ITERS_OVERHEAD        2U
 
-#define ACK_IFS            TURNAROUND_TIME ///< Ack Inter Frame Spacing [us] - delay between last symbol of received frame and first symbol of transmitted Ack
+#define ACK_IFS                  TURNAROUND_TIME ///< Ack Inter Frame Spacing [us] - delay between last symbol of received frame and first symbol of transmitted Ack
 
-#define MAX_CRIT_SECT_TIME 60              ///< Maximal time that the driver spends in single critical section.
+#define MAX_CRIT_SECT_TIME       60              ///< Maximal time that the driver spends in single critical section.
 
-#define LQI_VALUE_FACTOR   4               ///< Factor needed to calculate LQI value based on data from RADIO peripheral
-#define LQI_MAX            0xff            ///< Maximal LQI value
+#define LQI_VALUE_FACTOR         4               ///< Factor needed to calculate LQI value based on data from RADIO peripheral
+#define LQI_MAX                  0xff            ///< Maximal LQI value
 
 /** Get LQI of given received packet. If CRC is calculated by hardware LQI is included instead of CRC
  *  in the frame. Length is stored in byte with index 0; CRC is 2 last bytes.
  */
-#define RX_FRAME_LQI(data) ((data)[(data)[0] - 1])
+#define RX_FRAME_LQI(data)       ((data)[(data)[0] - 1])
 
-#define PRESTARTED_TIMER_TIMEOUT        (160U)
+#define PRESTARTED_TIMER_TIMEOUT (160U)
 
 #if NRF_802154_RX_BUFFERS > 1
 /// Pointer to currently used receive buffer.
@@ -1063,6 +1063,7 @@ void nrf_802154_trx_receive_ack_started(void)
 static void on_rx_prestarted_timeout(void * p_context)
 {
     bool in_crit_sect;
+
     (void)p_context;
 
     /* If we were in critical section this handler would not be called.
@@ -1108,8 +1109,8 @@ void nrf_802154_trx_receive_frame_prestarted(void)
     /* Request boosted preceonditions */
     nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
 
-    m_rx_prestarted_timer.t0 = now;
-    m_rx_prestarted_timer.dt = PRESTARTED_TIMER_TIMEOUT;
+    m_rx_prestarted_timer.t0       = now;
+    m_rx_prestarted_timer.dt       = PRESTARTED_TIMER_TIMEOUT;
     m_rx_prestarted_timer.callback = on_rx_prestarted_timeout;
 
     nrf_802154_timer_sched_add(&m_rx_prestarted_timer, true);
