@@ -151,7 +151,6 @@ static bool coex_tx_request_mode_is_supported(nrf_802154_coex_tx_request_mode_t 
 
     switch (mode)
     {
-        case NRF_802154_COEX_TX_REQUEST_MODE_DISABLED:
         case NRF_802154_COEX_TX_REQUEST_MODE_FRAME_READY:
         case NRF_802154_COEX_TX_REQUEST_MODE_CCA_START:
         case NRF_802154_COEX_TX_REQUEST_MODE_CCA_DONE:
@@ -179,7 +178,6 @@ static bool coex_rx_request_mode_is_supported(nrf_802154_coex_rx_request_mode_t 
 
     switch (mode)
     {
-        case NRF_802154_COEX_RX_REQUEST_MODE_DISABLED:
 #if !NRF_802154_DISABLE_BCC_MATCHING && defined(NRF_RADIO_EVENT_HELPER1)
         case NRF_802154_COEX_RX_REQUEST_MODE_ENERGY_DETECTION:
 #endif
@@ -215,7 +213,7 @@ void nrf_802154_pib_init(void)
     m_data.cca.corr_limit     = NRF_802154_CCA_CORR_LIMIT_DEFAULT;
 
 #if NRF_802154_DISABLE_BCC_MATCHING
-    m_data.coex.rx_request_mode = NRF_802154_COEX_RX_REQUEST_MODE_DISABLED;
+    m_data.coex.rx_request_mode = NRF_802154_COEX_RX_REQUEST_MODE_PREAMBLE;
 #else
     m_data.coex.rx_request_mode = NRF_802154_COEX_RX_REQUEST_MODE_DESTINED;
 #endif

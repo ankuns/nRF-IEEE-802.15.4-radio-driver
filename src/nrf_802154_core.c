@@ -744,10 +744,6 @@ static nrf_802154_trx_receive_notifications_t make_trx_frame_receive_notificatio
 
     switch (nrf_802154_pib_coex_rx_request_mode_get())
     {
-        case NRF_802154_COEX_RX_REQUEST_MODE_DISABLED:
-            /* No additional notifications required. */
-            break;
-
         case NRF_802154_COEX_RX_REQUEST_MODE_DESTINED:
             /* Coex requesting handled through nrf_802154_trx_receive_frame_bcmatched handler.
              * No additional notifications required. */
@@ -777,7 +773,6 @@ static nrf_802154_trx_transmit_notifications_t make_trx_frame_transmit_notificat
 
     switch (nrf_802154_pib_coex_tx_request_mode_get())
     {
-        case NRF_802154_COEX_TX_REQUEST_MODE_DISABLED:
         case NRF_802154_COEX_TX_REQUEST_MODE_FRAME_READY:
         case NRF_802154_COEX_TX_REQUEST_MODE_CCA_START:
             /* No additional notifications required. */
