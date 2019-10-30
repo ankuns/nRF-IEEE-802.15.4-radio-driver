@@ -290,7 +290,7 @@ static inline bool requested_prio_lvl_is_at_least(rsch_prio_t prio)
 static inline void notify_core(void)
 {
     nrf_802154_log_entry(notify_core, 2);
-
+#if (0)
     rsch_prio_t approved_prio_lvl;
     uint8_t     temp_mon;
 
@@ -319,6 +319,28 @@ static inline void notify_core(void)
         mutex_unlock(&m_ntf_mutex);
     }
     while (temp_mon != m_ntf_mutex_monitor);
+#else
+    uint32_t primask = __get_PRIMASK();
+    __disable_irq();
+
+    rsch_prio_t approved_prio_lvl;
+    approved_prio_lvl = approved_prio_lvl_get();
+
+    if (m_last_notified_prio != approved_prio_lvl)
+    {
+        m_last_notified_prio = approved_prio_lvl;
+        __set_PRIMASK(primask);
+
+        /* ISR */
+
+        nrf_802154_rsch_continuous_prio_changed(approved_prio_lvl);
+    }
+    else
+    {
+        __set_PRIMASK(primask);
+    }
+
+#endif
 
     nrf_802154_log_exit(notify_core, 2);
 }
