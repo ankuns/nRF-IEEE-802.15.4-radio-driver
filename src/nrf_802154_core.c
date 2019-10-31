@@ -742,25 +742,28 @@ static nrf_802154_trx_receive_notifications_t make_trx_frame_receive_notificatio
 {
     nrf_802154_trx_receive_notifications_t result = TRX_RECEIVE_NOTIFICATION_NONE;
 
-    switch (nrf_802154_pib_coex_rx_request_mode_get())
+    if (nrf_802154_wifi_coex_is_enabled())
     {
-        case NRF_802154_COEX_RX_REQUEST_MODE_DESTINED:
-            /* Coex requesting handled through nrf_802154_trx_receive_frame_bcmatched handler.
-             * No additional notifications required. */
-            break;
+        switch (nrf_802154_pib_coex_rx_request_mode_get())
+        {
+            case NRF_802154_COEX_RX_REQUEST_MODE_DESTINED:
+                /* Coex requesting handled through nrf_802154_trx_receive_frame_bcmatched handler.
+                 * No additional notifications required. */
+                break;
 
-        case NRF_802154_COEX_RX_REQUEST_MODE_ENERGY_DETECTION:
-            result |= TRX_RECEIVE_NOTIFICATION_PRESTARTED | TRX_RECEIVE_NOTIFICATION_STARTED;
-            // Note: TRX_RECEIVE_NOTIFICATION_STARTED is required for stopping counting timeout for
-            // activity triggered by nrf_802154_trx_receive_frame_prestarted.
-            break;
+            case NRF_802154_COEX_RX_REQUEST_MODE_ENERGY_DETECTION:
+                result |= TRX_RECEIVE_NOTIFICATION_PRESTARTED | TRX_RECEIVE_NOTIFICATION_STARTED;
+                // Note: TRX_RECEIVE_NOTIFICATION_STARTED is required for stopping counting timeout for
+                // activity triggered by nrf_802154_trx_receive_frame_prestarted.
+                break;
 
-        case NRF_802154_COEX_RX_REQUEST_MODE_PREAMBLE:
-            result |= TRX_RECEIVE_NOTIFICATION_STARTED;
-            break;
+            case NRF_802154_COEX_RX_REQUEST_MODE_PREAMBLE:
+                result |= TRX_RECEIVE_NOTIFICATION_STARTED;
+                break;
 
-        default:
-            assert(false);
+            default:
+                assert(false);
+        }
     }
 
     return result;
@@ -771,19 +774,22 @@ static nrf_802154_trx_transmit_notifications_t make_trx_frame_transmit_notificat
 {
     nrf_802154_trx_transmit_notifications_t result = TRX_TRANSMIT_NOTIFICATION_NONE;
 
-    switch (nrf_802154_pib_coex_tx_request_mode_get())
+    if (nrf_802154_wifi_coex_is_enabled())
     {
-        case NRF_802154_COEX_TX_REQUEST_MODE_FRAME_READY:
-        case NRF_802154_COEX_TX_REQUEST_MODE_CCA_START:
-            /* No additional notifications required. */
-            break;
+        switch (nrf_802154_pib_coex_tx_request_mode_get())
+        {
+            case NRF_802154_COEX_TX_REQUEST_MODE_FRAME_READY:
+            case NRF_802154_COEX_TX_REQUEST_MODE_CCA_START:
+                /* No additional notifications required. */
+                break;
 
-        case NRF_802154_COEX_TX_REQUEST_MODE_CCA_DONE:
-            result |= TRX_TRANSMIT_NOTIFICATION_CCAIDLE;
-            break;
+            case NRF_802154_COEX_TX_REQUEST_MODE_CCA_DONE:
+                result |= TRX_TRANSMIT_NOTIFICATION_CCAIDLE;
+                break;
 
-        default:
-            assert(false);
+            default:
+                assert(false);
+        }
     }
 
     return result;
