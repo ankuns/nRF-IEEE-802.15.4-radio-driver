@@ -68,3 +68,19 @@ __WEAK void nrf_802154_wifi_coex_prio_changed(rsch_prio_t priority)
     (void)priority;
     // Intentionally empty
 }
+
+bool nrf_802154_wifi_coex_enable(void)
+{
+    // Wifi coex signaling cannot be enabled
+    return false;
+}
+
+void nrf_802154_wifi_coex_disable(void)
+{
+    // Intentionally empty
+}
+
+bool nrf_802154_wifi_coex_is_enabled(void)
+{
+    return false;
+}
