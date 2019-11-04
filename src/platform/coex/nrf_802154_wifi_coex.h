@@ -36,6 +36,7 @@
 #ifndef NRF_802154_WIFI_COEX_H_
 #define NRF_802154_WIFI_COEX_H_
 
+#include "nrf_802154_config.h"
 #include "rsch/nrf_802154_rsch.h"
 
 #ifdef __cplusplus

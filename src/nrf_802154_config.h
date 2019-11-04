@@ -430,6 +430,21 @@ extern "C" {
 #endif // NRF_802154_TX_STARTED_NOTIFY_ENABLED
 
 /**
+ * @}
+ * @defgroup nrf_802154_coex WiFi coexistence feature configuration
+ * @{
+ */
+
+/**
+ * @def NRF_802154_COEX_INITIALLY_ENABLED
+ *
+ * Configures if WiFi coex is initially enabled or disabled.
+ */
+#ifndef NRF_802154_COEX_INITIALLY_ENABLED
+#define NRF_802154_COEX_INITIALLY_ENABLED 1
+#endif
+
+/**
  *@}
  **/
 
