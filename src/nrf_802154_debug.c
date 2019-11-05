@@ -38,8 +38,6 @@
 
 #include <stdint.h>
 
-#include "nrf.h"
-
 void nrf_802154_debug_gpio_init(void);
 void nrf_802154_debug_log_init(void);
 void nrf_802154_debug_assert_init(void);
