@@ -1309,11 +1309,14 @@ void nrf_802154_ack_timeout_set(uint32_t time);
 /**
  * @brief Enables wifi coex signaling.
  *
- * When @ref nrf_802154_init is called, the wifi coex signaling is initially disabled.
- * You can call this function (after @ref nrf_802154_init) to enable the wifi coex signaling.
- * When wifi coex signaling has been already enabled, this function has no effect.
+ * When @ref nrf_802154_init is called, the wifi coex signaling is initially enabled or disabled
+ * depending on @ref NRF_802154_COEX_INITIALLY_ENABLED. You can call this function
+ * (after @ref nrf_802154_init) to enable the wifi coex signaling. When wifi coex signaling
+ * has been already enabled, this function has no effect.
  *
- * @note The nRF 802.15.4 driver must be in sleep state to perform this operations.
+ * When this function is called during receive or transmit operation, the effect on coex interface
+ * may be delayed until current frame (or ack) is received or transmitted.
+ * To avoid this issue please call this function when the driver is in sleep mode.
  *
  * @retval true     Wifi coex is supported and is enabled after call to this function.
  * @retval false    Wifi coex is not supported.
@@ -1325,7 +1328,10 @@ bool nrf_802154_wifi_coex_enable(void);
  *
  * You can call this function (after @ref nrf_802154_init) to disable the wifi coex signaling.
  * When wifi coex signaling has been already disabled, this function has no effect.
- * @note The nRF 802.15.4 driver must be in sleep state to perform this operations.
+ *
+ * When this function is called during receive or transmit operation, the effect on coex interface
+ * may be delayed until current frame (or ack) is received or transmitted.
+ * To avoid this issue please call this function when the driver is in sleep mode.
  */
 void nrf_802154_wifi_coex_disable(void);
 
