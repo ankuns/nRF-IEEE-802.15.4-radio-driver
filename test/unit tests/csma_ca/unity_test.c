@@ -69,14 +69,13 @@
 #define CSMACA_MAX_BACKOFFS_MAXIMUM 5  ///< The maximum number of the CSMA-CA backoffs allowed by the protocol specification
 
 #define TEST_FRAME_LENGTH           16 ///< Length of the test frame in bytes.
-#define COEX_TX_REQUEST_MODE_NUM    4  ///< Number of Coex TX request modes
 
 static const uint8_t mp_test_data[TEST_FRAME_LENGTH] =
 {
     0xf, 0xe, 0xd, 0xc, 0xb, 0xa, 0x9, 0x8, 0x7, 0x6, 0x5, 0x4, 0x3, 0x2, 0x1, 0x0
 };
 
-static const nrf_802154_coex_tx_request_mode_t m_tx_req_modes[COEX_TX_REQUEST_MODE_NUM] =
+static const nrf_802154_coex_tx_request_mode_t m_tx_req_modes[] =
 {
     NRF_802154_COEX_TX_REQUEST_MODE_FRAME_READY,
     NRF_802154_COEX_TX_REQUEST_MODE_CCA_START,
@@ -211,7 +210,7 @@ static void verify_csma_ca_succeeded(uint8_t cca_busy_backoffs)
 
 static void verify_channel_busy_scenario(uint8_t min_be, uint8_t max_be)
 {
-    for (int i = 0; i < COEX_TX_REQUEST_MODE_NUM; i++)
+    for (int i = 0; i < sizeof(m_tx_req_modes)/sizeof(m_tx_req_modes[0]); i++)
     {
         for (uint8_t max_backoffs = CSMACA_MAX_BACKOFFS_MINIMUM; max_backoffs <= CSMACA_MAX_BACKOFFS_MAXIMUM; max_backoffs++)
         {
@@ -242,7 +241,7 @@ static void verify_channel_busy_scenario(uint8_t min_be, uint8_t max_be)
 
 static void verify_channel_empty_scenario(uint8_t min_be, uint8_t max_be)
 {
-    for (int i = 0; i < COEX_TX_REQUEST_MODE_NUM; i++)
+    for (int i = 0; i < sizeof(m_tx_req_modes)/sizeof(m_tx_req_modes[0]); i++)
     {
         for (uint8_t max_backoffs = CSMACA_MAX_BACKOFFS_MINIMUM; max_backoffs <= CSMACA_MAX_BACKOFFS_MAXIMUM; max_backoffs++)
         {
