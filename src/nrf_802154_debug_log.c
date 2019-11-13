@@ -34,6 +34,7 @@
  *
  */
 
+#include <assert.h>
 #include <stdint.h>
 
 #include "nrf_802154_debug_log.h"
@@ -46,5 +47,7 @@ volatile uint32_t nrf_802154_debug_log_ptr = 0;
 
 void nrf_802154_debug_log_init(void)
 {
-    // Intentionally empty
+    // Let's check if address of generated __func__ will fit into log generated
+    // by @ref nrf_802154_debug_log_function_entry
+    assert((uint32_t)((uintptr_t)(__func__)) < (1U << 22)) ;
 }
