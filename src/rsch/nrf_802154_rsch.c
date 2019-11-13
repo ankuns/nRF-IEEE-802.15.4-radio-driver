@@ -1,3 +1,7 @@
+
+#define NRF_802154_DEBUG_LOG_MODULE_ID  NRF_802154_DEBUG_LOG_MODULE_ID_RSCH
+#define NRF_802154_DEBUG_LOG_VERBOSITY  NRF_802154_DEBUG_LOG_VERBOSITY_DEFAULT
+
 #include "nrf_802154_rsch.h"
 
 #include <assert.h>
@@ -75,7 +79,7 @@ static dly_ts_t m_dly_ts[RSCH_DLY_TS_NUM];
  */
 static inline bool mutex_trylock(volatile uint8_t * p_mutex, volatile uint8_t * p_mutex_monitor)
 {
-    nrf_802154_log_entry(mutex_trylock, 2);
+    nrf_802154_debug_log_function_entry(2);
 
     do
     {
@@ -87,7 +91,7 @@ static inline bool mutex_trylock(volatile uint8_t * p_mutex, volatile uint8_t * 
 
             (*p_mutex_monitor)++;
 
-            nrf_802154_log_exit(mutex_trylock, 2);
+            nrf_802154_debug_log_function_exit(2);
 
             return false;
         }
@@ -96,7 +100,7 @@ static inline bool mutex_trylock(volatile uint8_t * p_mutex, volatile uint8_t * 
 
     __DMB();
 
-    nrf_802154_log_exit(mutex_trylock, 2);
+    nrf_802154_debug_log_function_exit(2);
 
     return true;
 }
@@ -104,12 +108,12 @@ static inline bool mutex_trylock(volatile uint8_t * p_mutex, volatile uint8_t * 
 /** @brief Release mutex. */
 static inline void mutex_unlock(volatile uint8_t * p_mutex)
 {
-    nrf_802154_log_entry(mutex_unlock, 2);
+    nrf_802154_debug_log_function_entry(2);
 
     __DMB();
     *p_mutex = 0;
 
-    nrf_802154_log_exit(mutex_unlock, 2);
+    nrf_802154_debug_log_function_exit(2);
 }
 
 /** @brief Check maximal priority level required by any of delayed timeslots at the moment.
@@ -125,7 +129,7 @@ static inline void mutex_unlock(volatile uint8_t * p_mutex)
  */
 static rsch_prio_t max_prio_for_delayed_timeslot_get(void)
 {
-    nrf_802154_log_entry(max_prio_for_delayed_timeslot_get, 2);
+    nrf_802154_debug_log_function_entry(2);
 
     rsch_prio_t result = RSCH_PRIO_IDLE;
     uint32_t    now    = nrf_802154_timer_sched_time_get();
@@ -147,14 +151,14 @@ static rsch_prio_t max_prio_for_delayed_timeslot_get(void)
         result = dly_ts_prio > result ? dly_ts_prio : result;
     }
 
-    nrf_802154_log_exit(max_prio_for_delayed_timeslot_get, 2);
+    nrf_802154_debug_log_function_exit(2);
 
     return result;
 }
 
 static rsch_prio_t required_prio_lvl_get(void)
 {
-    nrf_802154_log_entry(required_prio_lvl_get, 2);
+    nrf_802154_debug_log_function_entry(2);
 
     rsch_prio_t result = max_prio_for_delayed_timeslot_get();
 
@@ -163,7 +167,7 @@ static rsch_prio_t required_prio_lvl_get(void)
         result = m_cont_mode_prio;
     }
 
-    nrf_802154_log_exit(required_prio_lvl_get, 2);
+    nrf_802154_debug_log_function_exit(2);
 
     return result;
 }
@@ -178,21 +182,21 @@ static rsch_prio_t required_prio_lvl_get(void)
  */
 static inline void prec_approved_prio_set(rsch_prec_t prec, rsch_prio_t prio)
 {
-    nrf_802154_log_entry(prec_approved_prio_set, 2);
+    nrf_802154_debug_log_function_entry(2);
 
     assert(prec <= RSCH_PREC_CNT);
     assert((m_approved_prios[prec] != prio) || (prio == RSCH_PRIO_IDLE));
 
     m_approved_prios[prec] = prio;
 
-    nrf_802154_log_exit(prec_approved_prio_set, 2);
+    nrf_802154_debug_log_function_exit(2);
 }
 
 /** @brief Request all preconditions.
  */
 static inline void all_prec_update(void)
 {
-    nrf_802154_log_entry(all_prec_update, 2);
+    nrf_802154_debug_log_function_entry(2);
 
     rsch_prio_t prev_prio;
     rsch_prio_t new_prio;
@@ -202,6 +206,7 @@ static inline void all_prec_update(void)
     {
         if (!mutex_trylock(&m_req_mutex, &m_req_mutex_monitor))
         {
+            nrf_802154_debug_log_function_exit(2);
             return;
         }
 
@@ -245,7 +250,7 @@ static inline void all_prec_update(void)
     }
     while (monitor != m_req_mutex_monitor);
 
-    nrf_802154_log_exit(all_prec_update, 2);
+    nrf_802154_debug_log_function_exit(2);
 }
 
 /** @brief Get currently approved priority level.
@@ -254,7 +259,7 @@ static inline void all_prec_update(void)
  */
 static inline rsch_prio_t approved_prio_lvl_get(void)
 {
-    nrf_802154_log_entry(approved_prio_lvl_get, 2);
+    nrf_802154_debug_log_function_entry(2);
 
     rsch_prio_t result = RSCH_PRIO_MAX;
 
@@ -266,7 +271,7 @@ static inline rsch_prio_t approved_prio_lvl_get(void)
         }
     }
 
-    nrf_802154_log_exit(approved_prio_lvl_get, 2);
+    nrf_802154_debug_log_function_exit(2);
 
     return result;
 }
@@ -280,8 +285,8 @@ static inline rsch_prio_t approved_prio_lvl_get(void)
  */
 static inline bool requested_prio_lvl_is_at_least(rsch_prio_t prio)
 {
-    nrf_802154_log_entry(requested_prio_lvl_is_at_least, 2);
-    nrf_802154_log_exit(requested_prio_lvl_is_at_least, 2);
+    nrf_802154_debug_log_function_entry(2);
+    nrf_802154_debug_log_function_exit(2);
 
     return m_requested_prio >= prio;
 }
@@ -293,7 +298,7 @@ static inline bool requested_prio_lvl_is_at_least(rsch_prio_t prio)
  */
 static inline bool notify_core(void)
 {
-    nrf_802154_log_entry(notify_core, 2);
+    nrf_802154_debug_log_function_entry(2);
 
     rsch_prio_t approved_prio_lvl;
     uint8_t     temp_mon;
@@ -303,8 +308,7 @@ static inline bool notify_core(void)
     {
         if (!mutex_trylock(&m_ntf_mutex, &m_ntf_mutex_monitor))
         {
-            break;
-        }
+            break;        }
 
         /* It is possible that preemption is not detected (m_ntf_mutex_monitor is read after
          * acquiring mutex). It is not a problem because we will call proper handler function
@@ -327,7 +331,7 @@ static inline bool notify_core(void)
     }
     while (temp_mon != m_ntf_mutex_monitor);
 
-    nrf_802154_log_exit(notify_core, 2);
+    nrf_802154_debug_log_function_exit(2);
 
     return notified;
 }
@@ -338,10 +342,10 @@ static inline bool notify_core(void)
  */
 static void delayed_timeslot_start(void * p_context)
 {
+    nrf_802154_debug_log_function_entry(1);
+
     rsch_dly_ts_id_t dly_ts_id = (rsch_dly_ts_id_t)(uint32_t)p_context;
     dly_ts_t       * p_dly_ts  = &m_dly_ts[dly_ts_id];
-
-    nrf_802154_log(EVENT_TRACE_ENTER, FUNCTION_RSCH_TIMER_DELAYED_START);
 
     p_dly_ts->param.started_callback(dly_ts_id);
 
@@ -353,7 +357,7 @@ static void delayed_timeslot_start(void * p_context)
         notify_core();
     }
 
-    nrf_802154_log(EVENT_TRACE_EXIT, FUNCTION_RSCH_TIMER_DELAYED_START);
+    nrf_802154_debug_log_function_exit(1);
 }
 
 /** Timer callback used to request preconditions for delayed timeslot.
@@ -362,10 +366,10 @@ static void delayed_timeslot_start(void * p_context)
  */
 static void delayed_timeslot_prec_request(void * p_context)
 {
+    nrf_802154_debug_log_function_entry(1);
+
     rsch_dly_ts_id_t dly_ts_id = (rsch_dly_ts_id_t)(uint32_t)p_context;
     dly_ts_t       * p_dly_ts  = &m_dly_ts[dly_ts_id];
-
-    nrf_802154_log(EVENT_TRACE_ENTER, FUNCTION_RSCH_TIMER_DELAYED_PREC);
 
     all_prec_update();
 
@@ -376,7 +380,7 @@ static void delayed_timeslot_prec_request(void * p_context)
 
     nrf_802154_timer_sched_add(&p_dly_ts->timer, true);
 
-    nrf_802154_log(EVENT_TRACE_EXIT, FUNCTION_RSCH_TIMER_DELAYED_PREC);
+    nrf_802154_debug_log_function_exit(1);
 }
 
 /**
@@ -391,6 +395,8 @@ static void delayed_timeslot_prec_request(void * p_context)
 static bool precise_delayed_timeslot_request(dly_ts_t                  * p_dly_ts,
                                              const rsch_dly_ts_param_t * p_param)
 {
+    nrf_802154_debug_log_function_entry(1);
+
     // Assert that no operation is scheduled for the selected slot
     assert(p_dly_ts->param.prio == RSCH_PRIO_IDLE);
     assert(!nrf_802154_timer_sched_is_running(&p_dly_ts->timer));
@@ -411,6 +417,7 @@ static bool precise_delayed_timeslot_request(dly_ts_t                  * p_dly_t
 
         nrf_802154_timer_sched_add(&p_dly_ts->timer, false);
 
+        nrf_802154_debug_log_function_exit(1);
         return true;
     }
     else if (requested_prio_lvl_is_at_least(RSCH_PRIO_IDLE_LISTENING) &&
@@ -429,11 +436,14 @@ static bool precise_delayed_timeslot_request(dly_ts_t                  * p_dly_t
         all_prec_update();
         nrf_802154_timer_sched_add(&p_dly_ts->timer, true);
 
+        nrf_802154_debug_log_function_exit(1);
+
         return true;
     }
     else
     {
         // The requested time is in the past.
+        nrf_802154_debug_log_function_exit(1);
         return false;
     }
 }
@@ -449,6 +459,8 @@ static bool precise_delayed_timeslot_request(dly_ts_t                  * p_dly_t
 static bool relaxed_delayed_timeslot_request(dly_ts_t                  * p_dly_ts,
                                              const rsch_dly_ts_param_t * p_param)
 {
+    nrf_802154_debug_log_function_entry(1);
+
     p_dly_ts->param = *p_param;
 
     p_dly_ts->timer.t0        = p_param->t0;
@@ -459,6 +471,8 @@ static bool relaxed_delayed_timeslot_request(dly_ts_t                  * p_dly_t
     all_prec_update();
 
     nrf_802154_timer_sched_add(&p_dly_ts->timer, false);
+
+    nrf_802154_debug_log_function_exit(1);
 
     return true;
 }
@@ -503,6 +517,7 @@ void nrf_802154_rsch_uninit(void)
 
 void nrf_802154_rsch_continuous_mode_priority_set(rsch_prio_t prio)
 {
+    // TODO: change this to log appropriately
     nrf_802154_log(EVENT_TRACE_ENTER, (prio > RSCH_PRIO_IDLE) ? FUNCTION_RSCH_CONTINUOUS_ENTER :
                    FUNCTION_RSCH_CONTINUOUS_EXIT);
 
@@ -528,7 +543,7 @@ bool nrf_802154_rsch_timeslot_request(uint32_t length_us)
 
 bool nrf_802154_rsch_delayed_timeslot_request(const rsch_dly_ts_param_t * p_dly_ts_param)
 {
-    nrf_802154_log(EVENT_TRACE_ENTER, FUNCTION_RSCH_DELAYED_TIMESLOT_REQ);
+    nrf_802154_debug_log_function_entry(1);
 
     assert(p_dly_ts_param->id < RSCH_DLY_TS_NUM);
     assert(p_dly_ts_param->prio != RSCH_PRIO_IDLE);
@@ -552,14 +567,15 @@ bool nrf_802154_rsch_delayed_timeslot_request(const rsch_dly_ts_param_t * p_dly_
             break;
     }
 
-    nrf_802154_log(EVENT_TRACE_EXIT, FUNCTION_RSCH_DELAYED_TIMESLOT_REQ);
+    nrf_802154_debug_log_function_exit(1);
 
     return result;
 }
 
 bool nrf_802154_rsch_delayed_timeslot_cancel(rsch_dly_ts_id_t dly_ts_id)
 {
-    nrf_802154_log(EVENT_TRACE_ENTER, FUNCTION_RSCH_DELAYED_TIMESLOT_CANCEL);
+    nrf_802154_debug_log_function_entry(1);
+
     assert(dly_ts_id < RSCH_DLY_TS_NUM);
 
     bool       result   = false;
@@ -589,7 +605,7 @@ bool nrf_802154_rsch_delayed_timeslot_cancel(rsch_dly_ts_id_t dly_ts_id)
             assert(false);
     }
 
-    nrf_802154_log(EVENT_TRACE_EXIT, FUNCTION_RSCH_DELAYED_TIMESLOT_CANCEL);
+    nrf_802154_debug_log_function_exit(1);
 
     return result;
 }
@@ -644,17 +660,17 @@ uint32_t nrf_802154_rsch_timeslot_us_left_get(void)
 
 void nrf_raal_timeslot_started(void)
 {
-    nrf_802154_log(EVENT_TRACE_ENTER, FUNCTION_RSCH_TIMESLOT_STARTED);
+    nrf_802154_debug_log_function_entry(1);
 
     prec_approved_prio_set(RSCH_PREC_RAAL, RSCH_PRIO_MAX);
     notify_core();
 
-    nrf_802154_log(EVENT_TRACE_EXIT, FUNCTION_RSCH_TIMESLOT_STARTED);
+    nrf_802154_debug_log_function_exit(1);
 }
 
 void nrf_raal_timeslot_ended(void)
 {
-    nrf_802154_log(EVENT_TRACE_ENTER, FUNCTION_RSCH_TIMESLOT_ENDED);
+    nrf_802154_debug_log_function_entry(1);
 
     prec_approved_prio_set(RSCH_PREC_RAAL, RSCH_PRIO_IDLE);
 
@@ -664,24 +680,35 @@ void nrf_raal_timeslot_ended(void)
         nrf_802154_rsch_continuous_ended();
     }
 
-    nrf_802154_log(EVENT_TRACE_EXIT, FUNCTION_RSCH_TIMESLOT_ENDED);
-}
+    nrf_802154_debug_log_function_exit(1);}
 
 void nrf_802154_clock_hfclk_ready(void)
 {
+    nrf_802154_debug_log_function_entry(1);
+
     prec_approved_prio_set(RSCH_PREC_HFCLK, RSCH_PRIO_MAX);
     notify_core();
+
+    nrf_802154_debug_log_function_exit(1);
 }
 
 void nrf_802154_wifi_coex_granted(void)
 {
+    nrf_802154_debug_log_function_entry(1);
+
     prec_approved_prio_set(RSCH_PREC_COEX, RSCH_PRIO_MAX);
     // TODO: make conditional on CONFIG/PRIORITY pin: tx/rx granted
     notify_core();
+
+    nrf_802154_debug_log_function_exit(1);
 }
 
 void nrf_802154_wifi_coex_denied(void)
 {
+    nrf_802154_debug_log_function_entry(1);
+
     prec_approved_prio_set(RSCH_PREC_COEX, RSCH_PRIO_RX);
     notify_core();
+
+    nrf_802154_debug_log_function_exit(1);
 }
