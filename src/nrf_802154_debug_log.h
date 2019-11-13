@@ -59,6 +59,10 @@
 #define NRF_802154_DEBUG_LOG_BLOCKS_INTERRUPTS 0
 #endif
 
+#ifndef NRF_802154_DEBUG_LOG_VERBOSITY_DEFAULT
+#define NRF_802154_DEBUG_LOG_VERBOSITY_DEFAULT 1
+#endif
+
 #ifndef DEBUG_VERBOSITY
 #define DEBUG_VERBOSITY 1
 #endif
@@ -119,6 +123,7 @@ do                                                                              
 }                                                                                           \
 while(0)
 
+#if (0)
 #define nrf_802154_log(EVENT_CODE, EVENT_ARG)                                                   \
     do                                                                                          \
     {                                                                                           \
@@ -128,6 +133,9 @@ while(0)
         nrf_802154_debug_log_ptr         = (ptr + 1U) & (NRF_802154_DEBUG_LOG_BUFFER_LEN - 1U); \
     }                                                                                           \
     while (0)
+#else
+#define nrf_802154_log(EVENT_CODE, EVENT_ARG)  do {} while(0)
+#endif
 
 #else // !defined(CU_TEST) && (ENABLE_DEBUG_LOG)
 

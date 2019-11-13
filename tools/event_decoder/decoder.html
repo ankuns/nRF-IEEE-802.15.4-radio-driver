@@ -22,12 +22,20 @@
             <form id="draw-form">
             <div class="form-group">
             <label for="debug-str">GDB Log:</label>
-            <textarea class="form-control" rows="20" id="debug-str"></textarea>
+            <p id="gdb-command">Paste below value of <tt>nrf_802154_debug_log_buffer</tt> from GDB output.</p>
+            <textarea class="form-control" rows="10" id="debug-str"></textarea>
             </div>
 
             <div class="form-group">
             <label for="debug-ptr">Index pointer:</label>
+            <p id="gdb-command">Paste below result value of <tt>nrf_802154_debug_log_ptr</tt> from GDB output.</p>
             <input type="text" class="form-control" id="debug-ptr">
+            </div>
+
+            <div class="form-group">
+            <label for="debug-str">Function id to function name map</label>
+            <p id="gdb-command">Paste below result of <tt>make_addr2fname_map.sh</tt> script.</p>
+            <textarea class="form-control" rows="5" id="debug-func_map"></textarea>
             </div>
 
             <div class="col-xs-12 text-center">
@@ -39,6 +47,9 @@
 
             <div id="loading" style="display: none">
                 <div class="alert alert-success">Loading SVG..</div>
+            </div>
+            <div id="errorbox" style="display: none">
+                <div id="errorboxText" class="alert alert-danger">Error</div>
             </div>
             <div id="diagram" style="text-align: center">
             </div>
@@ -61,8 +72,8 @@
 
         var events = [
             {
-                id :  "TRACE_ENTER",
-                val:  0x0001,
+                id :  "NRF_802154_DEBUG_LOG_EVENT_FUNCTION_ENTRY",
+                val:  1,
                 draw: function(from, to, text, param)
                 {
                     if (from != to)
@@ -77,8 +88,8 @@
                 }
             },
             {
-                id :  "TRACE_EXIT",
-                val:  0x0002,
+                id :  "NRF_802154_DEBUG_LOG_EVENT_FUNCTION_EXIT",
+                val:  2,
                 draw: function(from, to, text, param)
                 {
                     if (from != to)
@@ -93,7 +104,7 @@
             },
             {
                 id :  "SET_STATE",
-                val:  0x0005,
+                val:  5,
                 draw: function(from, to, text, param)
                 {
                     var ret = "Note over DRIVER: ";
@@ -143,7 +154,7 @@
             },
             {
                 id :  "RADIO_RESET",
-                val:  0x0006,
+                val:  6,
                 draw: function(from, to, text, param)
                 {
                     return "Note over DRIVER: Reset";
@@ -151,7 +162,7 @@
             },
             {
                 id :  "TIMESLOT_REQUEST",
-                val:  0x0007,
+                val:  7,
                 draw: function(from, to, text, param)
                 {
                     return "Note over RAAL: Timeslot Request (" +  param + "us)";
@@ -159,7 +170,7 @@
             },
             {
                 id :  "TIMESLOT_REQUEST_RESULT",
-                val:  0x0008,
+                val:  8,
                 draw: function(from, to, text, param)
                 {
                     return "Note over RAAL: Timeslot Request Result (" +  param + ")";
@@ -167,7 +178,7 @@
             },
             {
                 id :  "EVENT_TIMESTAMP",
-                val:  0x0009,
+                val:  9,
                 draw: function(from, to, text, param)
                 {
                     return "Note over RAAL: Timestamp: " +  param + " ms";
@@ -175,7 +186,7 @@
             },
             {
                 id :  "EVENT_TIMESLOT_STATE",
-                val:  0x000A,
+                val:  10,
                 draw: function(from, to, text, param)
                 {
                     var ret = "Note over RAAL: ";
@@ -207,102 +218,18 @@
             },
         ];
 
-        var functions = [
-            {id: "SLEEP", val: 0x0001, from: "APP", to: "DRIVER", text: "nrf_802154_sleep()"},
-            {id: "RECEIVE", val: 0x0002, from: "APP", to: "DRIVER", text: "nrf_802154_receive()"},
-            {id: "TRANSMIT", val: 0x0003, from: "APP", to: "DRIVER", text: "nrf_802154_transmit()"},
-            {id: "ENERGY_DETECTION", val: 0x0004, from: "APP", to: "DRIVER", text: "nrf_802154_energy_detection()"},
-            {id: "BUFFER_FREE", val: 0x0005, from: "APP", to: "DRIVER", text: "nrf_802154_buffer_free()"},
-            {id: "CCA", val: 0x0006, from: "APP", to: "DRIVER", text: "nrf_802154_cca()"},
-            {id: "CONTINUOUS_CARRIER", val: 0x0007, from: "APP", to: "DRIVER", text: "nrf_802154_continuous_carrier()"},
-            {id: "CSMA_CA", val: 0x0008, from: "APP", to: "DRIVER", text: "nrf_802154_transmit_csma_ca()"},
-            {id: "TRANSMIT_AT", val: 0x0009, from: "APP", to: "DRIVER", text: "nrf_802154_transmit_at()"},
-            {id: "RECEIVE_AT", val: 0x000A, from: "APP", to: "DRIVER", text: "nrf_802154_receive_at()"},
-            {id: "TRANSMIT_AT_CANCEL", val: 0x000B, from: "APP", to: "DRIVER", text: "nrf_802154_transmit_at_cancel()"},
-            {id: "RECEIVE_AT_CANCEL", val: 0x000C, from: "APP", to: "DRIVER", text: "nrf_802154_receive_at_cancel()"},
-            {id: "MODULATED_CARRIER", val: 0x000D, from: "APP", to: "DRIVER", text: "nrf_802154_modulated_carrier()"},
-
-            {id: "RADIO_IRQ", val: 0x0100, from: "RAAL", to: "DRIVER", text: "RADIO_IRQHandler()"},
-            {id: "EVENT_FRAMESTART", val: 0x0101, from: "DRIVER", to: "DRIVER", text: "EVENT_FRAMESTART"},
-            {id: "EVENT_BCMATCH", val: 0x0102, from: "DRIVER", to: "DRIVER", text: "EVENT_BCMATCH "},
-            {id: "EVENT_END", val: 0x0103, from: "DRIVER", to: "DRIVER", text: "EVENT_END"},
-            {id: "EVENT_DISABLED", val: 0x0104, from: "DRIVER", to: "DRIVER", text: "EVENT_DISABLED"},
-            {id: "EVENT_READY", val: 0x0105, from: "DRIVER", to: "DRIVER", text: "EVENT_READY"},
-            {id: "EVENT_CCAIDLE", val: 0x0106, from: "DRIVER", to: "DRIVER", text: "EVENT_CCAIDLE"},
-            {id: "EVENT_CCABUSY", val: 0x0107, from: "DRIVER", to: "DRIVER", text: "EVENT_CCABUSY"},
-            {id: "EVENT_EDEND", val: 0x0108, from: "DRIVER", to: "DRIVER", text: "EVENT_EDEND"},
-            {id: "EVENT_PHYEND", val: 0x0109, from: "DRIVER", to: "DRIVER", text: "EVENT_PHYEND"},
-            {id: "EVENT_CRCOK", val: 0x010A, from: "DRIVER", to: "DRIVER", text: "EVENT_CRCOK"},
-            {id: "EVENT_CRCERROR", val: 0x010B, from: "DRIVER", to: "DRIVER", text: "EVENT_CRCERROR"},
-
-            {id: "AUTO_ACK_ABORT", val: 0x0201, from: "DRIVER", to: "DRIVER", text: "AUTO ACK ABORT"},
-            {id: "TIMESLOT_STARTED", val: 0x0202, from: "RSCH", to: "DRIVER", text: "nrf_rsch_timeslot_started()"},
-            {id: "TIMESLOT_ENDED", val: 0x0203, from: "RSCH", to: "DRIVER", text: "nrf_rsch_timeslot_ended()"},
-            {id: "CRIT_SECT_ENTER", val: 0x0204, from: "DRIVER", to: "DRIVER", text: "CRITICAL_SECTION_ENTER"},
-            {id: "CRIT_SECT_EXIT", val: 0x0205, from: "DRIVER", to: "DRIVER", text: "CRITICAL_SECTION_EXIT"},
-
-            {id: "RAAL_CRITICAL_SECTION_ENTER", val: 0x0301, from: "RSCH", to: "RAAL", text: "nrf_raal_criticial_section_enter()"},
-            {id: "RAAL_CRITICAL_SECTION_EXIT", val: 0x0302, from: "RSCH", to: "RAAL", text: "nrf_raal_criticial_section_exit()"},
-            {id: "RAAL_CONTINUOUS_ENTER", val: 0x0303, from: "RSCH", to: "RAAL", text: "nrf_raal_continuous_enter()"},
-            {id: "RAAL_CONTINUOUS_EXIT", val: 0x0304, from: "RSCH", to: "RAAL", text: "nrf_raal_continuous_exit()"},
-
-            {id: "TIMESLOT_SIGNAL", val: 0x0400, from: "SOFTDEVICE", to: "RAAL", text: "signal_handler()"},
-            {id: "TIMESLOT_STARTED", val: 0x0401, from: "RAAL", to: "RAAL", text: "EVENT_STARTED"},
-            {id: "TIMESLOT_MARGIN", val: 0x0402, from: "RAAL", to: "RAAL", text: "EVENT_MARGIN"},
-            {id: "TIMESLOT_EXTEND", val: 0x0403, from: "RAAL", to: "RAAL", text: "EVENT_EXTEND"},
-            {id: "TIMESLOT_ENDED", val: 0x0404, from: "RAAL", to: "RAAL", text: "EVENT_ENDED"},
-            {id: "TIMESLOT_RADIO", val: 0x0405, from: "RAAL", to: "RAAL", text: "EVENT_RADIO"},
-            {id: "TIMESLOT_EXTEND_SUCCESS", val: 0x0406, from: "RAAL", to: "RAAL", text: "EVENT_EXTEND_SUCCESS"},
-            {id: "TIMESLOT_EXTEND_FAIL", val: 0x0407, from: "RAAL", to: "RAAL", text: "EVENT_EXTEND_FAIL"},
-            {id: "TIMESLOT_EVT_BLOCKED", val: 0x0408, from: "RAAL", to: "RAAL", text: "EVENT_BLOCKED"},
-            {id: "TIMESLOT_SESSION_IDLE", val: 0x0409, from: "RAAL", to: "RAAL", text: "EVENT_SESSION_IDLE"},
-            {id: "EVENT_HFCLK_READY", val: 0x040A, from: "RAAL", to: "RAAL", text: "EVENT_HFCLK_READY"},
-            {id: "TIMESLOT_MARGIN", val: 0x040B, from: "RAAL", to: "RAAL", text: "EVENT_MARGIN_MOVE"},
-            {id: "TIMESLOT_STOP", val: 0x040C, from: "RAAL", to: "RAAL", text: "EVENT_STOP"},
-
-            {id: "RSCH_CONTINUOUS_ENTER", val: 0x0480, from: "DRIVER", to: "RSCH", text: "nrf_rsch_continuous_enter()"},
-            {id: "RSCH_CONTINUOUS_EXIT", val: 0x0481, from: "DRIVER", to: "RSCH", text: "nrf_rsch_continuous_exit()"},
-            {id: "RSCH_CRITICAL_SECTION_ENTER", val: 0x0482, from: "DRIVER", to: "RSCH", text: "nrf_rsch_critical_section_enter()"},
-            {id: "RSCH_CRITICAL_SECTION_EXIT", val: 0x0483, from: "DRIVER", to: "RSCH", text: "nrf_rsch_critical_section_exit()"},
-            {id: "RSCH_TIMESLOT_STARTED", val: 0x0484, from: "RAAL", to: "RSCH", text: "nrf_raal_timeslot_started()"},
-            {id: "RSCH_TIMESLOT_ENDED", val: 0x0485, from: "RAAL", to: "RSCH", text: "nrf_raal_timeslot_ended()"},
-            {id: "RSCH_DELAYED_TIMESLOT_REQ", val: 0x048B, from: "DRIVER", to: "RSCH", text: "nrf_802154_rsch_delayed_timeslot_request()"},
-            {id: "RSCH_TIMER_DELAYED_PREC", val: 0x048C, from: "TSCH", to: "RSCH", text: "delayed_timeslot_prec_request()"},
-            {id: "RSCH_TIMER_DELAYED_START", val: 0x048D, from: "TSCH", to: "RSCH", text: "delayed_timeslot_start()"},
-            {id: "RSCH_DELAYED_TIMESLOT_CANCEL", val: 0x048E, from: "DRIVER", to: "RSCH", text: "delayed_timeslot_cancel()"},
-
-            {id: "CSMA_ABORT", val: 0x0500, from: "DRIVER", to: "CSMACA", text: "nrf_802154_csma_ca_abort()"},
-            {id: "CSMA_TX_FAILED", val: 0x0501, from: "DRIVER", to: "CSMACA", text: "nrf_802154_csma_ca_tx_failed_hook()"},
-            {id: "CSMA_TX_STARTED", val: 0x0502, from: "DRIVER", to: "CSMACA", text: "nrf_802154_csma_ca_tx_started_hook()"},
-            {id: "CSMA_CHANNEL_BUSY", val: 0x0503, from: "CSMACA", to: "CSMACA", text: "channel_busy()"},
-            {id: "CSMA_FRAME_TRANSMIT", val: 0x0504, from: "CSMACA", to: "CSMACA", text: "frame_transmit()"},
-
-            {id: "TSCH_ADD", val: 0x0600, from: "TSCH", to: "TSCH", text: "nrf_802154_timer_sched_add()"},
-            {id: "TSCH_FIRED", val: 0x0601, from: "TSCH", to: "TSCH", text: "nrf_802154_lp_timer_fired()"},
-
-            {id: "TCOOR_START", val: 0x0700, from: "DRIVER", to: "TCOOR", text: "nrf_802154_timer_coord_start()"},
-            {id: "TCOOR_STOP", val: 0x0701, from: "DRIVER", to: "TCOOR", text: "nrf_802154_timer_coord_stop()"},
-            {id: "TCOOR_TIMESTAMP_PREPARE", val: 0x0702, from: "DRIVER", to: "TCOOR", text: "nrf_802154_timer_coord_timestamp_prepare()"},
-            {id: "TCOOR_TIMESTAMP_GET", val: 0x0703, from: "DRIVER", to: "TCOOR", text: "nrf_802154_timer_coord_timestamp_get()"},
-            {id: "TCOOR_SYNCHRONIZED", val: 0x0704, from: "TCOOR", to: "TCOOR", text: "nrf_802154_lp_timer_synchronized()"},
-
-            {id: "DTRX_RX_TIMEOUT", val: 0x0800, from: "TSCH", to: "DTRX", text: "notify_rx_timeout()"},
-
-            {id: "ACK_TIMEOUT_FIRED", val: 0x0900, from: "TSCH", to: "ACK_TIMEOUT", text: "timeout_timer_fired()"},
-
-            {id: "FUNCTION_mutex_trylock", val: 0x1000, from: "RSCH", to: "RSCH", text: "mutex_trylock()"},
-            {id: "FUNCTION_mutex_unlock", val: 0x1001, from: "RSCH", to: "RSCH", text: "mutex_unlock()"},
-            {id: "FUNCTION_max_prio_for_delayed_timeslot_get", val: 0x1002, from: "RSCH", to: "RSCH", text: "max_prio_for_delayed_timeslot_get()"},
-            {id: "FUNCTION_required_prio_lvl_get", val: 0x1003, from: "RSCH", to: "RSCH", text: "required_prio_lvl_get()"},
-            {id: "FUNCTION_prec_approved_prio_set", val: 0x1004, from: "RSCH", to: "RSCH", text: "prec_approved_prio_set()"},
-            {id: "FUNCTION_all_prec_update", val: 0x1005, from: "RSCH", to: "RSCH", text: "all_prec_update()"},
-            {id: "FUNCTION_approved_prio_lvl_get", val: 0x1006, from: "RSCH", to: "RSCH", text: "approved_prio_lvl_get()"},
-            {id: "FUNCTION_requested_prio_lvl_is_at_least", val: 0x1007, from: "RSCH", to: "RSCH", text: "requested_prio_lvl_is_at_least()"},
-            {id: "FUNCTION_notify_core", val: 0x1008, from: "RSCH", to: "RSCH", text: "notify_core()"},
+        var modules = [
+            {module_id: 1, module_name: "APPLICATION"},
+            {module_id: 2, module_name: "CORE"},
+            {module_id: 3, module_name: "RSCH"},
+            {module_id: 4, module_name: "CRITICAL_SECTION"},
+            {module_id: 5, module_name: "TIMER_COORD"}
         ];
 
-        var debugDecoder = function(debug_json, debug_ptr)
+        var debugDecoder = function(debug_json, debug_ptr, debug_funcmap)
         {
+            this.addr2fname_map = this.parseAddr2fnameMap(debug_funcmap);
+            
             // Diagram sequence input syntax.
             this.input = "";
 
@@ -315,17 +242,31 @@
             this.json = jQuery.parseJSON(debug_json);
             this.ptr  = debug_ptr;
         }
+        
+        debugDecoder.prototype.parseAddr2fnameMap = function(addr2fname_map)
+        {
+            var arr = addr2fname_map.split(/\r?\n/);
+            for (var i = 0; i < arr.length; i++)
+            {
+                var words = arr[i].split(/ +/);
+                var obj = {};
+                obj.func_id = parseInt(words[0]);
+                obj.text = words[1];
+                arr[i] = obj;
+            }                        
+            return arr;
+        }
 
         debugDecoder.prototype.addLine = function(line)
         {
             this.input += line + "\n";
         }
 
-        debugDecoder.prototype.getFunctionIndex = function(val)
+        debugDecoder.prototype.getFunctionIndex = function(func_id)
         {
-            for (var i = 0; i < functions.length; i++)
+            for (var i = 0; i < this.addr2fname_map.length; i++)
             {
-                if (functions[i].val == val)
+                if (this.addr2fname_map[i].func_id == func_id)
                 {
                     return i;
                 }
@@ -346,7 +287,18 @@
 
             return -1;
         }
-
+        
+        debugDecoder.prototype.getParticipant = function(module_id)
+        {
+            for (var i = 0; i < modules.length; i++)
+            {
+                if (modules[i].module_id == module_id) {
+                    return modules[i].module_name;
+                }
+            }
+            return "Unknown (" + module_id.toString() + ")";
+        }
+        
         debugDecoder.prototype.parseEvents = function()
         {
             var last_element = this.ptr ? this.ptr : this.json.length - 1;
@@ -362,26 +314,27 @@
                     continue;
                 }
 
-                var event    = hexValue & 0xffff;
-                var func     = hexValue >>> 16;
+                var event_id   = (hexValue >> 28) & 0xF;
+                var module_id = (hexValue >> 22) & 0x3F;
+                var func_id   = (hexValue) & 0x3FFFFF;
 
-                var event_id = this.getEventIndex(event);
-                var func_id  = this.getFunctionIndex(func);
+                var event_index = this.getEventIndex(event_id);
+                var func_index  = this.getFunctionIndex(func_id);
 
-                if (event_id != -1)
+                if (event_index != -1)
                 {
-                    if (func_id != -1)
+                    if (func_index != -1)
                     {
-                        this.addLine(events[event_id].draw(
-                            functions[func_id].from,
-                            functions[func_id].to,
-                            functions[func_id].text,
-                            func
+                        this.addLine(events[event_index].draw(
+                            this.getParticipant(module_id),
+                            this.getParticipant(module_id),
+                            this.addr2fname_map[func_index].text,
+                            func_id
                         ));
                     }
                     else
                     {
-                        this.addLine(events[event_id].draw(0, 0, 0, func));
+                        this.addLine(events[event_index].draw(0, 0, "???", func_id));
                     }
                 }
                 else
@@ -394,22 +347,19 @@
                     i = 0;
                 }
              } while (i != last_element)
-
+        }
+                
+        
+        debugDecoder.prototype.createParticipants = function()
+        {
+            for (var i = 0; i < modules.length; i++) {
+                this.addLine("Participant " + modules[i].module_name);
+            }
         }
 
         debugDecoder.prototype.draw = function()
-        {
-            this.addLine("Participant APP");
-            this.addLine("Participant ACK_TIMEOUT");
-            this.addLine("Participant CSMACA");
-            this.addLine("Participant DTRX");
-            this.addLine("Participant TSCH");
-            this.addLine("Participant TCOOR");
-            this.addLine("Participant DRIVER");
-            this.addLine("Participant RSCH")
-            this.addLine("Participant RAAL");
-            this.addLine("Participant SOFTDEVICE");
-
+        {            
+            this.createParticipants();
             this.parseEvents();
 
             var d = Diagram.parse(this.input);
@@ -418,18 +368,27 @@
 
         function draw()
         {
-            $('#diagram svg').remove();
-            $('#loading').show();
+            try {        
+                $('#diagram svg').remove();
+                $('#errorbox').hide();
+                $('#loading').show();
+                
+                setTimeout(function(){
+                    var debug_str = $('#debug-str').val();
+                    var debug_ptr = $('#debug-ptr').val();
+                    var debug_funcmap = $('#debug-func_map').val();
 
-            setTimeout(function(){
-                var debug_str = $('#debug-str').val();
-                var debug_ptr = $('#debug-ptr').val();
+                    var decoder = new debugDecoder(debug_str, debug_ptr, debug_funcmap);
+                    decoder.draw();
 
-                var decoder = new debugDecoder(debug_str, debug_ptr);
-                decoder.draw();
-
+                    $('#loading').hide();
+                }, 100);
+            }
+            catch(err) {
                 $('#loading').hide();
-            }, 100);
+                $('#errorboxText').text( "Error: " + err );
+                $('#errorbox').show();
+            }
 
             return false;
         };
