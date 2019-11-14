@@ -63,6 +63,15 @@
 #define NRF_802154_DEBUG_LOG_VERBOSITY_DEFAULT 1
 #endif
 
+/**@def NRF_802154_DEBUG_LOG_VERBOSITY
+ * @brief Current verbosity level of generated logs.
+ * Define this macro in your C file before inclusion of nrf_802154_debug_log.h to
+ * set verbosity level per-module basis.
+ */
+#ifndef NRF_802154_DEBUG_LOG_VERBOSITY
+#define NRF_802154_DEBUG_LOG_VERBOSITY         1
+#endif
+
 #ifndef DEBUG_VERBOSITY
 #define DEBUG_VERBOSITY 1
 #endif
