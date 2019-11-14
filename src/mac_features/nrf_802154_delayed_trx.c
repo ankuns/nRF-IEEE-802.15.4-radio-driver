@@ -34,6 +34,8 @@
  *
  */
 
+#define NRF_802154_DEBUG_LOG_MODULE_ID NRF_802154_DEBUG_LOG_MODULE_ID_DELAYED_TRX
+
 #include "nrf_802154_delayed_trx.h"
 
 #include <assert.h>
@@ -223,7 +225,7 @@ static void notify_rx_timeout(void * p_context)
 {
     (void)p_context;
 
-    nrf_802154_log(EVENT_TRACE_ENTER, FUNCTION_DTRX_RX_TIMEOUT);
+    nrf_802154_debug_log_function_entry(1);
 
     assert(dly_op_state_get(RSCH_DLY_RX) != DELAYED_TRX_OP_STATE_PENDING);
 
@@ -260,7 +262,7 @@ static void notify_rx_timeout(void * p_context)
         }
     }
 
-    nrf_802154_log(EVENT_TRACE_EXIT, FUNCTION_DTRX_RX_TIMEOUT);
+    nrf_802154_debug_log_function_exit(1);
 }
 
 /**
@@ -320,6 +322,8 @@ static void dly_rx_result_notify(bool result)
  */
 static void tx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
 {
+    nrf_802154_debug_log_function_entry(2);
+
     assert(dly_ts_id == RSCH_DLY_TX);
 
     switch (dly_op_state_get(dly_ts_id))
@@ -352,6 +356,8 @@ static void tx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
             assert(false);
             break;
     }
+
+    nrf_802154_debug_log_function_exit(2);
 }
 
 /**
@@ -361,6 +367,8 @@ static void tx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
  */
 static void rx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
 {
+    nrf_802154_debug_log_function_entry(2);
+
     assert(dly_ts_id == RSCH_DLY_RX);
 
     switch (dly_op_state_get(dly_ts_id))
@@ -391,6 +399,8 @@ static void rx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
             assert(false);
             break;
     }
+
+    nrf_802154_debug_log_function_exit(2);
 }
 
 bool nrf_802154_delayed_trx_transmit(const uint8_t * p_data,
