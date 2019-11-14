@@ -54,33 +54,6 @@
 #define EVENT_TIMESLOT_REQUEST        0x0007UL
 #define EVENT_TIMESLOT_REQUEST_RESULT 0x0008UL
 
-#define FUNCTION_SLEEP              0x0001UL
-#define FUNCTION_RECEIVE            0x0002UL
-#define FUNCTION_TRANSMIT           0x0003UL
-#define FUNCTION_ENERGY_DETECTION   0x0004UL
-#define FUNCTION_BUFFER_FREE        0x0005UL
-#define FUNCTION_CCA                0x0006UL
-#define FUNCTION_CONTINUOUS_CARRIER 0x0007UL
-#define FUNCTION_CSMACA             0x0008UL
-#define FUNCTION_TRANSMIT_AT        0x0009UL
-#define FUNCTION_RECEIVE_AT         0x000AUL
-#define FUNCTION_TRANSMIT_AT_CANCEL 0x000BUL
-#define FUNCTION_RECEIVE_AT_CANCEL  0x000CUL
-#define FUNCTION_MODULATED_CARRIER  0x000DUL
-
-#define FUNCTION_IRQ_HANDLER        0x0100UL
-#define FUNCTION_EVENT_FRAMESTART   0x0101UL
-#define FUNCTION_EVENT_BCMATCH      0x0102UL
-#define FUNCTION_EVENT_END          0x0103UL
-#define FUNCTION_EVENT_DISABLED     0x0104UL
-#define FUNCTION_EVENT_READY        0x0105UL
-#define FUNCTION_EVENT_CCAIDLE      0x0106UL
-#define FUNCTION_EVENT_CCABUSY      0x0107UL
-#define FUNCTION_EVENT_EDEND        0x0108UL
-#define FUNCTION_EVENT_PHYEND       0x0109UL
-#define FUNCTION_EVENT_CRCOK        0x010AUL
-#define FUNCTION_EVENT_CRCERROR     0x010BUL
-
 #define FUNCTION_AUTO_ACK_ABORT     0x0201UL
 #define FUNCTION_TIMESLOT_STARTED   0x0202UL
 #define FUNCTION_TIMESLOT_ENDED     0x0203UL
@@ -107,45 +80,6 @@
 #define FUNCTION_RAAL_SIG_EVENT_MARGIN_MOVE    0x040BUL
 
 
-#define FUNCTION_RSCH_CONTINUOUS_ENTER             0x0480UL
-#define FUNCTION_RSCH_CONTINUOUS_EXIT              0x0481UL
-#define FUNCTION_RSCH_CRITICAL_SECTION_ENTER       0x0482UL
-#define FUNCTION_RSCH_CRITICAL_SECTION_EXIT        0x0483UL
-#define FUNCTION_RSCH_TIMESLOT_STARTED             0x0484UL
-#define FUNCTION_RSCH_TIMESLOT_ENDED               0x0485UL
-#define FUNCTION_RSCH_DELAYED_TIMESLOT_REQ         0x048BUL
-#define FUNCTION_RSCH_TIMER_DELAYED_PREC           0x048CUL
-#define FUNCTION_RSCH_TIMER_DELAYED_START          0x048DUL
-#define FUNCTION_RSCH_DELAYED_TIMESLOT_CANCEL      0x048EUL
-
-#define FUNCTION_CSMA_ABORT                        0x0500UL
-#define FUNCTION_CSMA_TX_FAILED                    0x0501UL
-#define FUNCTION_CSMA_TX_STARTED                   0x0502UL
-#define FUNCTION_CSMA_CHANNEL_BUSY                 0x0503UL
-#define FUNCTION_CSMA_FRAME_TRANSMIT               0x0504UL
-
-#define FUNCTION_TSCH_ADD                          0x0600UL
-#define FUNCTION_TSCH_FIRED                        0x0601UL
-
-#define FUNCTION_TCOOR_START                       0x0700UL
-#define FUNCTION_TCOOR_STOP                        0x0701UL
-#define FUNCTION_TCOOR_TIMESTAMP_PREPARE           0x0702UL
-#define FUNCTION_TCOOR_TIMESTAMP_GET               0x0703UL
-#define FUNCTION_TCOOR_SYNCHRONIZED                0x0704UL
-
-#define FUNCTION_DTRX_RX_TIMEOUT                   0x0800UL
-
-#define FUNCTION_ACK_TIMEOUT_FIRED                 0x0900UL
-
-#define FUNCTION_mutex_trylock                     0x1000UL
-#define FUNCTION_mutex_unlock                      0x1001UL
-#define FUNCTION_max_prio_for_delayed_timeslot_get 0x1002UL
-#define FUNCTION_required_prio_lvl_get             0x1003UL
-#define FUNCTION_prec_approved_prio_set            0x1004UL
-#define FUNCTION_all_prec_update                   0x1005UL
-#define FUNCTION_approved_prio_lvl_get             0x1006UL
-#define FUNCTION_requested_prio_lvl_is_at_least    0x1007UL
-#define FUNCTION_notify_core                       0x1008UL
 
 
 #endif /* NRF_802154_DEBUG_LOG_CODES_H_ */
