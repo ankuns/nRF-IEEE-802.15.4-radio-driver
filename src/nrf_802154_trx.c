@@ -293,7 +293,7 @@ static void nrf_radio_reset(void)
     nrf_radio_power_set(false);
     nrf_radio_power_set(true);
 
-    nrf_802154_log(EVENT_RADIO_RESET, 0);
+    nrf_802154_debug_log_global_event(1, NRF_802154_DEBUG_LOG_GLOBAL_EVENT_ID_RADIO_RESET, 0U);
 
     nrf_802154_debug_log_function_exit(1);
 }
@@ -683,7 +683,7 @@ void nrf_802154_trx_disable(void)
 
         m_trx_state = TRX_STATE_DISABLED;
 
-        nrf_802154_log(EVENT_RADIO_RESET, 0);
+        nrf_802154_debug_log_global_event(1, NRF_802154_DEBUG_LOG_GLOBAL_EVENT_ID_RADIO_RESET, 0U);
     }
     else
     {

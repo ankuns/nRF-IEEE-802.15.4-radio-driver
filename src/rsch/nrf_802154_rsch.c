@@ -516,9 +516,9 @@ void nrf_802154_rsch_uninit(void)
 
 void nrf_802154_rsch_continuous_mode_priority_set(rsch_prio_t prio)
 {
-    // TODO: change this to log appropriately
-    nrf_802154_log(EVENT_TRACE_ENTER, (prio > RSCH_PRIO_IDLE) ? FUNCTION_RSCH_CONTINUOUS_ENTER :
-                   FUNCTION_RSCH_CONTINUOUS_EXIT);
+    nrf_802154_debug_log_function_entry(1);
+
+    nrf_802154_debug_log_local_event(1, NRF_802154_DEBUG_LOG_LOCAL_EVENT_ID_RSCH_PRIORITY_SET, (uint32_t)prio);
 
     m_cont_mode_prio = prio;
     __DMB();
@@ -526,8 +526,7 @@ void nrf_802154_rsch_continuous_mode_priority_set(rsch_prio_t prio)
     all_prec_update();
     notify_core();
 
-    nrf_802154_log(EVENT_TRACE_EXIT, (prio > RSCH_PRIO_IDLE) ? FUNCTION_RSCH_CONTINUOUS_ENTER :
-                   FUNCTION_RSCH_CONTINUOUS_EXIT);
+    nrf_802154_debug_log_function_exit(1);
 }
 
 void nrf_802154_rsch_continuous_ended(void)

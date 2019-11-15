@@ -174,34 +174,73 @@ while(0)
     }                                                                \
     while (0)
 
-/**@brief Records log about entry to a function. */
+/**@brief Records log about entry to a function.
+ * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
+ */
 #define nrf_802154_debug_log_function_entry(verbosity)                  \
 do                                                                      \
 {                                                                       \
     if (nrf_802154_debug_log_verbosity_allows(verbosity))               \
     {                                                                   \
         nrf_802154_debug_log_write_raw(                                 \
-                ((NRF_802154_DEBUG_LOG_EVENT_FUNCTION_ENTRY) << 28) |   \
+                ((NRF_802154_DEBUG_LOG_TYPE_FUNCTION_ENTRY) << 28) |    \
                 ((NRF_802154_DEBUG_LOG_MODULE_ID) << 22) |              \
                 ((uint32_t)((uintptr_t)(__func__)) << 0));              \
     }                                                                   \
 }                                                                       \
 while(0)
 
-/**@brief Records log about exit from a function. */
+/**@brief Records log about exit from a function.
+ * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
+ */
 #define nrf_802154_debug_log_function_exit(verbosity)                   \
 do                                                                      \
 {                                                                       \
     if (nrf_802154_debug_log_verbosity_allows(verbosity))               \
     {                                                                   \
         nrf_802154_debug_log_write_raw(                                 \
-                ((NRF_802154_DEBUG_LOG_EVENT_FUNCTION_EXIT) << 28) |    \
+                ((NRF_802154_DEBUG_LOG_TYPE_FUNCTION_EXIT) << 28) |     \
                 ((NRF_802154_DEBUG_LOG_MODULE_ID) << 22) |              \
                 ((uint32_t)((uintptr_t)(__func__)) << 0));              \
     }                                                                   \
 }                                                                       \
 while(0)
 
+/**@brief Records log about event with parameter.
+ * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
+ * @param event_id      Event identifier whose meaning is defined within scope of the module
+ *                      in which log is recorded. Possible values 0...127
+ * @param param_u16     Additional parameter to be logged with event. Meaning
+ *                      of the parameter is defined by the module in which
+ *                      the log is recorded and event_id.
+ */
+#define nrf_802154_debug_log_local_event(verbosity, local_event_id, param_u16)  \
+do                                                                              \
+{                                                                               \
+    if (nrf_802154_debug_log_verbosity_allows(verbosity))                       \
+    {                                                                           \
+        nrf_802154_debug_log_write_raw(                                         \
+                ((NRF_802154_DEBUG_LOG_TYPE_LOCAL_EVENT) << 28) |               \
+                ((NRF_802154_DEBUG_LOG_MODULE_ID) << 22) |                      \
+                ((local_event_id) << 16) |                                      \
+                ((uint16_t)(param_u16) << 0));                                  \
+    }                                                                           \
+}                                                                               \
+while(0)
+
+#define nrf_802154_debug_log_global_event(verbosity, global_event_id, param_u16)\
+do                                                                              \
+{                                                                               \
+    if (nrf_802154_debug_log_verbosity_allows(verbosity))                       \
+    {                                                                           \
+        nrf_802154_debug_log_write_raw(                                         \
+                ((NRF_802154_DEBUG_LOG_TYPE_GLOBAL_EVENT) << 28) |              \
+                ((NRF_802154_DEBUG_LOG_MODULE_ID) << 22) |                      \
+                ((global_event_id) << 16) |                                     \
+                ((uint16_t)(param_u16) << 0));                                  \
+    }                                                                           \
+}                                                                               \
+while(0)
 
 
 #endif /* NRF_802154_DEBUG_LOG_H_ */

@@ -154,7 +154,7 @@ static void state_set(radio_state_t state)
 {
     m_state = state;
 
-    nrf_802154_log(EVENT_SET_STATE, (uint32_t)state);
+    nrf_802154_debug_log_local_event(1, NRF_802154_DEBUG_LOG_LOCAL_EVENT_ID_CORE_SET_STATE, (uint32_t)state);
 
     request_preconditions_for_state(state);
 }
