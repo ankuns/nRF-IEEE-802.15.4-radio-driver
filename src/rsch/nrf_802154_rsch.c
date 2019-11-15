@@ -307,7 +307,8 @@ static inline bool notify_core(void)
     {
         if (!mutex_trylock(&m_ntf_mutex, &m_ntf_mutex_monitor))
         {
-            break;        }
+            break;
+        }
 
         /* It is possible that preemption is not detected (m_ntf_mutex_monitor is read after
          * acquiring mutex). It is not a problem because we will call proper handler function
@@ -678,7 +679,8 @@ void nrf_raal_timeslot_ended(void)
         nrf_802154_rsch_continuous_ended();
     }
 
-    nrf_802154_debug_log_function_exit(1);}
+    nrf_802154_debug_log_function_exit(1);
+}
 
 void nrf_802154_clock_hfclk_ready(void)
 {
