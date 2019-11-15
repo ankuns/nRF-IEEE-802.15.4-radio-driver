@@ -72,10 +72,6 @@
 #define NRF_802154_DEBUG_LOG_VERBOSITY         1
 #endif
 
-#ifndef DEBUG_VERBOSITY
-#define DEBUG_VERBOSITY 1
-#endif
-
 #if (NRF_802154_DEBUG_LOG_BLOCKS_INTERRUPTS)
 #define nrf_802154_debug_log_saved_interrupt_state_variable(var_name)   \
     uint32_t var_name
@@ -132,47 +128,11 @@ do                                                                              
 }                                                                                           \
 while(0)
 
-#if (0)
-#define nrf_802154_log(EVENT_CODE, EVENT_ARG)                                                   \
-    do                                                                                          \
-    {                                                                                           \
-        uint32_t ptr = nrf_802154_debug_log_ptr;                                                \
-                                                                                                \
-        nrf_802154_debug_log_buffer[ptr] = ((EVENT_CODE) | ((EVENT_ARG) << 16));                \
-        nrf_802154_debug_log_ptr         = (ptr + 1U) & (NRF_802154_DEBUG_LOG_BUFFER_LEN - 1U); \
-    }                                                                                           \
-    while (0)
-#else
-#define nrf_802154_log(EVENT_CODE, EVENT_ARG)  do {} while(0)
-#endif
-
 #else // !defined(CU_TEST) && (ENABLE_DEBUG_LOG)
-
-#define nrf_802154_log(EVENT_CODE, EVENT_ARG) (void)(EVENT_ARG)
 
 #define nrf_802154_debug_log_write_raw(value) do { } while(0)
 
 #endif // !defined(CU_TEST) && (ENABLE_DEBUG_LOG)
-
-#define nrf_802154_log_entry(function, verbosity)                     \
-    do                                                                \
-    {                                                                 \
-        if (verbosity <= DEBUG_VERBOSITY)                             \
-        {                                                             \
-            nrf_802154_log(EVENT_TRACE_ENTER, FUNCTION_ ## function); \
-        }                                                             \
-    }                                                                 \
-    while (0)
-
-#define nrf_802154_log_exit(function, verbosity)                     \
-    do                                                               \
-    {                                                                \
-        if (verbosity <= DEBUG_VERBOSITY)                            \
-        {                                                            \
-            nrf_802154_log(EVENT_TRACE_EXIT, FUNCTION_ ## function); \
-        }                                                            \
-    }                                                                \
-    while (0)
 
 /**@brief Records log about entry to a function.
  * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
@@ -206,13 +166,13 @@ do                                                                      \
 }                                                                       \
 while(0)
 
-/**@brief Records log about event with parameter.
- * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
- * @param event_id      Event identifier whose meaning is defined within scope of the module
- *                      in which log is recorded. Possible values 0...127
- * @param param_u16     Additional parameter to be logged with event. Meaning
- *                      of the parameter is defined by the module in which
- *                      the log is recorded and event_id.
+/**@brief Records log about event (with parameter) related to current module.
+ * @param verbosity         Verbosity level of the module in which log is recorded required to emit log.
+ * @param local_event_id    Event identifier whose meaning is defined within scope of the module
+ *                          in which log is recorded. Possible values 0...127
+ * @param param_u16         Additional parameter to be logged with event. Meaning
+ *                          of the parameter is defined by the module in which
+ *                          the log is recorded and event_id.
  */
 #define nrf_802154_debug_log_local_event(verbosity, local_event_id, param_u16)  \
 do                                                                              \
@@ -228,6 +188,12 @@ do                                                                              
 }                                                                               \
 while(0)
 
+/**@brief Records log about event (with parameter) related to global resource.
+ * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
+ * @param event_id      Event identifier whose meaning is defined globally. Possible values 0...127
+ * @param param_u16     Additional parameter to be logged with event. Meaning
+ *                      of the parameter is defined by value of global_event_id.
+ */
 #define nrf_802154_debug_log_global_event(verbosity, global_event_id, param_u16)\
 do                                                                              \
 {                                                                               \
