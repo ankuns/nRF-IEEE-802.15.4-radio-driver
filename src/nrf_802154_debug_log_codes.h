@@ -34,6 +34,11 @@
 #define NRF_802154_DEBUG_LOG_EVENT_FUNCTION_ENTRY   1U
 #define NRF_802154_DEBUG_LOG_EVENT_FUNCTION_EXIT    2U
 
+// Debug log module identifiers.
+// Note: Certain value e.g. NRF_802154_DEBUG_LOG_MODULE_ID_RAAL may be shared
+// between alternative implementations of module
+// (e.g. raal_single_phy/raal_softdevice/raal_simulator)
+// In other cases they must be unique.
 #define NRF_802154_DEBUG_LOG_MODULE_ID_APPLICATION      1U
 #define NRF_802154_DEBUG_LOG_MODULE_ID_CORE             2U
 #define NRF_802154_DEBUG_LOG_MODULE_ID_RSCH             3U
@@ -44,6 +49,8 @@
 #define NRF_802154_DEBUG_LOG_MODULE_ID_CSMACA           8U
 #define NRF_802154_DEBUG_LOG_MODULE_ID_DELAYED_TRX      9U
 #define NRF_802154_DEBUG_LOG_MODULE_ID_ACK_TIMEOUT      10U
+#define NRF_802154_DEBUG_LOG_MODULE_ID_RAAL             11U
+
 
 #define EVENT_TRACE_ENTER           0x0001UL
 #define EVENT_TRACE_EXIT            0x0002UL
