@@ -60,341 +60,119 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/snap.svg/0.5.1/snap.svg-min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.8.3/underscore-min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/js-sequence-diagrams/1.0.6/sequence-diagram-min.js"></script>
+        <script src="debugLogDecoderData.js"></script>
+        <script src="debugLogDecoder.js"></script>
 
         <script type="text/javascript">
-        /**
-         * Simple inline JSON event decoder.
-         */
-
-        /************************************************************
-         * Events
-         ************************************************************/
-
-        var events = [
-            {
-                id :  "NRF_802154_DEBUG_LOG_EVENT_FUNCTION_ENTRY",
-                val:  1,
-                draw: function(from, to, text, param)
-                {
-                    if (from != to)
-                    {
-                        return from + "->" + to + ": " + text;
-                    }
-                    else
-                    {
-                        return "Note over " + from + ": Enter " + text;
-                    }
-
-                }
-            },
-            {
-                id :  "NRF_802154_DEBUG_LOG_EVENT_FUNCTION_EXIT",
-                val:  2,
-                draw: function(from, to, text, param)
-                {
-                    if (from != to)
-                    {
-                        return to + "-->" + from + ": " + text;
-                    }
-                    else
-                    {
-                        return "Note over " + from + ": Exit " + text;
-                    }
-                }
-            },
-            {
-                id :  "SET_STATE",
-                val:  5,
-                draw: function(from, to, text, param)
-                {
-                    var ret = "Note over DRIVER: ";
-
-                    switch (param)
-                    {
-                        case 0:
-                            ret += "RADIO_STATE_SLEEP";
-                        break;
-                        case 1:
-                            ret += "RADIO_STATE_FALLING_ASLEEP";
-                        break;
-                        case 2:
-                            ret += "RADIO_STATE_RX";
-                        break;
-                        case 3:
-                            ret += "RADIO_STATE_TX_ACK";
-                        break;
-                        case 4:
-                            ret += "RADIO_STATE_CCA_TX";
-                        break;
-                        case 5:
-                            ret += "RADIO_STATE_TX";
-                        break;
-                        case 6:
-                            ret += "RADIO_STATE_RX_ACK";
-                        break;
-                        case 7:
-                            ret += "RADIO_STATE_ED";
-                        break;
-                        case 8:
-                            ret += "RADIO_STATE_CCA";
-                        break;
-                        case 9:
-                            ret += "RADIO_STATE_CONTINUOUS_CARRIER";
-                        break;
-                        case 10:
-                            ret += "RADIO_STATE_MODULATED_CARRIER";
-                        break;
-                        default:
-                            console.log("state = " + param);
-                            break;
-                    }
-
-                    return ret;
-                }
-            },
-            {
-                id :  "RADIO_RESET",
-                val:  6,
-                draw: function(from, to, text, param)
-                {
-                    return "Note over DRIVER: Reset";
-                }
-            },
-            {
-                id :  "TIMESLOT_REQUEST",
-                val:  7,
-                draw: function(from, to, text, param)
-                {
-                    return "Note over RAAL: Timeslot Request (" +  param + "us)";
-                }
-            },
-            {
-                id :  "TIMESLOT_REQUEST_RESULT",
-                val:  8,
-                draw: function(from, to, text, param)
-                {
-                    return "Note over RAAL: Timeslot Request Result (" +  param + ")";
-                }
-            },
-            {
-                id :  "EVENT_TIMESTAMP",
-                val:  9,
-                draw: function(from, to, text, param)
-                {
-                    return "Note over RAAL: Timestamp: " +  param + " ms";
-                }
-            },
-            {
-                id :  "EVENT_TIMESLOT_STATE",
-                val:  10,
-                draw: function(from, to, text, param)
-                {
-                    var ret = "Note over RAAL: ";
-
-                    switch (param)
-                    {
-                        case 0:
-                            ret += "TIMESLOT_STATE_IDLE";
-                        break;
-                        case 1:
-                            ret += "TIMESLOT_STATE_REQUESTED";
-                        break;
-                        case 2:
-                            ret += "TIMESLOT_STATE_GRANTED";
-                        break;
-                        case 3:
-                            ret += "TIMESLOT_STATE_BLOCKED";
-                        break;
-                        case 4:
-                            ret += "TIMESLOT_STATE_MARGIN";
-                        break;
-                        default:
-                            console.log("state = " + param);
-                            break;
-                    }
-
-                    return ret;
-                }
-            },
-        ];
-
-        var modules = [
-            {module_id: 1, module_name: "APPLICATION"},
-            {module_id: 2, module_name: "CORE"},
-            {module_id: 3, module_name: "RSCH"},
-            {module_id: 4, module_name: "CRITICAL_SECTION"},
-            {module_id: 5, module_name: "TIMER_COORD"},
-            {module_id: 6, module_name: "TRX"},
-            {module_id: 7, module_name: "TIMER_SCHED"},
-            {module_id: 8, module_name: "CSMACA"},
-            {module_id: 9, module_name: "DELAYED_TRX"},
-            {module_id: 10, module_name: "ACK_TIMEOUT"},
-            {module_id: 11, module_name: "RAAL"}
-        ];
-
-        var debugDecoder = function(debug_json, debug_ptr, debug_funcmap)
+        
+        // Loads GDB input nrf_802154_debug_log array
+        // Return: array of integers being eventCodes 
+        function loadGdbDebugLog(inputStr)
         {
-            this.addr2fname_map = this.parseAddr2fnameMap(debug_funcmap);
+            var str = inputStr.substring(inputStr.indexOf("{"));
             
-            // Diagram sequence input syntax.
-            this.input = "";
+            str = str.replace('{', '[');
+            str = str.replace('}', ']');
+            str = str.replace(/0x[0-9a-fA-F]{8}/g, function myFunction(x){return parseInt(x)});
 
-            // Transform GDB input to JSON compatible object.
-            debug_json = debug_json.substring(debug_json.indexOf("{"));
-            debug_json = debug_json.replace(/0x[0-9a-fA-F]{8}/g, function myFunction(x){return '"' + x + '"'});
-            debug_json = debug_json.replace('{', '[');
-            debug_json = debug_json.replace('}', ']');
-
-            this.json = jQuery.parseJSON(debug_json);
-            this.ptr  = debug_ptr;
+            return jQuery.parseJSON(str);
         }
         
-        debugDecoder.prototype.parseAddr2fnameMap = function(addr2fname_map)
+        function loadFuncMap(inputStr)
         {
-            var arr = addr2fname_map.split(/\r?\n/);
+            var arr = inputStr.split(/\r?\n/);
             for (var i = 0; i < arr.length; i++)
             {
                 var words = arr[i].split(/ +/);
                 var obj = {};
-                obj.func_id = parseInt(words[0]);
-                obj.text = words[1];
+                obj.id = parseInt(words[0]);
+                obj.name = words[1];
                 arr[i] = obj;
             }                        
             return arr;
         }
 
-        debugDecoder.prototype.addLine = function(line)
+        // Loads all input data necessary to draw 
+        function loadInput()
         {
-            this.input += line + "\n";
-        }
-
-        debugDecoder.prototype.getFunctionIndex = function(func_id)
-        {
-            for (var i = 0; i < this.addr2fname_map.length; i++)
-            {
-                if (this.addr2fname_map[i].func_id == func_id)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
-        }
-
-        debugDecoder.prototype.getEventIndex = function(val)
-        {
-            for (var i = 0; i < events.length; i++)
-            {
-                if (events[i].val == val)
-                {
-                    return i;
-                }
-            }
-
-            return -1;
+            var debug_str = $('#debug-str').val();
+            var debug_ptr = $('#debug-ptr').val();
+            var debug_funcmap_str = $('#debug-func_map').val();
+            
+            var result = {};
+            
+            result.debug_log = loadGdbDebugLog(debug_str);
+            result.debug_log_ptr = parseInt(debug_ptr);
+            result.funcMap = loadFuncMap(debug_funcmap_str);            
+            
+            return result;
         }
         
-        debugDecoder.prototype.getParticipant = function(module_id)
+        function makeSequenceDiagramParticipants(modules)
         {
-            for (var i = 0; i < modules.length; i++)
-            {
-                if (modules[i].module_id == module_id) {
-                    return modules[i].module_name;
-                }
-            }
-            return "Unknown (" + module_id.toString() + ")";
-        }
-        
-        debugDecoder.prototype.parseEvents = function()
-        {
-            var last_element = this.ptr ? this.ptr : this.json.length - 1;
-            i = parseInt(this.ptr);
-
-            do
-            {
-                var hexValue = parseInt(this.json[i]);
-
-                if (hexValue == 0)
-                {
-                    i = (i + 1) % this.json.length;
-                    continue;
-                }
-
-                var event_id   = (hexValue >> 28) & 0xF;
-                var module_id = (hexValue >> 22) & 0x3F;
-                var func_id   = (hexValue) & 0x3FFFFF;
-
-                var event_index = this.getEventIndex(event_id);
-                var func_index  = this.getFunctionIndex(func_id);
-
-                if (event_index != -1)
-                {
-                    if (func_index != -1)
-                    {
-                        this.addLine(events[event_index].draw(
-                            this.getParticipant(module_id),
-                            this.getParticipant(module_id),
-                            this.addr2fname_map[func_index].text,
-                            func_id
-                        ));
-                    }
-                    else
-                    {
-                        this.addLine(events[event_index].draw(0, 0, "???", func_id));
-                    }
-                }
-                else
-                {
-                    console.log('Cannot parse - ' + this.json[i]);
-                }
-
-                if (++i == this.json.length)
-                {
-                    i = 0;
-                }
-             } while (i != last_element)
-        }
-                
-        
-        debugDecoder.prototype.createParticipants = function()
-        {
+            var result = "" ;
             for (var i = 0; i < modules.length; i++) {
-                this.addLine("Participant " + modules[i].module_name);
+                result += "Participant " + modules[i].name + "\n";
             }
+            return result;
         }
-
-        debugDecoder.prototype.draw = function()
-        {            
-            this.createParticipants();
-            this.parseEvents();
-
-            var d = Diagram.parse(this.input);
-            d.drawSVG('diagram', {theme: 'simple'});
+        
+        function makeSequenceDiagramEvent(event)
+        {
+            // Hints how to display on sequence diagram (see js-sequence-diagrams lib)
+            // - for function enter: "callerModule.name" + " -> " + calledModule.name": " + text
+            // - for function exit: "calledModule.name" + " --> " + callerModule.name": " + text
+            // - for simple block: "Note over " + module.name + ": " + text
+            return "Note over " + event.module.name + ": " + event.text;
         }
-
+        
+        function makeSequenceDiagram(input)
+        {
+            var result = "" ;
+            var decoder = new DebugLogDecoder(debugLogDecoderModules, debugLogDecoderGlobalEvents, input.funcMap);
+            
+            result += makeSequenceDiagramParticipants(decoder.modules);
+            
+            var index = input.debug_log_ptr;
+            for (var i = 0; i < input.debug_log.length; i++)
+            {
+                var eventCode = input.debug_log[index];
+                if (eventCode != 0)
+                {
+                    var decodedEvent = decoder.parseEventCode(eventCode);
+                    result += makeSequenceDiagramEvent(decodedEvent) + "\n";
+                }                
+                else {
+                    // eventCode == 0 means entry that has been not written yet thus we skip it
+                }
+                index = (index + 1) % input.debug_log.length;
+            }
+            
+            return result;
+        }
+        
         function draw()
         {
-            try {        
-                $('#diagram svg').remove();
-                $('#errorbox').hide();
-                $('#loading').show();
+            $('#diagram svg').remove();
+            $('#errorbox').hide();
+            $('#loading').show();
                 
-                setTimeout(function(){
-                    var debug_str = $('#debug-str').val();
-                    var debug_ptr = $('#debug-ptr').val();
-                    var debug_funcmap = $('#debug-func_map').val();
-
-                    var decoder = new debugDecoder(debug_str, debug_ptr, debug_funcmap);
-                    decoder.draw();
+            setTimeout(function(){
+                try {        
+                    var input = loadInput();
+                    var sequenceDiagramCmdStr = makeSequenceDiagram(input);
+                    
+                    var sequenceDiagram = Diagram.parse(sequenceDiagramCmdStr);
+                    sequenceDiagram.drawSVG('diagram', {theme: 'simple'});                    
 
                     $('#loading').hide();
-                }, 100);
-            }
-            catch(err) {
-                $('#loading').hide();
-                $('#errorboxText').text( "Error: " + err );
-                $('#errorbox').show();
-            }
+                }
+                catch(err) {
+                    $('#loading').hide();
+                    $('#errorboxText').text( "Error: " + err );
+                    $('#errorbox').show();
+                }
+            }, 100);
 
             return false;
         };
