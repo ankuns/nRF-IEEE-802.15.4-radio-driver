@@ -46,7 +46,6 @@
 extern "C" {
 #endif
 
-
 #ifdef NRF52811_XXAA
 
 #define PIN_DBG_RADIO_EVT_END        13
@@ -116,8 +115,6 @@ extern "C" {
  * @brief Initializes debug helpers for the nRF 802.15.4 driver.
  */
 void nrf_802154_debug_init(void);
-
-
 
 #ifdef __cplusplus
 }

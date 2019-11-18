@@ -69,39 +69,47 @@
  * set verbosity level per-module basis.
  */
 #ifndef NRF_802154_DEBUG_LOG_VERBOSITY
-#define NRF_802154_DEBUG_LOG_VERBOSITY         1
+#define NRF_802154_DEBUG_LOG_VERBOSITY 1
 #endif
 
 #if (NRF_802154_DEBUG_LOG_BLOCKS_INTERRUPTS)
-#define nrf_802154_debug_log_saved_interrupt_state_variable(var_name)   \
+#define nrf_802154_debug_log_saved_interrupt_state_variable(var_name) \
     uint32_t var_name
 
-#define nrf_802154_debug_log_disable_interrupts(var_name)   \
-do {                                                        \
-    (var_name) = __get_PRIMASK();                           \
-    __disable_irq();                                        \
-}                                                           \
-while(0)
+#define nrf_802154_debug_log_disable_interrupts(var_name) \
+    do                                                    \
+    {                                                     \
+        (var_name) = __get_PRIMASK();                     \
+        __disable_irq();                                  \
+    }                                                     \
+    while (0)
 
-#define nrf_802154_debug_log_restore_interrupts(var_name)   \
-do                                                          \
-{                                                           \
-    __set_PRIMASK(var_name);                                \
-}                                                           \
-while(0)
+#define nrf_802154_debug_log_restore_interrupts(var_name) \
+    do                                                    \
+    {                                                     \
+        __set_PRIMASK(var_name);                          \
+    }                                                     \
+    while (0)
 
 #else
 
-#define nrf_802154_debug_log_saved_interrupt_state_variable(var_name)   /* empty macro */
-#define nrf_802154_debug_log_disable_interrupts(var_name)               do {} while(0)
-#define nrf_802154_debug_log_restore_interrupts(var_name)               do {} while(0)
+#define nrf_802154_debug_log_saved_interrupt_state_variable(var_name) /* empty macro */
+#define nrf_802154_debug_log_disable_interrupts(var_name) \
+    do                                                    \
+    {                                                     \
+    }                                                     \
+    while (0)
+#define nrf_802154_debug_log_restore_interrupts(var_name) \
+    do                                                    \
+    {                                                     \
+    }                                                     \
+    while (0)
 
 #endif
 
 /**@brief Checks if provided @c verbosity has value allowing the module to record a log. */
 #define nrf_802154_debug_log_verbosity_allows(verbosity) \
     (((verbosity) > 0) && ((verbosity) <= NRF_802154_DEBUG_LOG_VERBOSITY))
-
 
 #if !defined(CU_TEST) && (ENABLE_DEBUG_LOG)
 
@@ -110,70 +118,76 @@ extern volatile uint32_t nrf_802154_debug_log_ptr;
 
 /**@brief Writes one word into debug log buffer
  */
-#define nrf_802154_debug_log_write_raw(value)                                               \
-do                                                                                          \
-{                                                                                           \
-    uint32_t nrf_802154_debug_log_write_raw_value = (value);                                \
-                                                                                            \
-    nrf_802154_debug_log_saved_interrupt_state_variable(nrf_802154_debug_log_write_raw_sv); \
-    nrf_802154_debug_log_disable_interrupts(nrf_802154_debug_log_write_raw_sv);             \
-                                                                                            \
-    uint32_t nrf_802154_debug_log_write_raw_ptr   = nrf_802154_debug_log_ptr;               \
-                                                                                            \
-    nrf_802154_debug_log_buffer[nrf_802154_debug_log_write_raw_ptr] = nrf_802154_debug_log_write_raw_value; \
-    nrf_802154_debug_log_write_raw_ptr = (nrf_802154_debug_log_write_raw_ptr + 1U) & (NRF_802154_DEBUG_LOG_BUFFER_LEN - 1U); \
-    nrf_802154_debug_log_ptr           = nrf_802154_debug_log_write_raw_ptr;                \
-                                                                                            \
-    nrf_802154_debug_log_restore_interrupts(nrf_802154_debug_log_write_raw_sv);             \
-}                                                                                           \
-while(0)
+#define nrf_802154_debug_log_write_raw(value)                                                   \
+    do                                                                                          \
+    {                                                                                           \
+        uint32_t nrf_802154_debug_log_write_raw_value = (value);                                \
+                                                                                                \
+        nrf_802154_debug_log_saved_interrupt_state_variable(nrf_802154_debug_log_write_raw_sv); \
+        nrf_802154_debug_log_disable_interrupts(nrf_802154_debug_log_write_raw_sv);             \
+                                                                                                \
+        uint32_t nrf_802154_debug_log_write_raw_ptr = nrf_802154_debug_log_ptr;                 \
+                                                                                                \
+        nrf_802154_debug_log_buffer[nrf_802154_debug_log_write_raw_ptr] =                       \
+            nrf_802154_debug_log_write_raw_value;                                               \
+        nrf_802154_debug_log_write_raw_ptr =                                                    \
+            (nrf_802154_debug_log_write_raw_ptr + 1U) & (NRF_802154_DEBUG_LOG_BUFFER_LEN - 1U); \
+        nrf_802154_debug_log_ptr = nrf_802154_debug_log_write_raw_ptr;                          \
+                                                                                                \
+        nrf_802154_debug_log_restore_interrupts(nrf_802154_debug_log_write_raw_sv);             \
+    }                                                                                           \
+    while (0)
 
 #else // !defined(CU_TEST) && (ENABLE_DEBUG_LOG)
 
-#define nrf_802154_debug_log_write_raw(value) do { } while(0)
+#define nrf_802154_debug_log_write_raw(value) \
+    do                                        \
+    {                                         \
+    }                                         \
+    while (0)
 
 #endif // !defined(CU_TEST) && (ENABLE_DEBUG_LOG)
 
 /**@brief Bit shift of field "log type" in log word. */
-#define NRF_802154_DEBUG_LOG_TYPE_BITPOS        28
+#define NRF_802154_DEBUG_LOG_TYPE_BITPOS      28
 
 /**@brief Bit shift of field "module id" in log word. */
-#define NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS   22
+#define NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS 22
 
 /**@brief Bit shift of field "event id" in log word. */
-#define NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS    16
+#define NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS  16
 
 /**@brief Records log about entry to a function.
  * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
  */
-#define nrf_802154_log_function_enter(verbosity)                        \
-do                                                                      \
-{                                                                       \
-    if (nrf_802154_debug_log_verbosity_allows(verbosity))               \
-    {                                                                   \
-        nrf_802154_debug_log_write_raw(                                 \
+#define nrf_802154_log_function_enter(verbosity)                                             \
+    do                                                                                       \
+    {                                                                                        \
+        if (nrf_802154_debug_log_verbosity_allows(verbosity))                                \
+        {                                                                                    \
+            nrf_802154_debug_log_write_raw(                                                  \
                 ((NRF_802154_LOG_TYPE_FUNCTION_ENTER) << NRF_802154_DEBUG_LOG_TYPE_BITPOS) | \
-                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) | \
-                ((uint32_t)((uintptr_t)(__func__)) << 0));              \
-    }                                                                   \
-}                                                                       \
-while(0)
+                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) |          \
+                ((uint32_t)((uintptr_t)(__func__)) << 0));                                   \
+        }                                                                                    \
+    }                                                                                        \
+    while (0)
 
 /**@brief Records log about exit from a function.
  * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
  */
-#define nrf_802154_log_function_exit(verbosity)                         \
-do                                                                      \
-{                                                                       \
-    if (nrf_802154_debug_log_verbosity_allows(verbosity))               \
-    {                                                                   \
-        nrf_802154_debug_log_write_raw(                                 \
+#define nrf_802154_log_function_exit(verbosity)                                             \
+    do                                                                                      \
+    {                                                                                       \
+        if (nrf_802154_debug_log_verbosity_allows(verbosity))                               \
+        {                                                                                   \
+            nrf_802154_debug_log_write_raw(                                                 \
                 ((NRF_802154_LOG_TYPE_FUNCTION_EXIT) << NRF_802154_DEBUG_LOG_TYPE_BITPOS) | \
-                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) | \
-                ((uint32_t)((uintptr_t)(__func__)) << 0));              \
-    }                                                                   \
-}                                                                       \
-while(0)
+                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) |         \
+                ((uint32_t)((uintptr_t)(__func__)) << 0));                                  \
+        }                                                                                   \
+    }                                                                                       \
+    while (0)
 
 /**@brief Records log about event (with parameter) related to current module.
  * @param verbosity         Verbosity level of the module in which log is recorded required to emit log.
@@ -183,19 +197,19 @@ while(0)
  *                          of the parameter is defined by the module in which
  *                          the log is recorded and event_id.
  */
-#define nrf_802154_log_local_event(verbosity, local_event_id, param_u16)        \
-do                                                                              \
-{                                                                               \
-    if (nrf_802154_debug_log_verbosity_allows(verbosity))                       \
-    {                                                                           \
-        nrf_802154_debug_log_write_raw(                                         \
+#define nrf_802154_log_local_event(verbosity, local_event_id, param_u16)                  \
+    do                                                                                    \
+    {                                                                                     \
+        if (nrf_802154_debug_log_verbosity_allows(verbosity))                             \
+        {                                                                                 \
+            nrf_802154_debug_log_write_raw(                                               \
                 ((NRF_802154_LOG_TYPE_LOCAL_EVENT) << NRF_802154_DEBUG_LOG_TYPE_BITPOS) | \
-                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) | \
-                ((local_event_id) << NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS) |    \
-                ((uint16_t)(param_u16) << 0));                                  \
-    }                                                                           \
-}                                                                               \
-while(0)
+                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) |       \
+                ((local_event_id) << NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS) |              \
+                ((uint16_t)(param_u16) << 0));                                            \
+        }                                                                                 \
+    }                                                                                     \
+    while (0)
 
 /**@brief Records log about event (with parameter) related to global resource.
  * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
@@ -203,19 +217,18 @@ while(0)
  * @param param_u16     Additional parameter to be logged with event. Meaning
  *                      of the parameter is defined by value of global_event_id.
  */
-#define nrf_802154_log_global_event(verbosity, global_event_id, param_u16)      \
-do                                                                              \
-{                                                                               \
-    if (nrf_802154_debug_log_verbosity_allows(verbosity))                       \
-    {                                                                           \
-        nrf_802154_debug_log_write_raw(                                         \
+#define nrf_802154_log_global_event(verbosity, global_event_id, param_u16)                 \
+    do                                                                                     \
+    {                                                                                      \
+        if (nrf_802154_debug_log_verbosity_allows(verbosity))                              \
+        {                                                                                  \
+            nrf_802154_debug_log_write_raw(                                                \
                 ((NRF_802154_LOG_TYPE_GLOBAL_EVENT) << NRF_802154_DEBUG_LOG_TYPE_BITPOS) | \
-                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) | \
-                ((global_event_id) << NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS) |   \
-                ((uint16_t)(param_u16) << 0));                                  \
-    }                                                                           \
-}                                                                               \
-while(0)
-
+                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) |        \
+                ((global_event_id) << NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS) |              \
+                ((uint16_t)(param_u16) << 0));                                             \
+        }                                                                                  \
+    }                                                                                      \
+    while (0)
 
 #endif /* NRF_802154_DEBUG_LOG_H_ */

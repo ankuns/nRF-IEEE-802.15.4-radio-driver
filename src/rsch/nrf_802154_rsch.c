@@ -1,5 +1,5 @@
 
-#define NRF_802154_MODULE_ID  NRF_802154_MODULE_ID_RSCH
+#define NRF_802154_MODULE_ID NRF_802154_MODULE_ID_RSCH
 
 #include "nrf_802154_rsch.h"
 
@@ -402,7 +402,7 @@ static bool precise_delayed_timeslot_request(dly_ts_t                  * p_dly_t
 
     uint32_t now    = nrf_802154_timer_sched_time_get();
     uint32_t req_dt = p_param->dt - PREC_RAMP_UP_TIME;
-    bool result     = false;
+    bool     result = false;
 
     if (nrf_802154_timer_sched_time_is_in_future(now, p_param->t0, req_dt))
     {

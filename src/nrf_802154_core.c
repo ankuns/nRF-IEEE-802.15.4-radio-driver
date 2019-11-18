@@ -34,7 +34,7 @@
  *
  */
 
-#define NRF_802154_MODULE_ID  NRF_802154_MODULE_ID_CORE
+#define NRF_802154_MODULE_ID NRF_802154_MODULE_ID_CORE
 
 #include "nrf_802154_core.h"
 

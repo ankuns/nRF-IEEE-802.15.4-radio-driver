@@ -390,8 +390,12 @@ static void timeslot_request(void)
         m_timeslot_state = TIMESLOT_STATE_IDLE;
     }
 
-    nrf_802154_log_local_event(1, NRF_802154_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST, m_request.params.earliest.length_us);
-    nrf_802154_log_local_event(1, NRF_802154_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST_RESULT, err_code);
+    nrf_802154_log_local_event(1,
+                               NRF_802154_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST,
+                               m_request.params.earliest.length_us);
+    nrf_802154_log_local_event(1,
+                               NRF_802154_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST_RESULT,
+                               err_code);
 }
 
 /**@brief Decrease timeslot length. */
@@ -408,7 +412,9 @@ static void timeslot_extend(uint32_t timeslot_length)
     m_ret_param.params.extend.length_us = timeslot_length;
 
     nrf_802154_pin_set(PIN_DBG_TIMESLOT_EXTEND_REQ);
-    nrf_802154_log_local_event(1, NRF_802154_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST, m_ret_param.params.extend.length_us);
+    nrf_802154_log_local_event(1,
+                               NRF_802154_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST,
+                               m_ret_param.params.extend.length_us);
 }
 
 /**@brief Extend timeslot further. */
