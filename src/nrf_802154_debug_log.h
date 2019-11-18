@@ -169,7 +169,7 @@ while(0)
 /**@brief Records log about event (with parameter) related to current module.
  * @param verbosity         Verbosity level of the module in which log is recorded required to emit log.
  * @param local_event_id    Event identifier whose meaning is defined within scope of the module
- *                          in which log is recorded. Possible values 0...127
+ *                          in which log is recorded. Possible values 0...63
  * @param param_u16         Additional parameter to be logged with event. Meaning
  *                          of the parameter is defined by the module in which
  *                          the log is recorded and event_id.
@@ -190,7 +190,7 @@ while(0)
 
 /**@brief Records log about event (with parameter) related to global resource.
  * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
- * @param event_id      Event identifier whose meaning is defined globally. Possible values 0...127
+ * @param event_id      Event identifier whose meaning is defined globally. Possible values 0...63
  * @param param_u16     Additional parameter to be logged with event. Meaning
  *                      of the parameter is defined by value of global_event_id.
  */
