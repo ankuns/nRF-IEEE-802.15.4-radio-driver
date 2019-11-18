@@ -205,8 +205,7 @@ static inline void all_prec_update(void)
     {
         if (!mutex_trylock(&m_req_mutex, &m_req_mutex_monitor))
         {
-            nrf_802154_debug_log_function_exit(2);
-            return;
+            break;
         }
 
         monitor   = m_req_mutex_monitor;
@@ -403,6 +402,7 @@ static bool precise_delayed_timeslot_request(dly_ts_t                  * p_dly_t
 
     uint32_t now    = nrf_802154_timer_sched_time_get();
     uint32_t req_dt = p_param->dt - PREC_RAMP_UP_TIME;
+    bool result     = false;
 
     if (nrf_802154_timer_sched_time_is_in_future(now, p_param->t0, req_dt))
     {
@@ -417,8 +417,7 @@ static bool precise_delayed_timeslot_request(dly_ts_t                  * p_dly_t
 
         nrf_802154_timer_sched_add(&p_dly_ts->timer, false);
 
-        nrf_802154_debug_log_function_exit(1);
-        return true;
+        result = true;
     }
     else if (requested_prio_lvl_is_at_least(RSCH_PRIO_IDLE_LISTENING) &&
              nrf_802154_timer_sched_time_is_in_future(now, p_param->t0, p_param->dt))
@@ -436,16 +435,16 @@ static bool precise_delayed_timeslot_request(dly_ts_t                  * p_dly_t
         all_prec_update();
         nrf_802154_timer_sched_add(&p_dly_ts->timer, true);
 
-        nrf_802154_debug_log_function_exit(1);
-
-        return true;
+        result = true;
     }
     else
     {
         // The requested time is in the past.
-        nrf_802154_debug_log_function_exit(1);
-        return false;
     }
+
+    nrf_802154_debug_log_function_exit(1);
+
+    return result;
 }
 
 /**

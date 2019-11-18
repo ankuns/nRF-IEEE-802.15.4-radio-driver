@@ -167,7 +167,7 @@ static void frame_transmit(rsch_dly_ts_id_t dly_ts_id)
         }
     }
 
-    nrf_802154_debug_log_function_exit(2);
+    nrf_802154_debug_log_function_exit(1);
 }
 
 /**
@@ -175,6 +175,8 @@ static void frame_transmit(rsch_dly_ts_id_t dly_ts_id)
  */
 static void random_backoff_start(void)
 {
+    nrf_802154_debug_log_function_entry(2);
+
     uint8_t backoff_periods = nrf_802154_random_get() % (1 << m_be);
 
     // If maximum number of CSMA-CA backoffs is equal to 0, this function is called only once
@@ -221,6 +223,8 @@ static void random_backoff_start(void)
     {
         assert(false);
     }
+
+    nrf_802154_debug_log_function_exit(2);
 }
 
 static bool channel_busy(void)

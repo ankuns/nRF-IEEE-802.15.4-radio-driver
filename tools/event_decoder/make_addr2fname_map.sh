@@ -8,7 +8,7 @@ if [ "$1" == "" ]; then
 	echo "Usage:"
 	echo "make_addr2fname_map.sh <input_elf_file>"
 	echo ""
-	echo "input_elf_file    The name (with path if necessary) to elf file to parse"
+	echo "input_elf_file    The name to elf file to parse"
 	echo
 	exit 1
 fi
@@ -21,13 +21,13 @@ if [ ! -f "$INPUT_ELF_FILE" ]; then
 fi
 
 # Prepare command script for gdb (initial part)
-echo > make_addr2fname_map_script.gdb
-echo set pagination off >> make_addr2fname_map_script.gdb
-echo set height unlimited >> make_addr2fname_map_script.gdb
+gdb_script='make_addr2fname_map_script.gdb'
+echo > "${gdb_script}"
+echo set pagination off >> "${gdb_script}"
+echo set height unlimited >> "${gdb_script}"
 
-# Prepare command script for gdb (commands reading content of elf file at addresses we are interested in)
 # Steps (according to pipe)
-# 1. Using readelf read sybmol table of input elf file
+# 1. Using readelf read symbol table of input elf file
 #
 # 2. Take those symbols containing __func__ string. This relies on compiler used to produce such symbols
 #    whenever special identifier __func__ of the C language was used.
@@ -36,7 +36,7 @@ echo set height unlimited >> make_addr2fname_map_script.gdb
 #       250: 00009f49    34 OBJECT  LOCAL  DEFAULT    1 __func__.11079
 #
 # 3. With awk we produce commands for gdb to read memory at addresses related with these symbols as strings
-arm-none-eabi-readelf --symbols $INPUT_ELF_FILE | grep "__func__" | awk '{l="x/s 0x"$2; print l}' >> make_addr2fname_map_script.gdb
+arm-none-eabi-readelf --symbols $INPUT_ELF_FILE | grep "__func__" | awk '{l="x/s 0x"$2; print l}' >> "${gdb_script}"
 
 # Now using gdb we read the content of input elf file
 # Steps (according to pipe)
@@ -45,4 +45,4 @@ arm-none-eabi-readelf --symbols $INPUT_ELF_FILE | grep "__func__" | awk '{l="x/s
 # 3. With awk we take the address and string that has been read at given address
 # 4. With sed we discard quotes "" from the string
 # 5. Leave result at stdout
-arm-none-eabi-gdb -q -ex 'source make_addr2fname_map_script.gdb' -ex quit $INPUT_ELF_FILE | grep "__func__" | awk '{print $1, $3}' | sed -e s/\"//g
+arm-none-eabi-gdb -q -ex "source ${gdb_script}" -ex quit $INPUT_ELF_FILE | grep "__func__" | awk '{print $1, $3}' | sed -e s/\"//g

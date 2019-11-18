@@ -2076,6 +2076,7 @@ static void txframe_finish_disable_ppis(void)
     nrf_ppi_fork_endpoint_setup(PPI_EGU_RAMP_UP, 0);
     nrf_ppi_channel_remove_from_group(PPI_EGU_RAMP_UP, PPI_CHGRP0);
     nrf_ppi_channel_disable(PPI_CCABUSY_CCASTART);
+
     nrf_802154_debug_log_function_exit(2);
 }
 

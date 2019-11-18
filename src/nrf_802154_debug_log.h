@@ -48,7 +48,7 @@
  * @brief Configures if writing to log buffer is performed with interrupts disabled.
  * Setting this macro to 1 has following consequences:
  * - Interrupts are automatically disabled during write to log buffer. This ensures
- *   thread-safety and always coherent log)
+ *   thread-safety and always coherent log
  * - Higher priority interrupts may be delayed, so logging has impact on timing
  * Setting this macto to 0 has following consequences:
  * - Interrupts are NOT disabled during write to log buffer. This may lead to missing
