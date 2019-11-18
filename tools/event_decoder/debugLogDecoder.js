@@ -133,34 +133,52 @@ DebugLogDecoder.prototype.parseEventCode = function(eventCode)
 {
     var result = {};
     
-    result.eventType = (eventCode >> 28) & 0xF;
+    // Constants related to log word encoding
+    const NRF_802154_DEBUG_LOG_TYPE_BITPOS = 28;
+    const NRF_802154_DEBUG_LOG_TYPE_BITMASK = 0xF;
+    const NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS = 22;
+    const NRF_802154_DEBUG_LOG_MODULE_ID_BITMASK = 0x3F;
+    const NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS = 16;
+    const NRF_802154_DEBUG_LOG_EVENT_ID_BITMASK = 0x3F;
+    const NRF_802154_DEBUG_LOG_EVENT_PARAM_BITPOS = 0;
+    const NRF_802154_DEBUG_LOG_EVENT_PARAM_BITMASK = 0xFFFF;
+    const NRF_802154_DEBUG_LOG_FUNCTION_ID_BITPOS = 0;
+    const NRF_802154_DEBUG_LOG_FUNCTION_ID_BITMASK = 0x3FFFFF;
+
+    const NRF_802154_LOG_TYPE_FUNCTION_ENTER = 1;
+    const NRF_802154_LOG_TYPE_FUNCTION_EXIT  = 2;
+    const NRF_802154_LOG_TYPE_LOCAL_EVENT    = 3;
+    const NRF_802154_LOG_TYPE_GLOBAL_EVENT   = 4;
+    
+    
+    result.eventType = (eventCode >> NRF_802154_DEBUG_LOG_TYPE_BITPOS) & NRF_802154_DEBUG_LOG_TYPE_BITMASK;
     switch(result.eventType)
     {
-        case 1:
-            result.module = this.getModuleById((eventCode >> 22) & 0x3F);            
-            result.functionId = (eventCode >> 0) & 0x3FFFFF;
+        case NRF_802154_LOG_TYPE_FUNCTION_ENTER:
+            result.module = this.getModuleById((eventCode >> NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) & NRF_802154_DEBUG_LOG_MODULE_ID_BITMASK);            
+            result.functionId = (eventCode >> NRF_802154_DEBUG_LOG_FUNCTION_ID_BITPOS) & NRF_802154_DEBUG_LOG_FUNCTION_ID_BITMASK;
             result.functionObj = this.getFunctionObjById(result.functionId);
             result.text = "Enter: " + result.functionObj.name;
             break;
             
-        case 2:
-            result.module = this.getModuleById((eventCode >> 22) & 0x3F);            
-            result.functionId = (eventCode >> 0) & 0x3FFFFF;
+        case NRF_802154_LOG_TYPE_FUNCTION_EXIT:
+            result.module = this.getModuleById((eventCode >> NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) & NRF_802154_DEBUG_LOG_MODULE_ID_BITMASK);            
+            result.functionId = (eventCode >> NRF_802154_DEBUG_LOG_FUNCTION_ID_BITPOS) & NRF_802154_DEBUG_LOG_FUNCTION_ID_BITMASK;
             result.functionObj = this.getFunctionObjById(result.functionId);
             result.text = "Exit: " + result.functionObj.name;
             break;
             
-        case 3:
-            result.module = this.getModuleById((eventCode >> 22) & 0x3F);
-            result.localEvent = this.getLocalEventById(result.module, (eventCode >> 16) & 0x3F);
-            result.localEventParam = (eventCode >> 0) & 0xFFFF;
+        case NRF_802154_LOG_TYPE_LOCAL_EVENT:
+            result.module = this.getModuleById((eventCode >> NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) & NRF_802154_DEBUG_LOG_MODULE_ID_BITMASK);
+            result.localEvent = this.getLocalEventById(result.module, (eventCode >> NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS) & NRF_802154_DEBUG_LOG_EVENT_ID_BITMASK);
+            result.localEventParam = (eventCode >> NRF_802154_DEBUG_LOG_EVENT_PARAM_BITPOS) & NRF_802154_DEBUG_LOG_EVENT_PARAM_BITMASK;
             result.text = "Event: " + this.getEventText(result.localEvent, result.localEventParam);
             break;
             
-        case 4:
-            result.module = this.getModuleById((eventCode >> 22) & 0x3F);
-            result.globalEvent = this.getGlobalEventById((eventCode >> 16) & 0x3F);
-            result.globalEventParam = (eventCode >> 0) & 0xFFFF;
+        case NRF_802154_LOG_TYPE_GLOBAL_EVENT:
+            result.module = this.getModuleById((eventCode >> NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) & NRF_802154_DEBUG_LOG_MODULE_ID_BITMASK);
+            result.globalEvent = this.getGlobalEventById((eventCode >> NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS) & NRF_802154_DEBUG_LOG_EVENT_ID_BITMASK);
+            result.globalEventParam = (eventCode >> NRF_802154_DEBUG_LOG_EVENT_PARAM_BITPOS) & NRF_802154_DEBUG_LOG_EVENT_PARAM_BITMASK;
             result.text = "Event: " + this.getEventText(result.globalEvent, result.globalEventParam);
             break;
             
