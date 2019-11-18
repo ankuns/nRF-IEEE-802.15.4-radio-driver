@@ -34,7 +34,7 @@
  *
  */
 
-#define NRF_802154_DEBUG_LOG_MODULE_ID NRF_802154_DEBUG_LOG_MODULE_ID_CSMACA
+#define NRF_802154_MODULE_ID NRF_802154_MODULE_ID_CSMACA
 
 #include "nrf_802154_csma_ca.h"
 
@@ -91,17 +91,17 @@ static bool procedure_is_running(void)
  */
 static void procedure_stop(void)
 {
-    nrf_802154_debug_log_function_entry(2);
+    nrf_802154_log_function_enter(2);
 
     nrf_802154_rsch_delayed_timeslot_cancel(RSCH_DLY_CSMACA);
     m_is_running = false;
 
-    nrf_802154_debug_log_function_exit(2);
+    nrf_802154_log_function_exit(2);
 }
 
 static void priority_leverage(void)
 {
-    nrf_802154_debug_log_function_entry(2);
+    nrf_802154_log_function_enter(2);
 
     bool first_transmit_attempt     = (0 == m_nb);
     bool coex_requires_boosted_prio = (nrf_802154_pib_coex_tx_request_mode_get() ==
@@ -117,7 +117,7 @@ static void priority_leverage(void)
         }
     }
 
-    nrf_802154_debug_log_function_exit(2);
+    nrf_802154_log_function_exit(2);
 }
 
 /**
@@ -127,14 +127,14 @@ static void priority_leverage(void)
  */
 static void notify_busy_channel(bool result)
 {
-    nrf_802154_debug_log_function_entry(2);
+    nrf_802154_log_function_enter(2);
 
     if (!result && (m_nb >= (nrf_802154_pib_csmaca_max_backoffs_get() - 1)))
     {
         nrf_802154_notify_transmit_failed(mp_data, NRF_802154_TX_ERROR_BUSY_CHANNEL);
     }
 
-    nrf_802154_debug_log_function_exit(2);
+    nrf_802154_log_function_exit(2);
 }
 
 /**
@@ -150,7 +150,7 @@ static void frame_transmit(rsch_dly_ts_id_t dly_ts_id)
 {
     (void)dly_ts_id;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     if (procedure_is_running())
     {
@@ -167,7 +167,7 @@ static void frame_transmit(rsch_dly_ts_id_t dly_ts_id)
         }
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**
@@ -175,7 +175,7 @@ static void frame_transmit(rsch_dly_ts_id_t dly_ts_id)
  */
 static void random_backoff_start(void)
 {
-    nrf_802154_debug_log_function_entry(2);
+    nrf_802154_log_function_enter(2);
 
     uint8_t backoff_periods = nrf_802154_random_get() % (1 << m_be);
 
@@ -224,7 +224,7 @@ static void random_backoff_start(void)
         assert(false);
     }
 
-    nrf_802154_debug_log_function_exit(2);
+    nrf_802154_log_function_exit(2);
 }
 
 static bool channel_busy(void)
@@ -233,7 +233,7 @@ static bool channel_busy(void)
 
     if (procedure_is_running())
     {
-        nrf_802154_debug_log_function_entry(1);
+        nrf_802154_log_function_enter(1);
 
         m_nb++;
 
@@ -252,7 +252,7 @@ static bool channel_busy(void)
             procedure_stop();
         }
 
-        nrf_802154_debug_log_function_exit(1);
+        nrf_802154_log_function_exit(1);
     }
 
     return result;
@@ -260,7 +260,7 @@ static bool channel_busy(void)
 
 void nrf_802154_csma_ca_start(const uint8_t * p_data)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(!procedure_is_running());
 
@@ -271,7 +271,7 @@ void nrf_802154_csma_ca_start(const uint8_t * p_data)
 
     random_backoff_start();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 bool nrf_802154_csma_ca_abort(nrf_802154_term_t term_lvl, req_originator_t req_orig)
@@ -284,7 +284,7 @@ bool nrf_802154_csma_ca_abort(nrf_802154_term_t term_lvl, req_originator_t req_o
 
     bool result = true;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     if (term_lvl >= NRF_802154_TERM_802154)
     {
@@ -297,7 +297,7 @@ bool nrf_802154_csma_ca_abort(nrf_802154_term_t term_lvl, req_originator_t req_o
         result = !procedure_is_running();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
@@ -310,11 +310,11 @@ bool nrf_802154_csma_ca_tx_failed_hook(const uint8_t * p_frame, nrf_802154_tx_er
 
     if (p_frame == mp_data)
     {
-        nrf_802154_debug_log_function_entry(1);
+        nrf_802154_log_function_enter(1);
 
         result = channel_busy();
 
-        nrf_802154_debug_log_function_exit(1);
+        nrf_802154_log_function_exit(1);
     }
 
     return result;
@@ -324,11 +324,11 @@ bool nrf_802154_csma_ca_tx_started_hook(const uint8_t * p_frame)
 {
     if (p_frame == mp_data)
     {
-        nrf_802154_debug_log_function_entry(1);
+        nrf_802154_log_function_enter(1);
 
         procedure_stop();
 
-        nrf_802154_debug_log_function_exit(1);
+        nrf_802154_log_function_exit(1);
     }
 
     return true;

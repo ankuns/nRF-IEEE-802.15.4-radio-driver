@@ -34,7 +34,7 @@
  *
  */
 
-#define NRF_802154_DEBUG_LOG_MODULE_ID  NRF_802154_DEBUG_LOG_MODULE_ID_CORE
+#define NRF_802154_MODULE_ID  NRF_802154_MODULE_ID_CORE
 
 #include "nrf_802154_core.h"
 
@@ -154,7 +154,7 @@ static void state_set(radio_state_t state)
 {
     m_state = state;
 
-    nrf_802154_debug_log_local_event(1, NRF_802154_DEBUG_LOG_LOCAL_EVENT_ID_CORE_SET_STATE, (uint32_t)state);
+    nrf_802154_log_local_event(1, NRF_802154_LOG_LOCAL_EVENT_ID_CORE_SET_STATE, (uint32_t)state);
 
     request_preconditions_for_state(state);
 }
@@ -928,7 +928,7 @@ static void on_timeslot_ended(void)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     if (timeslot_is_granted())
     {
@@ -991,12 +991,12 @@ static void on_timeslot_ended(void)
         }
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 static void on_preconditions_denied(radio_state_t state)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result;
 
@@ -1054,12 +1054,12 @@ static void on_preconditions_denied(radio_state_t state)
 
     operation_terminated_notify(state, receiving_psdu_now);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 static void on_preconditions_approved(radio_state_t state)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     nrf_802154_trx_abort();
 
@@ -1101,12 +1101,12 @@ static void on_preconditions_approved(radio_state_t state)
             assert(false);
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 static void on_timeslot_started(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     nrf_802154_trx_enable();
 
@@ -1114,7 +1114,7 @@ static void on_timeslot_started(void)
 
     nrf_802154_timer_coord_start();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_rsch_crit_sect_prio_changed(rsch_prio_t prio)
@@ -1169,12 +1169,12 @@ void nrf_802154_rsch_crit_sect_prio_changed(rsch_prio_t prio)
 
 void nrf_802154_trx_receive_ack_started(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_state == RADIO_STATE_RX_ACK);
     nrf_802154_core_hooks_rx_ack_started();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 static void on_rx_prestarted_timeout(void * p_context)
@@ -1210,7 +1210,7 @@ static void on_rx_prestarted_timeout(void * p_context)
 
 void nrf_802154_trx_receive_frame_prestarted(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_state == RADIO_STATE_RX);
     assert((m_trx_receive_frame_notifications_mask & TRX_RECEIVE_NOTIFICATION_PRESTARTED) != 0U);
@@ -1234,12 +1234,12 @@ void nrf_802154_trx_receive_frame_prestarted(void)
 
     nrf_802154_timer_sched_add(&m_rx_prestarted_timer, true);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_receive_frame_started(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_state == RADIO_STATE_RX);
     assert((m_trx_receive_frame_notifications_mask & TRX_RECEIVE_NOTIFICATION_STARTED) != 0U);
@@ -1249,13 +1249,13 @@ void nrf_802154_trx_receive_frame_started(void)
     /* Request boosted preconditions */
     nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 #if !NRF_802154_DISABLE_BCC_MATCHING
 uint8_t nrf_802154_trx_receive_frame_bcmatched(uint8_t bcc)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     uint8_t               prev_num_data_bytes;
     uint8_t               num_data_bytes;
@@ -1331,7 +1331,7 @@ uint8_t nrf_802154_trx_receive_frame_bcmatched(uint8_t bcc)
         }
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return bcc;
 }
@@ -1340,19 +1340,19 @@ uint8_t nrf_802154_trx_receive_frame_bcmatched(uint8_t bcc)
 
 void nrf_802154_trx_go_idle_finished(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     sleep_init();
     state_set(RADIO_STATE_SLEEP);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 static void on_bad_ack(void);
 
 void nrf_802154_trx_receive_frame_crcerror(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_state == RADIO_STATE_RX);
 
@@ -1367,22 +1367,22 @@ void nrf_802154_trx_receive_frame_crcerror(void)
     receive_failed_notify(NRF_802154_RX_ERROR_INVALID_FCS);
 #endif // NRF_802154_NOTIFY_CRCERROR
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_receive_ack_crcerror(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_state == RADIO_STATE_RX_ACK);
     on_bad_ack();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_receive_frame_received(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     uint8_t * p_received_data = mp_current_rx_buffer->data;
 
@@ -1431,7 +1431,7 @@ void nrf_802154_trx_receive_frame_received(void)
             received_frame_notify_and_nesting_allow(p_received_data);
         }
 
-        nrf_802154_debug_log_function_exit(1);
+        nrf_802154_log_function_exit(1);
         return;
     }
 #endif // NRF_802154_DISABLE_BCC_MATCHING
@@ -1522,32 +1522,32 @@ void nrf_802154_trx_receive_frame_received(void)
 #endif  // NRF_802154_DISABLE_BCC_MATCHING
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_transmit_frame_started(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert((m_state == RADIO_STATE_TX) || (m_state == RADIO_STATE_CCA_TX));
     transmit_started_notify();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_transmit_ack_started(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_state == RADIO_STATE_TX_ACK);
     nrf_802154_tx_ack_started(mp_ack);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_transmit_ack_transmitted(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_state == RADIO_STATE_TX_ACK);
 
@@ -1562,12 +1562,12 @@ void nrf_802154_trx_transmit_ack_transmitted(void)
 
     received_frame_notify_and_nesting_allow(p_received_data);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_transmit_frame_transmitted(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     if (ack_is_requested(mp_tx_data))
     {
@@ -1595,7 +1595,7 @@ void nrf_802154_trx_transmit_frame_transmitted(void)
         transmitted_frame_notify(NULL, 0, 0);
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 static bool ack_match_check_version_not_2(const uint8_t * p_tx_data, const uint8_t * p_ack_data)
@@ -1685,7 +1685,7 @@ static bool ack_match_check(const uint8_t * p_tx_data, const uint8_t * p_ack_dat
 
 static void on_bad_ack(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     // We received either a frame with incorrect CRC or not an ACK frame or not matching ACK
     state_set(RADIO_STATE_RX);
@@ -1694,12 +1694,12 @@ static void on_bad_ack(void)
 
     transmit_failed_notify_and_nesting_allow(NRF_802154_TX_ERROR_INVALID_ACK);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_receive_ack_received(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     // CRC of received frame is correct
     uint8_t * p_ack_data = mp_current_rx_buffer->data;
@@ -1722,24 +1722,24 @@ void nrf_802154_trx_receive_ack_received(void)
         on_bad_ack();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_standalone_cca_finished(bool channel_was_idle)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     state_set(RADIO_STATE_RX);
     rx_init(true);
 
     cca_notify(channel_was_idle);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_transmit_frame_ccaidle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_state == RADIO_STATE_CCA_TX);
     assert(m_trx_transmit_frame_notifications_mask & TRX_TRANSMIT_NOTIFICATION_CCAIDLE);
@@ -1747,24 +1747,24 @@ void nrf_802154_trx_transmit_frame_ccaidle(void)
 
     nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_TX);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_transmit_frame_ccabusy(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     state_set(RADIO_STATE_RX);
     rx_init(true);
 
     transmit_failed_notify_and_nesting_allow(NRF_802154_TX_ERROR_BUSY_CHANNEL);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_trx_energy_detection_finished(uint8_t ed_sample)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     if (m_ed_result < ed_sample)
     {
@@ -1797,7 +1797,7 @@ void nrf_802154_trx_energy_detection_finished(uint8_t ed_sample)
 
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /***************************************************************************************************
@@ -1815,7 +1815,7 @@ void nrf_802154_core_init(void)
 
 void nrf_802154_core_deinit(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     if (timeslot_is_granted())
     {
@@ -1826,7 +1826,7 @@ void nrf_802154_core_deinit(void)
 
     irq_deinit();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 radio_state_t nrf_802154_core_state_get(void)
@@ -1836,7 +1836,7 @@ radio_state_t nrf_802154_core_state_get(void)
 
 bool nrf_802154_core_sleep(nrf_802154_term_t term_lvl)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = nrf_802154_critical_section_enter();
 
@@ -1865,7 +1865,7 @@ bool nrf_802154_core_sleep(nrf_802154_term_t term_lvl)
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
@@ -1875,7 +1875,7 @@ bool nrf_802154_core_receive(nrf_802154_term_t              term_lvl,
                              nrf_802154_notification_func_t notify_function,
                              bool                           notify_abort)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = nrf_802154_critical_section_enter();
 
@@ -1916,7 +1916,7 @@ bool nrf_802154_core_receive(nrf_802154_term_t              term_lvl,
         }
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
@@ -1928,7 +1928,7 @@ bool nrf_802154_core_transmit(nrf_802154_term_t              term_lvl,
                               bool                           immediate,
                               nrf_802154_notification_func_t notify_function)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = critical_section_enter_and_verify_timeslot_length();
 
@@ -1979,14 +1979,14 @@ bool nrf_802154_core_transmit(nrf_802154_term_t              term_lvl,
         }
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
 
 bool nrf_802154_core_energy_detection(nrf_802154_term_t term_lvl, uint32_t time_us)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = critical_section_enter_and_verify_timeslot_length();
 
@@ -2011,14 +2011,14 @@ bool nrf_802154_core_energy_detection(nrf_802154_term_t term_lvl, uint32_t time_
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
 
 bool nrf_802154_core_cca(nrf_802154_term_t term_lvl)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = critical_section_enter_and_verify_timeslot_length();
 
@@ -2035,14 +2035,14 @@ bool nrf_802154_core_cca(nrf_802154_term_t term_lvl)
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
 
 bool nrf_802154_core_continuous_carrier(nrf_802154_term_t term_lvl)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = critical_section_enter_and_verify_timeslot_length();
 
@@ -2059,7 +2059,7 @@ bool nrf_802154_core_continuous_carrier(nrf_802154_term_t term_lvl)
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
@@ -2067,7 +2067,7 @@ bool nrf_802154_core_continuous_carrier(nrf_802154_term_t term_lvl)
 bool nrf_802154_core_modulated_carrier(nrf_802154_term_t term_lvl,
                                        const uint8_t   * p_data)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = critical_section_enter_and_verify_timeslot_length();
 
@@ -2085,14 +2085,14 @@ bool nrf_802154_core_modulated_carrier(nrf_802154_term_t term_lvl,
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
 
 bool nrf_802154_core_notify_buffer_free(uint8_t * p_data)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     rx_buffer_t * p_buffer     = (rx_buffer_t *)p_data;
     bool          in_crit_sect = critical_section_enter_and_verify_timeslot_length();
@@ -2113,14 +2113,14 @@ bool nrf_802154_core_notify_buffer_free(uint8_t * p_data)
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return true;
 }
 
 bool nrf_802154_core_channel_update(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = critical_section_enter_and_verify_timeslot_length();
 
@@ -2162,14 +2162,14 @@ bool nrf_802154_core_channel_update(void)
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
 
 bool nrf_802154_core_cca_cfg_update(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = critical_section_enter_and_verify_timeslot_length();
 
@@ -2183,14 +2183,14 @@ bool nrf_802154_core_cca_cfg_update(void)
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
 
 bool nrf_802154_core_rssi_measure(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result = critical_section_enter_and_verify_timeslot_length();
 
@@ -2208,14 +2208,14 @@ bool nrf_802154_core_rssi_measure(void)
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
 
 bool nrf_802154_core_last_rssi_measurement_get(int8_t * p_rssi)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool result       = false;
     bool in_crit_sect = false;
@@ -2246,7 +2246,7 @@ bool nrf_802154_core_last_rssi_measurement_get(int8_t * p_rssi)
         nrf_802154_critical_section_exit();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }

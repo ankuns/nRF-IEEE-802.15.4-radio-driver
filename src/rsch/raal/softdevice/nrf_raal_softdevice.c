@@ -36,7 +36,7 @@
  *
  */
 
-#define NRF_802154_DEBUG_LOG_MODULE_ID NRF_802154_DEBUG_LOG_MODULE_ID_RAAL
+#define NRF_802154_MODULE_ID NRF_802154_MODULE_ID_RAAL
 
 #include "nrf_raal_softdevice.h"
 
@@ -390,8 +390,8 @@ static void timeslot_request(void)
         m_timeslot_state = TIMESLOT_STATE_IDLE;
     }
 
-    nrf_802154_debug_log_local_event(1, NRF_802154_DEBUG_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST, m_request.params.earliest.length_us);
-    nrf_802154_debug_log_local_event(1, NRF_802154_DEBUG_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST_RESULT, err_code);
+    nrf_802154_log_local_event(1, NRF_802154_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST, m_request.params.earliest.length_us);
+    nrf_802154_log_local_event(1, NRF_802154_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST_RESULT, err_code);
 }
 
 /**@brief Decrease timeslot length. */
@@ -408,7 +408,7 @@ static void timeslot_extend(uint32_t timeslot_length)
     m_ret_param.params.extend.length_us = timeslot_length;
 
     nrf_802154_pin_set(PIN_DBG_TIMESLOT_EXTEND_REQ);
-    nrf_802154_debug_log_local_event(1, NRF_802154_DEBUG_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST, m_ret_param.params.extend.length_us);
+    nrf_802154_log_local_event(1, NRF_802154_LOG_LOCAL_EVENT_ID_RAAL_TIMESLOT_REQUEST, m_ret_param.params.extend.length_us);
 }
 
 /**@brief Extend timeslot further. */
@@ -433,7 +433,7 @@ static void timeslot_next_extend(void)
 static void safety_margin_exceeded_handle(void)
 {
     nrf_802154_pin_clr(PIN_DBG_TIMESLOT_ACTIVE);
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     // Timeslot has been revoked. Notify higher layer
     timeslot_state_set(TIMESLOT_STATE_IDLE);
@@ -445,24 +445,24 @@ static void safety_margin_exceeded_handle(void)
     // Return and wait for NRF_EVT_RADIO_SESSION_IDLE event.
     m_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_NONE;
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Recalculate safety margin to compensate for clock drifts. */
 static void safety_margin_drift_correct(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     // Recalculate safety margin to suppress clock drifts
     timer_to_margin_set();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Handle reached extension margin. */
 static void extension_margin_exceeded_handle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     // Stop worrying about timer for a moment
     nrf_timer_int_disable(RAAL_TIMER, TIMER_CC_ACTION_INT);
@@ -486,7 +486,7 @@ static void extension_margin_exceeded_handle(void)
         m_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_NONE;
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Handle timer interrupts. */
@@ -530,7 +530,7 @@ static void timer_irq_handle(void)
 /**@brief Drop timeslot. */
 static void timeslot_dropped_handle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     // Drop the timeslot
     timeslot_state_set(TIMESLOT_STATE_IDLE);
@@ -545,13 +545,13 @@ static void timeslot_dropped_handle(void)
         m_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_NONE;
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Handle timeslot start. */
 static void timeslot_started_handle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(timeslot_state_is(TIMESLOT_STATE_REQUESTED));
 
@@ -570,24 +570,24 @@ static void timeslot_started_handle(void)
     // Do not notify started timeslot here. Notify after successful extend to make sure
     // enough timeslot length is available before notification.
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Handle an unwanted Radio IRQ. */
 static void unwanted_radio_irq_handle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     // Make sure no more interrupts are going to occur and drop the current one
     NVIC_DisableIRQ(RADIO_IRQn);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Handle Radio IRQs. */
 static void radio_irq_handle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     // Verify if the interrupt should be processed at all
     if (timeslot_state_is(TIMESLOT_STATE_GRANTED))
@@ -611,13 +611,13 @@ static void radio_irq_handle(void)
         unwanted_radio_irq_handle();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Handle failed attempt to extend current timeslot. */
 static void timeslot_extend_failed_handle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     if (!timer_is_set_to_margin())
     {
@@ -628,13 +628,13 @@ static void timeslot_extend_failed_handle(void)
     // Try to extend if possible
     timeslot_next_extend();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Handle successfully extended timeslot. */
 static void timeslot_extend_succeeded_handle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool timeslot_can_be_extended = (ticks_to_timeslot_end_get() >=
                                      MINIMUM_TIMESLOT_LENGTH_EXTENSION_TIME_TICKS);
@@ -670,13 +670,13 @@ static void timeslot_extend_succeeded_handle(void)
         timeslot_started_notify();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Handle unavailable timeslot. */
 static void timeslot_busy_handle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(!timeslot_state_is(TIMESLOT_STATE_GRANTED));
 
@@ -687,13 +687,13 @@ static void timeslot_busy_handle(void)
         timeslot_request();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 /**@brief Handle timeslot that is free to be requested. */
 static void timeslot_available_handle(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     if (m_continuous && timeslot_state_is(TIMESLOT_STATE_IDLE))
     {
@@ -701,14 +701,14 @@ static void timeslot_available_handle(void)
         timeslot_request();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
 }
 
 /**@brief Signal handler. */
 static nrf_radio_signal_callback_return_param_t * signal_handler(uint8_t signal_type)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     // Default response.
     m_ret_param.callback_action = NRF_RADIO_SIGNAL_CALLBACK_ACTION_NONE;
@@ -751,7 +751,7 @@ static nrf_radio_signal_callback_return_param_t * signal_handler(uint8_t signal_
         }
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return &m_ret_param;
 }
@@ -863,7 +863,7 @@ void nrf_raal_uninit(void)
 
 void nrf_raal_continuous_mode_enter(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_initialized);
     assert(!m_continuous);
@@ -876,12 +876,12 @@ void nrf_raal_continuous_mode_enter(void)
         timeslot_request();
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_raal_continuous_mode_exit(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     assert(m_initialized);
     assert(m_continuous);
@@ -903,7 +903,7 @@ void nrf_raal_continuous_mode_exit(void)
         m_continuous = false;
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_raal_continuous_ended(void)

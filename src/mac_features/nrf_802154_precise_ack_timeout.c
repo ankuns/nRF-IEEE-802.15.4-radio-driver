@@ -34,7 +34,7 @@
  *
  */
 
-#define NRF_802154_DEBUG_LOG_MODULE_ID NRF_802154_DEBUG_LOG_MODULE_ID_ACK_TIMEOUT
+#define NRF_802154_MODULE_ID NRF_802154_MODULE_ID_ACK_TIMEOUT
 
 #include "nrf_802154_ack_timeout.h"
 
@@ -70,7 +70,7 @@ static void notify_tx_error(bool result)
 
 static void timeout_timer_fired(void * p_context)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     (void)p_context;
 
@@ -89,7 +89,7 @@ static void timeout_timer_fired(void * p_context)
         }
     }
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 static void timeout_timer_retry(void)

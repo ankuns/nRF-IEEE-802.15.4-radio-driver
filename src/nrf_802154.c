@@ -34,7 +34,7 @@
  *
  */
 
-#define NRF_802154_DEBUG_LOG_MODULE_ID  NRF_802154_DEBUG_LOG_MODULE_ID_APPLICATION
+#define NRF_802154_MODULE_ID  NRF_802154_MODULE_ID_APPLICATION
 
 #include "nrf_802154.h"
 
@@ -338,11 +338,11 @@ bool nrf_802154_sleep(void)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_request_sleep(NRF_802154_TERM_802154);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
@@ -351,13 +351,13 @@ nrf_802154_sleep_error_t nrf_802154_sleep_if_idle(void)
 {
     nrf_802154_sleep_error_t result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result =
         nrf_802154_request_sleep(NRF_802154_TERM_NONE) ? NRF_802154_SLEEP_ERROR_NONE :
         NRF_802154_SLEEP_ERROR_BUSY;
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
@@ -366,11 +366,11 @@ bool nrf_802154_receive(void)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_request_receive(NRF_802154_TERM_802154, REQ_ORIG_HIGHER_LAYER, NULL, true);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -379,7 +379,7 @@ bool nrf_802154_transmit_raw(const uint8_t * p_data, bool cca)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_request_transmit(NRF_802154_TERM_NONE,
                                          REQ_ORIG_HIGHER_LAYER,
@@ -388,7 +388,7 @@ bool nrf_802154_transmit_raw(const uint8_t * p_data, bool cca)
                                          false,
                                          NULL);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -398,7 +398,7 @@ bool nrf_802154_transmit(const uint8_t * p_data, uint8_t length, bool cca)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     tx_buffer_fill(p_data, length);
     result = nrf_802154_request_transmit(NRF_802154_TERM_NONE,
@@ -408,7 +408,7 @@ bool nrf_802154_transmit(const uint8_t * p_data, uint8_t length, bool cca)
                                          false,
                                          NULL);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -423,11 +423,11 @@ bool nrf_802154_transmit_raw_at(const uint8_t * p_data,
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_delayed_trx_transmit(p_data, cca, t0, dt, channel);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -435,11 +435,11 @@ bool nrf_802154_transmit_at_cancel(void)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_delayed_trx_transmit_cancel();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -450,11 +450,11 @@ bool nrf_802154_receive_at(uint32_t t0,
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_delayed_trx_receive(t0, dt, timeout, channel);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -462,11 +462,11 @@ bool nrf_802154_receive_at_cancel(void)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_delayed_trx_receive_cancel();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -476,11 +476,11 @@ bool nrf_802154_energy_detection(uint32_t time_us)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_request_energy_detection(NRF_802154_TERM_NONE, time_us);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -488,11 +488,11 @@ bool nrf_802154_cca(void)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_request_cca(NRF_802154_TERM_NONE);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -500,11 +500,11 @@ bool nrf_802154_continuous_carrier(void)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_request_continuous_carrier(NRF_802154_TERM_NONE);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -512,11 +512,11 @@ bool nrf_802154_modulated_carrier(const uint8_t * p_data)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = nrf_802154_request_modulated_carrier(NRF_802154_TERM_NONE, p_data);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -524,7 +524,7 @@ bool nrf_802154_modulated_carrier(const uint8_t * p_data)
 
 void nrf_802154_buffer_free_raw(uint8_t * p_data)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool          result;
     rx_buffer_t * p_buffer = (rx_buffer_t *)p_data;
@@ -536,12 +536,12 @@ void nrf_802154_buffer_free_raw(uint8_t * p_data)
     assert(result);
     (void)result;
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 bool nrf_802154_buffer_free_immediately_raw(uint8_t * p_data)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool          result;
     rx_buffer_t * p_buffer = (rx_buffer_t *)p_data;
@@ -551,7 +551,7 @@ bool nrf_802154_buffer_free_immediately_raw(uint8_t * p_data)
 
     result = nrf_802154_request_buffer_free(p_data);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -559,7 +559,7 @@ bool nrf_802154_buffer_free_immediately_raw(uint8_t * p_data)
 
 void nrf_802154_buffer_free(uint8_t * p_data)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool          result;
     rx_buffer_t * p_buffer = (rx_buffer_t *)(p_data - RAW_PAYLOAD_OFFSET);
@@ -571,12 +571,12 @@ void nrf_802154_buffer_free(uint8_t * p_data)
     assert(result);
     (void)result;
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 bool nrf_802154_buffer_free_immediately(uint8_t * p_data)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     bool          result;
     rx_buffer_t * p_buffer = (rx_buffer_t *)(p_data - RAW_PAYLOAD_OFFSET);
@@ -586,7 +586,7 @@ bool nrf_802154_buffer_free_immediately(uint8_t * p_data)
 
     result = nrf_802154_request_buffer_free(p_data - RAW_PAYLOAD_OFFSET);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
     return result;
 }
 
@@ -699,24 +699,24 @@ void nrf_802154_cca_cfg_get(nrf_802154_cca_cfg_t * p_cca_cfg)
 
 void nrf_802154_transmit_csma_ca_raw(const uint8_t * p_data)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     nrf_802154_csma_ca_start(p_data);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 #else // NRF_802154_USE_RAW_API
 
 void nrf_802154_transmit_csma_ca(const uint8_t * p_data, uint8_t length)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     tx_buffer_fill(p_data, length);
 
     nrf_802154_csma_ca_start(m_tx_buffer);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 #endif // NRF_802154_USE_RAW_API

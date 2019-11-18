@@ -48,6 +48,6 @@ volatile uint32_t nrf_802154_debug_log_ptr = 0;
 void nrf_802154_debug_log_init(void)
 {
     // Let's check if address of generated __func__ will fit into log generated
-    // by @ref nrf_802154_debug_log_function_entry
-    assert((uint32_t)((uintptr_t)(__func__)) < (1U << 22)) ;
+    // by @ref nrf_802154_log_function_enter
+    assert((uint32_t)((uintptr_t)(__func__)) < (1U << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS)) ;
 }

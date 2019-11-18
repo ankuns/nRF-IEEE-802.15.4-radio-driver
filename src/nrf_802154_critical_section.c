@@ -34,7 +34,7 @@
  *
  */
 
-#define NRF_802154_DEBUG_LOG_MODULE_ID  NRF_802154_DEBUG_LOG_MODULE_ID_CRITICAL_SECTION
+#define NRF_802154_MODULE_ID  NRF_802154_MODULE_ID_CRITICAL_SECTION
 
 #include "nrf_802154_critical_section.h"
 
@@ -212,11 +212,11 @@ bool nrf_802154_critical_section_enter(void)
 {
     bool result;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     result = critical_section_enter(false);
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 
     return result;
 }
@@ -225,22 +225,22 @@ void nrf_802154_critical_section_forcefully_enter(void)
 {
     bool critical_section_entered;
 
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     critical_section_entered = critical_section_enter(true);
     assert(critical_section_entered);
     (void)critical_section_entered;
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_critical_section_exit(void)
 {
-    nrf_802154_debug_log_function_entry(1);
+    nrf_802154_log_function_enter(1);
 
     critical_section_exit();
 
-    nrf_802154_debug_log_function_exit(1);
+    nrf_802154_log_function_exit(1);
 }
 
 void nrf_802154_critical_section_nesting_allow(void)

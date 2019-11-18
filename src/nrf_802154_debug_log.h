@@ -134,17 +134,26 @@ while(0)
 
 #endif // !defined(CU_TEST) && (ENABLE_DEBUG_LOG)
 
+/**@brief Bit shift of field "log type" in log word. */
+#define NRF_802154_DEBUG_LOG_TYPE_BITPOS        28
+
+/**@brief Bit shift of field "module id" in log word. */
+#define NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS   22
+
+/**@brief Bit shift of field "event id" in log word. */
+#define NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS    16
+
 /**@brief Records log about entry to a function.
  * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
  */
-#define nrf_802154_debug_log_function_entry(verbosity)                  \
+#define nrf_802154_log_function_enter(verbosity)                        \
 do                                                                      \
 {                                                                       \
     if (nrf_802154_debug_log_verbosity_allows(verbosity))               \
     {                                                                   \
         nrf_802154_debug_log_write_raw(                                 \
-                ((NRF_802154_DEBUG_LOG_TYPE_FUNCTION_ENTRY) << 28) |    \
-                ((NRF_802154_DEBUG_LOG_MODULE_ID) << 22) |              \
+                ((NRF_802154_LOG_TYPE_FUNCTION_ENTER) << NRF_802154_DEBUG_LOG_TYPE_BITPOS) | \
+                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) | \
                 ((uint32_t)((uintptr_t)(__func__)) << 0));              \
     }                                                                   \
 }                                                                       \
@@ -153,14 +162,14 @@ while(0)
 /**@brief Records log about exit from a function.
  * @param verbosity     Verbosity level of the module in which log is recorded required to emit log.
  */
-#define nrf_802154_debug_log_function_exit(verbosity)                   \
+#define nrf_802154_log_function_exit(verbosity)                         \
 do                                                                      \
 {                                                                       \
     if (nrf_802154_debug_log_verbosity_allows(verbosity))               \
     {                                                                   \
         nrf_802154_debug_log_write_raw(                                 \
-                ((NRF_802154_DEBUG_LOG_TYPE_FUNCTION_EXIT) << 28) |     \
-                ((NRF_802154_DEBUG_LOG_MODULE_ID) << 22) |              \
+                ((NRF_802154_LOG_TYPE_FUNCTION_EXIT) << NRF_802154_DEBUG_LOG_TYPE_BITPOS) | \
+                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) | \
                 ((uint32_t)((uintptr_t)(__func__)) << 0));              \
     }                                                                   \
 }                                                                       \
@@ -174,15 +183,15 @@ while(0)
  *                          of the parameter is defined by the module in which
  *                          the log is recorded and event_id.
  */
-#define nrf_802154_debug_log_local_event(verbosity, local_event_id, param_u16)  \
+#define nrf_802154_log_local_event(verbosity, local_event_id, param_u16)        \
 do                                                                              \
 {                                                                               \
     if (nrf_802154_debug_log_verbosity_allows(verbosity))                       \
     {                                                                           \
         nrf_802154_debug_log_write_raw(                                         \
-                ((NRF_802154_DEBUG_LOG_TYPE_LOCAL_EVENT) << 28) |               \
-                ((NRF_802154_DEBUG_LOG_MODULE_ID) << 22) |                      \
-                ((local_event_id) << 16) |                                      \
+                ((NRF_802154_LOG_TYPE_LOCAL_EVENT) << NRF_802154_DEBUG_LOG_TYPE_BITPOS) | \
+                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) | \
+                ((local_event_id) << NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS) |    \
                 ((uint16_t)(param_u16) << 0));                                  \
     }                                                                           \
 }                                                                               \
@@ -194,15 +203,15 @@ while(0)
  * @param param_u16     Additional parameter to be logged with event. Meaning
  *                      of the parameter is defined by value of global_event_id.
  */
-#define nrf_802154_debug_log_global_event(verbosity, global_event_id, param_u16)\
+#define nrf_802154_log_global_event(verbosity, global_event_id, param_u16)      \
 do                                                                              \
 {                                                                               \
     if (nrf_802154_debug_log_verbosity_allows(verbosity))                       \
     {                                                                           \
         nrf_802154_debug_log_write_raw(                                         \
-                ((NRF_802154_DEBUG_LOG_TYPE_GLOBAL_EVENT) << 28) |              \
-                ((NRF_802154_DEBUG_LOG_MODULE_ID) << 22) |                      \
-                ((global_event_id) << 16) |                                     \
+                ((NRF_802154_LOG_TYPE_GLOBAL_EVENT) << NRF_802154_DEBUG_LOG_TYPE_BITPOS) | \
+                ((NRF_802154_MODULE_ID) << NRF_802154_DEBUG_LOG_MODULE_ID_BITPOS) | \
+                ((global_event_id) << NRF_802154_DEBUG_LOG_EVENT_ID_BITPOS) |   \
                 ((uint16_t)(param_u16) << 0));                                  \
     }                                                                           \
 }                                                                               \
