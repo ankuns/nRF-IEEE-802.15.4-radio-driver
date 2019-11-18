@@ -113,8 +113,8 @@ DebugLogDecoder.prototype.getEventText = function(event, eventParam)
                 result += this.enumValueToText(event.enumValues, eventParam);
                 break;
             default:
-				// Possibly you have typo or introduced new paramType value not handled here
-				throw "Internal error, unknown event.paramType";
+                // Possibly you have typo or introduced new paramType value not handled here
+                throw "Internal error, unknown event.paramType";
         }
     }
     return result;

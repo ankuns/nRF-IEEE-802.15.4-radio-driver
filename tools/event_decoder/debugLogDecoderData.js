@@ -10,7 +10,7 @@
 // name (string) - Name of the module to be displayed on sequence diagram
 // localEvents (array of objects or undefined) - local events that may be logged by the module. This is array of objects with following fields:
 //    id (int) - identifier of an event (See C defines NRF_802154_DEBUG_LOG_LOCAL_EVENT_ID_<MODULE_NAME>_xxxx
-//    text (string) - humen readable text describing an event (will be visible in sequence diagram)
+//    text (string) - human readable text describing an event (will be visible in sequence diagram)
 //    paramType (string or undefined) - selects type of param
 //        undefined - event has no parameter, parameter won't be displayed
 //        "uint" - prints parameter as unsigned integer

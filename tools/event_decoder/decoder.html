@@ -73,7 +73,7 @@
             
             str = str.replace('{', '[');
             str = str.replace('}', ']');
-            str = str.replace(/0x[0-9a-fA-F]{8}/g, function myFunction(x){return parseInt(x)});
+            str = str.replace(/0x[0-9a-fA-F]{8}/g, function (x){return parseInt(x)});
 
             return jQuery.parseJSON(str);
         }
