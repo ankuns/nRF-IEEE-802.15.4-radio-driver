@@ -67,7 +67,7 @@ static void notify_tx_error(bool result)
 
 static void timeout_timer_fired(void * p_context)
 {
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     (void)p_context;
 
@@ -86,7 +86,7 @@ static void timeout_timer_fired(void * p_context)
         }
     }
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 static void timeout_timer_retry(void)

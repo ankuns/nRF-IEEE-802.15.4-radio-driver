@@ -121,7 +121,7 @@ void nrf_raal_continuous_mode_enter(void)
 {
     uint32_t time;
 
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     assert(!m_continuous_requested);
 
@@ -140,12 +140,12 @@ void nrf_raal_continuous_mode_enter(void)
 
     NVIC_EnableIRQ(TIMER0_IRQn);
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 void nrf_raal_continuous_mode_exit(void)
 {
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     assert(m_continuous_requested);
 
@@ -154,7 +154,7 @@ void nrf_raal_continuous_mode_exit(void)
 
     nrf_802154_pin_clr(PIN_DBG_TIMESLOT_ACTIVE);
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 void nrf_raal_continuous_ended(void)
@@ -188,7 +188,7 @@ uint32_t nrf_raal_timeslot_us_left_get(void)
 
 static void timeslot_dropped_handle(void)
 {
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     NRF_MWU->REGIONENSET = MWU_REGIONENSET_PRGN0WA_Msk | MWU_REGIONENSET_PRGN0RA_Msk;
 
@@ -199,12 +199,12 @@ static void timeslot_dropped_handle(void)
 
     NRF_TIMER0->TASKS_START = 1;
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 static void timeslot_started_handle(void)
 {
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     NRF_MWU->REGIONENCLR = MWU_REGIONENCLR_PRGN0WA_Msk | MWU_REGIONENCLR_PRGN0RA_Msk;
 
@@ -212,25 +212,25 @@ static void timeslot_started_handle(void)
 
     continuous_grant();
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 static void safety_margin_exceeded_handle(void)
 {
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     NRF_TIMER0->CC[0] = m_ended_timestamp;
 
     continuous_revoke();
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 void TIMER0_IRQHandler(void)
 {
     uint32_t ev_timestamp;
 
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     if (NRF_TIMER0->EVENTS_COMPARE[0])
     {
@@ -259,7 +259,7 @@ void TIMER0_IRQHandler(void)
         }
     }
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 void MWU_IRQHandler(void)

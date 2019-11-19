@@ -59,18 +59,18 @@
 #define NRF_802154_DEBUG_LOG_BLOCKS_INTERRUPTS 0
 #endif
 
-#ifndef NRF_802154_DEBUG_LOG_VERBOSITY_DEFAULT
-#define NRF_802154_DEBUG_LOG_VERBOSITY_DEFAULT 1
-#endif
-
-/**@def NRF_802154_DEBUG_LOG_VERBOSITY
+/**@def NRF_802154_LOG_VERBOSITY
  * @brief Current verbosity level of generated logs.
  * Define this macro in your C file before inclusion of nrf_802154_debug_log.h to
  * set verbosity level per-module basis.
  */
-#ifndef NRF_802154_DEBUG_LOG_VERBOSITY
-#define NRF_802154_DEBUG_LOG_VERBOSITY 1
+#ifndef NRF_802154_LOG_VERBOSITY
+#define NRF_802154_LOG_VERBOSITY NRF_802154_LOG_VERBOSITY_LOW
 #endif
+
+#define NRF_802154_LOG_VERBOSITY_NONE  0
+#define NRF_802154_LOG_VERBOSITY_LOW   1
+#define NRF_802154_LOG_VERBOSITY_HIGH  2
 
 #if (NRF_802154_DEBUG_LOG_BLOCKS_INTERRUPTS)
 #define nrf_802154_debug_log_saved_interrupt_state_variable(var_name) \
@@ -109,7 +109,7 @@
 
 /**@brief Checks if provided @c verbosity has value allowing the module to record a log. */
 #define nrf_802154_debug_log_verbosity_allows(verbosity) \
-    (((verbosity) > 0) && ((verbosity) <= NRF_802154_DEBUG_LOG_VERBOSITY))
+    (((verbosity) > 0) && ((verbosity) <= NRF_802154_LOG_VERBOSITY))
 
 #if !defined(CU_TEST) && (ENABLE_DEBUG_LOG)
 

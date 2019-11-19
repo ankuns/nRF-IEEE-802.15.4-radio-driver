@@ -337,7 +337,7 @@ uint32_t nrf_802154_timer_sched_remaining_time_get(const nrf_802154_timer_t * p_
 
 void nrf_802154_timer_sched_add(nrf_802154_timer_t * p_timer, bool round_up)
 {
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     assert(p_timer != NULL);
     assert(p_timer->callback != NULL);
@@ -408,7 +408,7 @@ void nrf_802154_timer_sched_add(nrf_802154_timer_t * p_timer, bool round_up)
         handle_timer();
     }
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 void nrf_802154_timer_sched_remove(nrf_802154_timer_t * p_timer, bool * p_was_running)
@@ -447,7 +447,7 @@ bool nrf_802154_timer_sched_is_running(nrf_802154_timer_t * p_timer)
 
 void nrf_802154_lp_timer_fired(void)
 {
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     if (mutex_trylock(&m_fired_mutex))
     {
@@ -473,5 +473,5 @@ void nrf_802154_lp_timer_fired(void)
 
     handle_timer();
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }

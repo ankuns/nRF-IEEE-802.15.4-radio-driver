@@ -225,7 +225,7 @@ static void notify_rx_timeout(void * p_context)
 {
     (void)p_context;
 
-    nrf_802154_log_function_enter(1);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     assert(dly_op_state_get(RSCH_DLY_RX) != DELAYED_TRX_OP_STATE_PENDING);
 
@@ -262,7 +262,7 @@ static void notify_rx_timeout(void * p_context)
         }
     }
 
-    nrf_802154_log_function_exit(1);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 /**
@@ -322,7 +322,7 @@ static void dly_rx_result_notify(bool result)
  */
 static void tx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
 {
-    nrf_802154_log_function_enter(2);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_HIGH);
 
     assert(dly_ts_id == RSCH_DLY_TX);
 
@@ -357,7 +357,7 @@ static void tx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
             break;
     }
 
-    nrf_802154_log_function_exit(2);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_HIGH);
 }
 
 /**
@@ -367,7 +367,7 @@ static void tx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
  */
 static void rx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
 {
-    nrf_802154_log_function_enter(2);
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_HIGH);
 
     assert(dly_ts_id == RSCH_DLY_RX);
 
@@ -400,7 +400,7 @@ static void rx_timeslot_started_callback(rsch_dly_ts_id_t dly_ts_id)
             break;
     }
 
-    nrf_802154_log_function_exit(2);
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_HIGH);
 }
 
 bool nrf_802154_delayed_trx_transmit(const uint8_t * p_data,
