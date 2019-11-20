@@ -102,7 +102,7 @@ typedef uint32_t nrf_802154_mcu_critical_state_t;
         (mcu_critical_state) = __get_PRIMASK();           \
         __disable_irq();                                  \
     }                                                     \
-    while(0)
+    while (0)
 
 /**@brief Exits critical section on MCU level.
  *
@@ -112,12 +112,12 @@ typedef uint32_t nrf_802154_mcu_critical_state_t;
  *                              state of mcu level critical section is stored by
  *                              former call to @ref nrf_802154_mcu_critical_enter
  */
-#define nrf_802154_mcu_critical_exit(mcu_critical_state)  \
-    do                                                    \
-    {                                                     \
-        __set_PRIMASK(mcu_critical_state);                \
-    }                                                     \
-    while(0)
+#define nrf_802154_mcu_critical_exit(mcu_critical_state) \
+    do                                                   \
+    {                                                    \
+        __set_PRIMASK(mcu_critical_state);               \
+    }                                                    \
+    while (0)
 
 static inline uint64_t NRF_802154_US_TO_RTC_TICKS(uint64_t time)
 {

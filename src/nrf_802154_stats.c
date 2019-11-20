@@ -33,7 +33,7 @@
 #include "nrf_802154.h"
 #include "nrf_802154_stats.h"
 
-#define NUMBER_OF_STAT_COUNTERS     (sizeof(nrf_802154_stat_counters_t) / sizeof(uint32_t))
+#define NUMBER_OF_STAT_COUNTERS (sizeof(nrf_802154_stat_counters_t) / sizeof(uint32_t))
 
 /**@brief Structure holding statistics about the Radio Driver behavior. */
 volatile nrf_802154_stats_t nrf_802154_stats;
