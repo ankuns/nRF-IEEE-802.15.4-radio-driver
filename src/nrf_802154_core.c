@@ -54,6 +54,7 @@
 #include "nrf_802154_procedures_duration.h"
 #include "nrf_802154_rssi.h"
 #include "nrf_802154_rx_buffer.h"
+#include "nrf_802154_stats.h"
 #include "nrf_802154_utils.h"
 #include "nrf_802154_timer_coord.h"
 #include "nrf_802154_trx.h"
@@ -1754,6 +1755,8 @@ void nrf_802154_trx_transmit_frame_ccaidle(void)
 void nrf_802154_trx_transmit_frame_ccabusy(void)
 {
     nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
+
+    nrf_802154_stat_counter_increment(cca_failed_attempts);
 
     state_set(RADIO_STATE_RX);
     rx_init(true);
