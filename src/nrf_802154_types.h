@@ -206,6 +206,26 @@ typedef uint8_t nrf_802154_ifs_mode_t;
 #define NRF_802154_IFS_MODE_ALWAYS             0x02 // !< Interframe spacing is always inserted.
 
 /**
+ * @brief Type of structure holding statistic counters.
+ *
+ * This structure holds counters of @c uint32_t type only.
+ */
+typedef struct
+{
+    /**@brief Number of failed CCA attempts. */
+    uint32_t cca_failed_attempts;
+} nrf_802154_stat_counters_t;
+
+/**
+ * @brief Type of structure holding statistics about the Radio Driver behavior.
+ */
+typedef struct
+{
+    /**@brief Statistic counters */
+    nrf_802154_stat_counters_t counters;
+} nrf_802154_stats_t;
+
+/**
  *@}
  **/
 
