@@ -35,18 +35,19 @@
 #include "nrf_802154_utils.h"
 
 /**@brief Increment one of the @ref nrf_802154_stat_counters fields.
+ *
  * @param field_name    Identifier of struct member to increment
  */
-#define nrf_802154_stat_counter_increment(field_name)        \
-    do                                                       \
-    {                                                        \
-        extern volatile nrf_802154_stats_t nrf_802154_stats; \
-        nrf_802154_mcu_critical_state_t    mcu_cs;           \
-                                                             \
-        nrf_802154_mcu_critical_enter(mcu_cs);               \
-        (nrf_802154_stats.counters.field_name)++;            \
-        nrf_802154_mcu_critical_exit(mcu_cs);                \
-    }                                                        \
+#define nrf_802154_stat_counter_increment(field_name)          \
+    do                                                         \
+    {                                                          \
+        extern volatile nrf_802154_stats_t g_nrf_802154_stats; \
+        nrf_802154_mcu_critical_state_t    mcu_cs;             \
+                                                               \
+        nrf_802154_mcu_critical_enter(mcu_cs);                 \
+        (g_nrf_802154_stats.counters.field_name)++;            \
+        nrf_802154_mcu_critical_exit(mcu_cs);                  \
+    }                                                          \
     while (0)
 
 #endif /* NRF_802154_STATS_H_ */

@@ -76,9 +76,9 @@
 /**@brief Wait procedure used in a busy loop. */
 #define nrf_802154_busy_wait() __WFE()
 
-/**@brief Type holding mcu critical section state.
+/**@brief Type holding MCU critical section state.
  *
- * Variable of this type is required to hold state daved by @ref nrf_802154_mcu_critical_enter
+ * Variable of this type is required to hold state saved by @ref nrf_802154_mcu_critical_enter
  * and restored by @ref nrf_802154_mcu_critical_exit.
  */
 typedef uint32_t nrf_802154_mcu_critical_state_t;
@@ -94,7 +94,7 @@ typedef uint32_t nrf_802154_mcu_critical_state_t;
  * @endcode
  *
  * @param mcu_critical_state    Variable of @ref nrf_802154_mcu_critical_state_t where current
- *                              state of mcu level critical section will be stored.
+ *                              state of MCU level critical section will be stored.
  */
 #define nrf_802154_mcu_critical_enter(mcu_critical_state) \
     do                                                    \
@@ -109,7 +109,7 @@ typedef uint32_t nrf_802154_mcu_critical_state_t;
  * This shall be used complementary to @ref nrf_802154_mcu_critical_enter.
  *
  * @param mcu_critical_state    Variable of @ref nrf_802154_mcu_critical_state_t where
- *                              state of mcu level critical section is stored by
+ *                              state of MCU level critical section is stored by
  *                              former call to @ref nrf_802154_mcu_critical_enter
  */
 #define nrf_802154_mcu_critical_exit(mcu_critical_state) \
