@@ -1440,6 +1440,8 @@ void nrf_802154_trx_receive_frame_received(void)
 
     if (m_flags.frame_filtered || nrf_802154_pib_promiscuous_get())
     {
+        nrf_802154_stat_counter_increment(received_frames);
+
         bool send_ack = false;
 
         if (m_flags.frame_filtered &&

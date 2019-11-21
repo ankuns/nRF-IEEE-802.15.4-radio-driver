@@ -214,6 +214,8 @@ typedef struct
 {
     /**@brief Number of failed CCA attempts. */
     uint32_t cca_failed_attempts;
+    /**@brief Number of frames received with correct CRC and with filtering passing. */
+    uint32_t received_frames;
 } nrf_802154_stat_counters_t;
 
 /**
