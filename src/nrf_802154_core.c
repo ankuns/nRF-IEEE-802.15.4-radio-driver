@@ -738,6 +738,10 @@ static nrf_802154_trx_receive_notifications_t make_trx_frame_receive_notificatio
 {
     nrf_802154_trx_receive_notifications_t result = TRX_RECEIVE_NOTIFICATION_NONE;
 
+#if (NRF_802154_STATS_COUNT_ENERGY_DETECTED_EVENTS)
+    result |= TRX_RECEIVE_NOTIFICATION_PRESTARTED;
+#endif
+
     if (nrf_802154_wifi_coex_is_enabled())
     {
         switch (nrf_802154_pib_coex_rx_request_mode_get())
@@ -1217,24 +1221,32 @@ void nrf_802154_trx_receive_frame_prestarted(void)
     assert(m_state == RADIO_STATE_RX);
     assert((m_trx_receive_frame_notifications_mask & TRX_RECEIVE_NOTIFICATION_PRESTARTED) != 0U);
 
-    /* This handler serves one main purpose: boosting preconditions for receive.
-     * This handler might not be followed by nrf_802154_trx_receive_frame_started.
-     * That's why we need to revert boosted precondition if nrf_802154_trx_receive_frame_started
-     * doesn't come. We use timer for this purpose.
-     */
+#if (NRF_802154_STATS_COUNT_ENERGY_DETECTED_EVENTS)
+    nrf_802154_stat_counter_increment(received_energy_events);
+#endif
 
-    uint32_t now = nrf_802154_timer_sched_time_get();
+    if (nrf_802154_pib_coex_rx_request_mode_get() ==
+        NRF_802154_COEX_RX_REQUEST_MODE_ENERGY_DETECTION)
+    {
+        /* Code below serves one main purpose: boosting preconditions for receive.
+         * This handler might not be followed by nrf_802154_trx_receive_frame_started.
+         * That's why we need to revert boosted precondition if nrf_802154_trx_receive_frame_started
+         * doesn't come. We use timer for this purpose.
+         */
 
-    nrf_802154_timer_sched_remove(&m_rx_prestarted_timer, NULL);
+        uint32_t now = nrf_802154_timer_sched_time_get();
 
-    /* Request boosted preconditions */
-    nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
+        nrf_802154_timer_sched_remove(&m_rx_prestarted_timer, NULL);
 
-    m_rx_prestarted_timer.t0       = now;
-    m_rx_prestarted_timer.dt       = PRESTARTED_TIMER_TIMEOUT_US;
-    m_rx_prestarted_timer.callback = on_rx_prestarted_timeout;
+        /* Request boosted preconditions */
+        nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
 
-    nrf_802154_timer_sched_add(&m_rx_prestarted_timer, true);
+        m_rx_prestarted_timer.t0       = now;
+        m_rx_prestarted_timer.dt       = PRESTARTED_TIMER_TIMEOUT_US;
+        m_rx_prestarted_timer.callback = on_rx_prestarted_timeout;
+
+        nrf_802154_timer_sched_add(&m_rx_prestarted_timer, true);
+    }
 
     nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
