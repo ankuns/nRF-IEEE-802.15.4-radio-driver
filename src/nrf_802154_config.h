@@ -480,6 +480,19 @@ extern "C" {
 #endif
 
 /**
+ * @def NRF_802154_STATS_COUNT_RECEIVED_PREAMBLES
+ *
+ * Configures if number of received preambles will be counted in receive mode.
+ * When this option is enabled additional interrupts on preamble reveived will occur
+ * increasing power consumption. The events counter is stored in
+ * @ref nrf_802154_stat_counters_t::received_preambles field and can be retrieved by
+ * a call to @ref nrf_802154_stats_get or @ref nrf_802154_stat_counters_get.
+ */
+#ifndef NRF_802154_STATS_COUNT_RECEIVED_PREAMBLES
+#define NRF_802154_STATS_COUNT_RECEIVED_PREAMBLES 1
+#endif
+
+/**
  *@}
  **/
 

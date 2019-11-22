@@ -741,6 +741,9 @@ static nrf_802154_trx_receive_notifications_t make_trx_frame_receive_notificatio
 #if (NRF_802154_STATS_COUNT_ENERGY_DETECTED_EVENTS)
     result |= TRX_RECEIVE_NOTIFICATION_PRESTARTED;
 #endif
+#if (NRF_802154_STATS_COUNT_RECEIVED_PREAMBLES)
+    result |= TRX_RECEIVE_NOTIFICATION_STARTED;
+#endif
 
     if (nrf_802154_wifi_coex_is_enabled())
     {
@@ -1258,10 +1261,24 @@ void nrf_802154_trx_receive_frame_started(void)
     assert(m_state == RADIO_STATE_RX);
     assert((m_trx_receive_frame_notifications_mask & TRX_RECEIVE_NOTIFICATION_STARTED) != 0U);
 
-    nrf_802154_timer_sched_remove(&m_rx_prestarted_timer, NULL);
+#if (NRF_802154_STATS_COUNT_RECEIVED_PREAMBLES)
+    nrf_802154_stat_counter_increment(received_preambles);
+#endif
 
-    /* Request boosted preconditions */
-    nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
+    switch (nrf_802154_pib_coex_rx_request_mode_get())
+    {
+        case NRF_802154_COEX_RX_REQUEST_MODE_ENERGY_DETECTION:
+            nrf_802154_timer_sched_remove(&m_rx_prestarted_timer, NULL);
+        /* no break */
+
+        case NRF_802154_COEX_RX_REQUEST_MODE_PREAMBLE:
+            /* Request boosted preconditions */
+            nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_RX);
+            break;
+
+        default:
+            break;
+    }
 
     nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
