@@ -53,6 +53,17 @@ extern "C" {
  * to assert pins and respond to pin state changes.
  */
 
+/**@brief Enumeration representing state of request to PTA */
+typedef enum
+{
+    /** @brief No request is being made to PTA. */
+    WFFI_COEX_REQUEST_STATE_NO_REQUEST = 0,
+    /** @brief Requesting receive mode to PTA. */
+    WFFI_COEX_REQUEST_STATE_RX,
+    /** @brief Requesting transmit mode to PTA. */
+    WFFI_COEX_REQUEST_STATE_TX
+} nrf_802154_wifi_coex_request_state_t;
+
 /**
  * @brief Initializes the Wi-Fi Coexistence module.
  *
@@ -97,6 +108,23 @@ void * nrf_802154_wifi_coex_deny_event_addr_get(void);
  * @param[in]  priority  The approved priority level.
  */
 extern void nrf_802154_wifi_coex_prio_changed(rsch_prio_t priority);
+
+/**
+ * @brief Notifies about any change of request signaled to PTA.
+ *
+ * This function may be called from an ISR in consequence of call to @ref nrf_802154_wifi_coex_prio_request
+ * or from inside of the @ref nrf_802154_wifi_coex_prio_changed function.
+ * This function is called on changes of request signal only. After @ref nrf_802154_wifi_coex_init
+ * no request is signaled to PTA so @ref WFFI_COEX_REQUEST_STATE_NO_REQUEST value is assumed as
+ * request_state value. @ref nrf_802154_wifi_coex_init does not call the
+ * @ref nrf_802154_wifi_coex_request_changed.
+ *
+ * @param curr_request_state Current request signaled to PTA.
+ * @param prev_request_state Previous request signaled to PTA.
+ */
+extern void nrf_802154_wifi_coex_request_changed(
+    nrf_802154_wifi_coex_request_state_t curr_request_state,
+    nrf_802154_wifi_coex_request_state_t prev_request_state);
 
 /**
  * @brief Notifies that access to the medium was granted by the PTA.

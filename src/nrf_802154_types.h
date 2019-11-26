@@ -220,6 +220,8 @@ typedef struct
     uint32_t received_energy_events;
     /**@brief Number of times a preamble was received in receive mode. */
     uint32_t received_preambles;
+    /**@brief Number of coex requests issued to coex arbiter. */
+    uint32_t coex_requests;
 } nrf_802154_stat_counters_t;
 
 /**
