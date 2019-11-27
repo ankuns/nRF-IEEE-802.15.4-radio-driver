@@ -222,6 +222,12 @@ typedef struct
     uint32_t received_preambles;
     /**@brief Number of coex requests issued to coex arbiter. */
     uint32_t coex_requests;
+    /**@brief Number of coex requests issued to coex arbiter that have been granted. */
+    uint32_t coex_granted_requests;
+    /**@brief Number of coex requests issued to coex arbiter that have been denied. */
+    uint32_t coex_denied_requests;
+    /**@brief Number of coex grant activations that have been not requested. */
+    uint32_t coex_unsolicited_grants;
 } nrf_802154_stat_counters_t;
 
 /**

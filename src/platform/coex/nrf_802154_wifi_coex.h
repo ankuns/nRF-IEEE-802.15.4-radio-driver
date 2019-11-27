@@ -36,6 +36,8 @@
 #ifndef NRF_802154_WIFI_COEX_H_
 #define NRF_802154_WIFI_COEX_H_
 
+#include <stdbool.h>
+
 #include "nrf_802154_config.h"
 #include "rsch/nrf_802154_rsch.h"
 
@@ -113,28 +115,34 @@ extern void nrf_802154_wifi_coex_prio_changed(rsch_prio_t priority);
  * @brief Notifies about any change of request signaled to PTA.
  *
  * This function may be called from an ISR in consequence of call to @ref nrf_802154_wifi_coex_prio_request
- * or from inside of the @ref nrf_802154_wifi_coex_prio_changed function.
+ * or from inside of the @ref nrf_802154_wifi_coex_prio_request function.
  * This function is called on changes of request signal only. After @ref nrf_802154_wifi_coex_init
  * no request is signaled to PTA so @ref WFFI_COEX_REQUEST_STATE_NO_REQUEST value is assumed as
  * request_state value. @ref nrf_802154_wifi_coex_init does not call the
  * @ref nrf_802154_wifi_coex_request_changed.
  *
- * @param curr_request_state Current request signaled to PTA.
- * @param prev_request_state Previous request signaled to PTA.
+ * @param[in] curr_request_state    Current request signaled to PTA.
+ * @param[in] prev_request_state    Previous request signaled to PTA.
+ * @param[in] grant_state           State of grant signal just before change to request signal was made.
  */
 extern void nrf_802154_wifi_coex_request_changed(
     nrf_802154_wifi_coex_request_state_t curr_request_state,
-    nrf_802154_wifi_coex_request_state_t prev_request_state);
+    nrf_802154_wifi_coex_request_state_t prev_request_state,
+    bool                                 grant_state);
 
 /**
  * @brief Notifies that access to the medium was granted by the PTA.
+ *
+ * @param[in] curr_request_state    Current request signaled to PTA.
  */
-extern void nrf_802154_wifi_coex_granted(void);
+extern void nrf_802154_wifi_coex_granted(nrf_802154_wifi_coex_request_state_t curr_request_state);
 
 /**
  * @brief Notifies that access to the medium was denied by the PTA.
+ *
+ * @param[in] curr_request_state    Current request signaled to PTA.
  */
-extern void nrf_802154_wifi_coex_denied(void);
+extern void nrf_802154_wifi_coex_denied(nrf_802154_wifi_coex_request_state_t curr_request_state);
 
 /**
  *@}
