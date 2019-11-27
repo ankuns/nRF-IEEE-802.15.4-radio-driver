@@ -752,5 +752,3 @@ void nrf_802154_wifi_coex_request_changed(
         }
     }
 }
-
-
