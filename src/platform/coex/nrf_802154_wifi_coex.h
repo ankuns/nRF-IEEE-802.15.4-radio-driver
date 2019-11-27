@@ -59,11 +59,11 @@ extern "C" {
 typedef enum
 {
     /** @brief No request is being made to PTA. */
-    WFFI_COEX_REQUEST_STATE_NO_REQUEST = 0,
+    WIFI_COEX_REQUEST_STATE_NO_REQUEST = 0,
     /** @brief Requesting receive mode to PTA. */
-    WFFI_COEX_REQUEST_STATE_RX,
+    WIFI_COEX_REQUEST_STATE_RX,
     /** @brief Requesting transmit mode to PTA. */
-    WFFI_COEX_REQUEST_STATE_TX
+    WIFI_COEX_REQUEST_STATE_TX
 } nrf_802154_wifi_coex_request_state_t;
 
 /**
@@ -117,7 +117,7 @@ extern void nrf_802154_wifi_coex_prio_changed(rsch_prio_t priority);
  * This function may be called from an ISR in consequence of call to @ref nrf_802154_wifi_coex_prio_request
  * or from inside of the @ref nrf_802154_wifi_coex_prio_request function.
  * This function is called on changes of request signal only. After @ref nrf_802154_wifi_coex_init
- * no request is signaled to PTA so @ref WFFI_COEX_REQUEST_STATE_NO_REQUEST value is assumed as
+ * no request is signaled to PTA so @ref WIFI_COEX_REQUEST_STATE_NO_REQUEST value is assumed as
  * request_state value. @ref nrf_802154_wifi_coex_init does not call the
  * @ref nrf_802154_wifi_coex_request_changed.
  *

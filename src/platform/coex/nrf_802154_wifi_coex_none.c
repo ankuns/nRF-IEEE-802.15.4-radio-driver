@@ -43,7 +43,7 @@
 void nrf_802154_wifi_coex_init(void)
 {
     // Assume RF Access is always granted.
-    nrf_802154_wifi_coex_granted(WFFI_COEX_REQUEST_STATE_NO_REQUEST);
+    nrf_802154_wifi_coex_granted(WIFI_COEX_REQUEST_STATE_NO_REQUEST);
 }
 
 void nrf_802154_wifi_coex_uninit(void)

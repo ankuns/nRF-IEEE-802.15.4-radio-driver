@@ -1506,8 +1506,8 @@ void nrf_802154_trx_receive_frame_received(void)
             }
             else
             {
-                if (nrf_802154_rsch_approved_prec_get(RSCH_PREC_COEX) <
-                    min_required_rsch_prio(RADIO_STATE_TX_ACK))
+                if (!nrf_802154_rsch_prec_is_approved(RSCH_PREC_COEX,
+                                                      min_required_rsch_prio(RADIO_STATE_TX_ACK)))
                 {
                     nrf_802154_stat_counter_increment(coex_denied_requests);
                 }

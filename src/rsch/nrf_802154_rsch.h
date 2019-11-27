@@ -253,15 +253,6 @@ bool nrf_802154_rsch_timeslot_is_requested(void);
 bool nrf_802154_rsch_prec_is_approved(rsch_prec_t prec, rsch_prio_t prio);
 
 /**
- * @brief Gets value of approved RSCH precondition.
- *
- * @param[in] prec    RSCH precondition to be got.
- *
- * @return Approved priority level of the given precondition.
- */
-rsch_prio_t nrf_802154_rsch_approved_prec_get(rsch_prec_t prec);
-
-/**
  * @brief Gets the remaining time of the currently granted timeslot, in microseconds.
  *
  * @returns  Number of microseconds remaining in the currently granted timeslot.
