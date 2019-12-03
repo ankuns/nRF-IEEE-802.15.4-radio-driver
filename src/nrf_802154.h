@@ -1411,6 +1411,13 @@ void nrf_802154_stat_counters_get(nrf_802154_stat_counters_t * stat_counters);
 void nrf_802154_stat_counters_subtract(const nrf_802154_stat_counters_t * stat_counters);
 
 /**
+ * @brief Get time stamps of events gathered by the last operation.
+ *
+ * @param[out] stat_timestamps Structure that will be filled with current time stamps of events.
+ */
+void nrf_802154_stat_timestamps_get(nrf_802154_stat_timestamps_t * stat_timestamps);
+
+/**
  * @brief Resets current stat counters to 0.
  *
  * @note @ref nrf_802154_stat_counters_get and @ref nrf_802154_stat_counters_reset may lead to

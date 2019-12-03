@@ -66,6 +66,11 @@ void nrf_802154_stat_counters_subtract(const nrf_802154_stat_counters_t * stat_c
     }
 }
 
+void nrf_802154_stat_timestamps_get(nrf_802154_stat_timestamps_t * stat_timestamps)
+{
+    *stat_timestamps = g_nrf_802154_stats.timestamps;
+}
+
 void nrf_802154_stat_counters_reset(void)
 {
     volatile uint32_t * p_dst = (volatile uint32_t *)(&g_nrf_802154_stats.counters);

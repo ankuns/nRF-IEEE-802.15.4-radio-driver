@@ -1151,6 +1151,12 @@ void nrf_802154_trx_transmit_frame(const void                            * p_tra
             nrf_radio_event_clear(NRF_RADIO_EVENT_CCAIDLE);
             ints_to_enable |= NRF_RADIO_INT_CCAIDLE_MASK;
         }
+
+        if ((notifications_mask & TRX_TRANSMIT_NOTIFICATION_CCASTARTED) != 0U)
+        {
+            nrf_radio_event_clear(NRF_RADIO_EVENT_READY);
+            ints_to_enable |= NRF_RADIO_INT_READY_MASK;
+        }
     }
 
     nrf_radio_event_clear(NRF_RADIO_EVENT_ADDRESS);
@@ -1931,6 +1937,19 @@ static void energy_detection_abort(void)
     nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_HIGH);
 }
 
+static void irq_handler_ready(void)
+{
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
+
+    assert(m_trx_state == TRX_STATE_TXFRAME);
+
+    nrf_radio_int_disable(NRF_RADIO_INT_READY_MASK);
+
+    nrf_802154_trx_transmit_frame_ccastarted();
+
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
+}
+
 static void irq_handler_address(void)
 {
     nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
@@ -2089,7 +2108,8 @@ static void txframe_finish_disable_ints(void)
     nrf_radio_int_disable(NRF_RADIO_INT_PHYEND_MASK |
                           NRF_RADIO_INT_CCAIDLE_MASK |
                           NRF_RADIO_INT_CCABUSY_MASK |
-                          NRF_RADIO_INT_ADDRESS_MASK);
+                          NRF_RADIO_INT_ADDRESS_MASK |
+                          NRF_RADIO_INT_READY_MASK);
 
     nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_HIGH);
 }
@@ -2384,6 +2404,14 @@ void nrf_802154_radio_irq_handler(void)
         irq_handler_helper1();
     }
 #endif
+
+    if (nrf_radio_int_enable_check(NRF_RADIO_INT_READY_MASK) &&
+        nrf_radio_event_check(NRF_RADIO_EVENT_READY))
+    {
+        nrf_radio_event_clear(NRF_RADIO_EVENT_READY);
+
+        irq_handler_ready();
+    }
 
     if (nrf_radio_int_enable_check(NRF_RADIO_INT_ADDRESS_MASK) &&
         nrf_radio_event_check(NRF_RADIO_EVENT_ADDRESS))

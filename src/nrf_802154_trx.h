@@ -68,6 +68,9 @@ typedef enum
 
     /**@brief Notification @ref nrf_802154_trx_transmit_frame_ccaidle */
     TRX_TRANSMIT_NOTIFICATION_CCAIDLE = (1U << 1),
+
+    /**@brief Notification @ref nrf_802154_trx_transmit_frame_ccastarted */
+    TRX_TRANSMIT_NOTIFICATION_CCASTARTED = (1U << 2)
 } nrf_802154_trx_transmit_notifications_t;
 
 /**@brief Initializes trx module.
@@ -266,6 +269,9 @@ bool nrf_802154_trx_receive_buffer_set(void * p_receive_buffer);
  *
  * When cca==true:
  * - The radio starts ramp up in receive mode, then it starts cca procedure.
+ *     - The @ref nrf_802154_trx_transmit_frame_ccastarted handler is called from an ISR when
+ *       the RADIO started CCA procedure and @p notifications_mask contained
+ *       @ref TRX_TRANSMIT_NOTIFICATION_CCASTARTED flag.
  * - If cca succeded (channel was idle):
  *     - The RADIO switches to transmit mode (disables receive mode, starts ramp up in transmit mode).
  *     - The RADIO starts sending sending synchronization header (SHR).
@@ -530,6 +536,19 @@ extern void nrf_802154_trx_receive_ack_received(void);
  *     - @ref nrf_802154_trx_disable.
  */
 extern void nrf_802154_trx_receive_ack_crcerror(void);
+
+/**@brief Handler called when a cca operation during transmit attempt started.
+ *
+ * This handler is called from an ISR when:
+ * - transmit operation with cca has been started with a call to @ref nrf_802154_transmit_frame(cca=true).
+ * - transmit operation was started with parameter @c notifications_mask containing
+ *   TRX_TRANSMIT_NOTIFICATION_CCASTARTED
+ * - the RADIO peripheral started CCA operation.
+ *
+ * Implementation is not responsible for anything related to the trx module since it serves as
+ * a pure notification of the channel assessment started event during transmission.
+ */
+extern void nrf_802154_trx_transmit_frame_ccastarted(void);
 
 /**@brief Handler called when a cca operation during transmit attempt was successful.
  *

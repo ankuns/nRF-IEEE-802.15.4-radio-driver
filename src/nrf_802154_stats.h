@@ -34,7 +34,7 @@
 #include "nrf_802154_types.h"
 #include "nrf_802154_utils.h"
 
-/**@brief Increment one of the @ref nrf_802154_stat_counters fields.
+/**@brief Increment one of the @ref nrf_802154_stat_counters_t fields.
  *
  * @param field_name    Identifier of struct member to increment
  */
@@ -49,5 +49,18 @@
         nrf_802154_mcu_critical_exit(mcu_cs);                  \
     }                                                          \
     while (0)
+
+/**@brief Write one of the @ref nrf_802154_stat_timestamps_t fields.
+ *
+ * @param field_name    Identifier of struct member to write
+ * @param value         Value to write
+ */
+#define nrf_802154_stat_timestamp_write(field_name, value)     \
+    do                                                         \
+    {                                                          \
+        extern volatile nrf_802154_stats_t g_nrf_802154_stats; \
+        (g_nrf_802154_stats.timestamps.field_name) = (value);  \
+    }                                                          \
+    while(0)
 
 #endif /* NRF_802154_STATS_H_ */

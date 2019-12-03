@@ -231,12 +231,32 @@ typedef struct
 } nrf_802154_stat_counters_t;
 
 /**
+ * @brief Type of structure holding time stamps of certain events.
+ */
+typedef struct
+{
+    /**@brief Time stamp of last CSMA/CA procedure started. */
+    uint32_t last_csmaca_start_timestamp;
+    /**@brief Time stamp of last CCA start attempt. */
+    uint32_t last_cca_start_timestamp;
+    /**@brief Time stamp of last CCA attempt finished with CCA IDLE (channel was free to transmit). */
+    uint32_t last_cca_idle_timestamp;
+    /**@brief Time stamp when last bit of transmitted frame was sent on the air. */
+    uint32_t last_tx_end_timestamp;
+    /**@brief Time stamp when last bit of acknowledge frame was received */
+    uint32_t last_ack_end_timestamp;
+} nrf_802154_stat_timestamps_t;
+
+/**
  * @brief Type of structure holding statistics about the Radio Driver behavior.
  */
 typedef struct
 {
     /**@brief Statistic counters */
     nrf_802154_stat_counters_t counters;
+
+    /**@brief Time stamps of events */
+    nrf_802154_stat_timestamps_t timestamps;
 } nrf_802154_stats_t;
 
 /**

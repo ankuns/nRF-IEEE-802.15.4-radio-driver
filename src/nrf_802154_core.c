@@ -772,10 +772,19 @@ static nrf_802154_trx_receive_notifications_t make_trx_frame_receive_notificatio
     return result;
 }
 
-/**@brief Makes value to be passed to @ref nrf_802154_trx_transmit_frame as @c notifications_mask parameter */
-static nrf_802154_trx_transmit_notifications_t make_trx_frame_transmit_notification_mask(void)
+/**@brief Makes value to be passed to @ref nrf_802154_trx_transmit_frame as @c notifications_mask parameter
+ *
+ * @param[in] cca   Pass true, if cca operation it to be performed before transmit.
+ *                  Pass false otherwise.
+ */
+static nrf_802154_trx_transmit_notifications_t make_trx_frame_transmit_notification_mask(bool cca)
 {
     nrf_802154_trx_transmit_notifications_t result = TRX_TRANSMIT_NOTIFICATION_NONE;
+
+    if (cca)
+    {
+        result |= (TRX_TRANSMIT_NOTIFICATION_CCASTARTED | TRX_TRANSMIT_NOTIFICATION_CCAIDLE);
+    }
 
     if (nrf_802154_wifi_coex_is_enabled())
     {
@@ -848,6 +857,21 @@ static bool tx_init(const uint8_t * p_data, bool cca, bool disabled_was_triggere
     if (!are_preconditions_met())
     {
         return false;
+    }
+
+    if (cca)
+    {
+        // Configure the timer coordinator to get a time stamp of the READY event.
+        // Note: This event triggers CCASTART, so the time stamp of READY event
+        // is the time stamp when CCA started.
+        nrf_802154_timer_coord_timestamp_prepare(
+            (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_READY));
+    }
+    else
+    {
+        // Configure the timer coordinator to get a time stamp of the PHYEND event.
+        nrf_802154_timer_coord_timestamp_prepare(
+            (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_PHYEND));
     }
 
     nrf_802154_trx_transmit_frame(p_data,
@@ -1608,6 +1632,14 @@ void nrf_802154_trx_transmit_frame_transmitted(void)
 {
     nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
+    uint32_t ts = 0U;
+
+    // TODO: what with result ???
+    nrf_802154_timer_coord_timestamp_get(&ts);
+
+    // ts holds now timestamp of the PHYEND event
+    nrf_802154_stat_timestamp_write(last_tx_end_timestamp, ts);
+
     if (ack_is_requested(mp_tx_data))
     {
         state_set(RADIO_STATE_RX_ACK);
@@ -1615,6 +1647,10 @@ void nrf_802154_trx_transmit_frame_transmitted(void)
         bool rx_buffer_free = rx_buffer_is_available();
 
         nrf_802154_trx_receive_buffer_set(rx_buffer_get());
+
+        // Configure the timer coordinator to get a timestamp of the CRCOK event.
+        nrf_802154_timer_coord_timestamp_prepare(
+            (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_CRCOK));
 
         nrf_802154_trx_receive_ack();
 
@@ -1743,8 +1779,13 @@ void nrf_802154_trx_receive_ack_received(void)
     // CRC of received frame is correct
     uint8_t * p_ack_data = mp_current_rx_buffer->data;
 
+    uint32_t ts = 0U;
+    nrf_802154_timer_coord_timestamp_get(&ts);
+
     if (ack_match_check(mp_tx_data, p_ack_data))
     {
+        nrf_802154_stat_timestamp_write(last_ack_end_timestamp, ts);
+
         rx_buffer_t * p_ack_buffer = mp_current_rx_buffer;
 
         mp_current_rx_buffer->free = false;
@@ -1776,15 +1817,47 @@ void nrf_802154_trx_standalone_cca_finished(bool channel_was_idle)
     nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
+void nrf_802154_trx_transmit_frame_ccastarted(void)
+{
+    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
+
+    uint32_t ts = 0U;
+
+    // TODO: what with result ???
+    nrf_802154_timer_coord_timestamp_get(&ts);
+
+    // Configure the timer coordinator to get a timestamp of the CCAIDLE event
+    nrf_802154_timer_coord_timestamp_prepare(
+        (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_CCAIDLE));
+
+    // Update stat timestamp
+    nrf_802154_stat_timestamp_write(last_cca_start_timestamp, ts);
+
+    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
+}
+
 void nrf_802154_trx_transmit_frame_ccaidle(void)
 {
     nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     assert(m_state == RADIO_STATE_CCA_TX);
     assert(m_trx_transmit_frame_notifications_mask & TRX_TRANSMIT_NOTIFICATION_CCAIDLE);
-    assert(m_coex_tx_request_mode == NRF_802154_COEX_TX_REQUEST_MODE_CCA_DONE);
 
-    nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_TX);
+    uint32_t ts = 0U;
+
+    // TODO: what with result ???
+    nrf_802154_timer_coord_timestamp_get(&ts);
+
+    // Configure the timer coordinator to get a timestamp of the PHYEND event.
+    nrf_802154_timer_coord_timestamp_prepare(
+        (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_PHYEND));
+
+    nrf_802154_stat_timestamp_write(last_cca_idle_timestamp, ts);
+
+    if (m_coex_tx_request_mode == NRF_802154_COEX_TX_REQUEST_MODE_CCA_DONE)
+    {
+        nrf_802154_rsch_crit_sect_prio_request(RSCH_PRIO_TX);
+    }
 
     nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
@@ -1984,7 +2057,7 @@ bool nrf_802154_core_transmit(nrf_802154_term_t              term_lvl,
             {
                 m_coex_tx_request_mode                  = nrf_802154_pib_coex_tx_request_mode_get();
                 m_trx_transmit_frame_notifications_mask =
-                    make_trx_frame_transmit_notification_mask();
+                    make_trx_frame_transmit_notification_mask(cca);
 
                 state_set(cca ? RADIO_STATE_CCA_TX : RADIO_STATE_TX);
                 mp_tx_data = p_data;
