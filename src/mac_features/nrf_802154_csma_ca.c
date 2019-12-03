@@ -50,6 +50,7 @@
 #include "nrf_802154_pib.h"
 #include "nrf_802154_procedures_duration.h"
 #include "nrf_802154_request.h"
+#include "nrf_802154_stats.h"
 #include "mac_features/nrf_802154_frame_parser.h"
 #include "platform/random/nrf_802154_random.h"
 #include "rsch/nrf_802154_rsch.h"
@@ -261,6 +262,9 @@ static bool channel_busy(void)
 void nrf_802154_csma_ca_start(const uint8_t * p_data)
 {
     nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
+
+    uint32_t ts = nrf_802154_timer_sched_time_get();
+    nrf_802154_stat_timestamp_write(last_csmaca_start_timestamp, ts);
 
     assert(!procedure_is_running());
 

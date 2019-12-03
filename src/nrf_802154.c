@@ -55,6 +55,7 @@
 #include "nrf_802154_request.h"
 #include "nrf_802154_rssi.h"
 #include "nrf_802154_rx_buffer.h"
+#include "nrf_802154_stats.h"
 #include "nrf_802154_timer_coord.h"
 #include "nrf_radio.h"
 #include "platform/clock/nrf_802154_clock.h"
@@ -102,39 +103,6 @@ static void tx_buffer_fill(const uint8_t * p_data, uint8_t length)
 }
 
 #endif // !NRF_802154_USE_RAW_API
-
-/**
- * @brief Get timestamp of the last received frame.
- *
- * @note This function increments the returned value by 1 us if the timestamp is equal to the
- *       @ref NRF_802154_NO_TIMESTAMP value to indicate that the timestamp is available.
- *
- * @returns Timestamp [us] of the last received frame or @ref NRF_802154_NO_TIMESTAMP if
- *          the timestamp is inaccurate.
- */
-static uint32_t last_rx_frame_timestamp_get(void)
-{
-#if NRF_802154_FRAME_TIMESTAMP_ENABLED
-    uint32_t timestamp;
-    bool     timestamp_received = nrf_802154_timer_coord_timestamp_get(&timestamp);
-
-    if (!timestamp_received)
-    {
-        timestamp = NRF_802154_NO_TIMESTAMP;
-    }
-    else
-    {
-        if (timestamp == NRF_802154_NO_TIMESTAMP)
-        {
-            timestamp++;
-        }
-    }
-
-    return timestamp;
-#else // NRF_802154_FRAME_TIMESTAMP_ENABLED
-    return NRF_802154_NO_TIMESTAMP;
-#endif  // NRF_802154_FRAME_TIMESTAMP_ENABLED
-}
 
 void nrf_802154_channel_set(uint8_t channel)
 {
@@ -804,7 +772,8 @@ __WEAK void nrf_802154_tx_ack_started(const uint8_t * p_data)
 #if NRF_802154_USE_RAW_API
 __WEAK void nrf_802154_received_raw(uint8_t * p_data, int8_t power, uint8_t lqi)
 {
-    nrf_802154_received_timestamp_raw(p_data, power, lqi, last_rx_frame_timestamp_get());
+    nrf_802154_received_timestamp_raw(p_data, power, lqi,
+                                      nrf_802154_stat_timestamp_read(last_rx_end_timestamp));
 }
 
 __WEAK void nrf_802154_received_timestamp_raw(uint8_t * p_data,
@@ -858,7 +827,7 @@ __WEAK void nrf_802154_transmitted_raw(const uint8_t * p_frame,
                                        int8_t          power,
                                        uint8_t         lqi)
 {
-    uint32_t timestamp = (p_ack == NULL) ? NRF_802154_NO_TIMESTAMP : last_rx_frame_timestamp_get();
+    uint32_t timestamp = (p_ack == NULL) ? NRF_802154_NO_TIMESTAMP : nrf_802154_stat_timestamp_read(last_ack_end_timestamp);
 
     nrf_802154_transmitted_timestamp_raw(p_frame, p_ack, power, lqi, timestamp);
 }

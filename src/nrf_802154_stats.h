@@ -34,6 +34,9 @@
 #include "nrf_802154_types.h"
 #include "nrf_802154_utils.h"
 
+// Don't use directly. Use provided nrf_802154_stat_xxxx API macros.
+extern volatile nrf_802154_stats_t g_nrf_802154_stats;
+
 /**@brief Increment one of the @ref nrf_802154_stat_counters_t fields.
  *
  * @param field_name    Identifier of struct member to increment
@@ -41,7 +44,6 @@
 #define nrf_802154_stat_counter_increment(field_name)          \
     do                                                         \
     {                                                          \
-        extern volatile nrf_802154_stats_t g_nrf_802154_stats; \
         nrf_802154_mcu_critical_state_t    mcu_cs;             \
                                                                \
         nrf_802154_mcu_critical_enter(mcu_cs);                 \
@@ -58,9 +60,12 @@
 #define nrf_802154_stat_timestamp_write(field_name, value)     \
     do                                                         \
     {                                                          \
-        extern volatile nrf_802154_stats_t g_nrf_802154_stats; \
         (g_nrf_802154_stats.timestamps.field_name) = (value);  \
     }                                                          \
     while(0)
+
+/**@brief Read one of the @ref nrf_802154_stat_timestamps_t fields. */
+#define nrf_802154_stat_timestamp_read(field_name)  \
+    (g_nrf_802154_stats.timestamps.field_name)
 
 #endif /* NRF_802154_STATS_H_ */

@@ -245,6 +245,8 @@ typedef struct
     uint32_t last_tx_end_timestamp;
     /**@brief Time stamp when last bit of acknowledge frame was received */
     uint32_t last_ack_end_timestamp;
+    /**@brief Time stamp when last bit of received frame was received. */
+    uint32_t last_rx_end_timestamp;
 } nrf_802154_stat_timestamps_t;
 
 /**
