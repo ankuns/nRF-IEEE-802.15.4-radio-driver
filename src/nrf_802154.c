@@ -827,7 +827,8 @@ __WEAK void nrf_802154_transmitted_raw(const uint8_t * p_frame,
                                        int8_t          power,
                                        uint8_t         lqi)
 {
-    uint32_t timestamp = (p_ack == NULL) ? NRF_802154_NO_TIMESTAMP : nrf_802154_stat_timestamp_read(last_ack_end_timestamp);
+    uint32_t timestamp = (p_ack == NULL) ? NRF_802154_NO_TIMESTAMP : nrf_802154_stat_timestamp_read(
+        last_ack_end_timestamp);
 
     nrf_802154_transmitted_timestamp_raw(p_frame, p_ack, power, lqi, timestamp);
 }

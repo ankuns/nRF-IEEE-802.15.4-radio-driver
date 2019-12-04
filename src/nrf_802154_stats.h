@@ -41,15 +41,15 @@ extern volatile nrf_802154_stats_t g_nrf_802154_stats;
  *
  * @param field_name    Identifier of struct member to increment
  */
-#define nrf_802154_stat_counter_increment(field_name)          \
-    do                                                         \
-    {                                                          \
-        nrf_802154_mcu_critical_state_t    mcu_cs;             \
-                                                               \
-        nrf_802154_mcu_critical_enter(mcu_cs);                 \
-        (g_nrf_802154_stats.counters.field_name)++;            \
-        nrf_802154_mcu_critical_exit(mcu_cs);                  \
-    }                                                          \
+#define nrf_802154_stat_counter_increment(field_name) \
+    do                                                \
+    {                                                 \
+        nrf_802154_mcu_critical_state_t mcu_cs;       \
+                                                      \
+        nrf_802154_mcu_critical_enter(mcu_cs);        \
+        (g_nrf_802154_stats.counters.field_name)++;   \
+        nrf_802154_mcu_critical_exit(mcu_cs);         \
+    }                                                 \
     while (0)
 
 /**@brief Write one of the @ref nrf_802154_stat_timestamps_t fields.
@@ -57,15 +57,15 @@ extern volatile nrf_802154_stats_t g_nrf_802154_stats;
  * @param field_name    Identifier of struct member to write
  * @param value         Value to write
  */
-#define nrf_802154_stat_timestamp_write(field_name, value)     \
-    do                                                         \
-    {                                                          \
-        (g_nrf_802154_stats.timestamps.field_name) = (value);  \
-    }                                                          \
-    while(0)
+#define nrf_802154_stat_timestamp_write(field_name, value)    \
+    do                                                        \
+    {                                                         \
+        (g_nrf_802154_stats.timestamps.field_name) = (value); \
+    }                                                         \
+    while (0)
 
 /**@brief Read one of the @ref nrf_802154_stat_timestamps_t fields. */
-#define nrf_802154_stat_timestamp_read(field_name)  \
+#define nrf_802154_stat_timestamp_read(field_name) \
     (g_nrf_802154_stats.timestamps.field_name)
 
 #endif /* NRF_802154_STATS_H_ */

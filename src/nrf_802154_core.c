@@ -1532,6 +1532,7 @@ void nrf_802154_trx_receive_frame_received(void)
         nrf_802154_stat_counter_increment(received_frames);
 
         uint32_t ts = timer_coord_timestamp_get();
+
         nrf_802154_stat_timestamp_write(last_rx_end_timestamp, ts);
 
         bool send_ack = false;
@@ -1826,6 +1827,7 @@ void nrf_802154_trx_receive_ack_received(void)
     if (ack_match_check(mp_tx_data, p_ack_data))
     {
         uint32_t ts = timer_coord_timestamp_get();
+
         nrf_802154_stat_timestamp_write(last_ack_end_timestamp, ts);
 
         rx_buffer_t * p_ack_buffer = mp_current_rx_buffer;

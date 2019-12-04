@@ -255,7 +255,7 @@ typedef struct
 typedef struct
 {
     /**@brief Statistic counters */
-    nrf_802154_stat_counters_t counters;
+    nrf_802154_stat_counters_t   counters;
 
     /**@brief Time stamps of events */
     nrf_802154_stat_timestamps_t timestamps;
