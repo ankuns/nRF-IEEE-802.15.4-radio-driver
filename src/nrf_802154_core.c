@@ -243,6 +243,7 @@ static uint32_t timer_coord_timestamp_get(void)
 
     return timestamp;
 }
+
 #endif
 
 static void received_frame_notify(uint8_t * p_data)
