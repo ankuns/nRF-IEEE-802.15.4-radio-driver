@@ -38,20 +38,20 @@
 /**@brief Structure holding statistics about the Radio Driver behavior. */
 volatile nrf_802154_stats_t g_nrf_802154_stats;
 
-void nrf_802154_stats_get(nrf_802154_stats_t * stats)
+void nrf_802154_stats_get(nrf_802154_stats_t * p_stats)
 {
-    *stats = g_nrf_802154_stats;
+    *p_stats = g_nrf_802154_stats;
 }
 
-void nrf_802154_stat_counters_get(nrf_802154_stat_counters_t * stat_counters)
+void nrf_802154_stat_counters_get(nrf_802154_stat_counters_t * p_stat_counters)
 {
-    *stat_counters = g_nrf_802154_stats.counters;
+    *p_stat_counters = g_nrf_802154_stats.counters;
 }
 
-void nrf_802154_stat_counters_subtract(const nrf_802154_stat_counters_t * stat_counters)
+void nrf_802154_stat_counters_subtract(const nrf_802154_stat_counters_t * p_stat_counters)
 {
     volatile uint32_t * p_dst = (volatile uint32_t *)(&g_nrf_802154_stats.counters);
-    const uint32_t    * p_src = (const uint32_t *)stat_counters;
+    const uint32_t    * p_src = (const uint32_t *)p_stat_counters;
 
     for (size_t i = 0; i < NUMBER_OF_STAT_COUNTERS; ++i)
     {
@@ -66,9 +66,9 @@ void nrf_802154_stat_counters_subtract(const nrf_802154_stat_counters_t * stat_c
     }
 }
 
-void nrf_802154_stat_timestamps_get(nrf_802154_stat_timestamps_t * stat_timestamps)
+void nrf_802154_stat_timestamps_get(nrf_802154_stat_timestamps_t * p_stat_timestamps)
 {
-    *stat_timestamps = g_nrf_802154_stats.timestamps;
+    *p_stat_timestamps = g_nrf_802154_stats.timestamps;
 }
 
 void nrf_802154_stat_counters_reset(void)

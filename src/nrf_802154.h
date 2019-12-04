@@ -1386,18 +1386,18 @@ nrf_802154_coex_tx_request_mode_t nrf_802154_coex_tx_request_mode_get(void);
 /**
  * @brief Gets current statistics.
  *
- * @param[out] stats    Structure that will be filled with current stats values.
+ * @param[out] p_stats    Structure that will be filled with current stats values.
  */
-void nrf_802154_stats_get(nrf_802154_stats_t * stats);
+void nrf_802154_stats_get(nrf_802154_stats_t * p_stats);
 
 /**
  * @brief Get current statistics.
  *
  * @note This returns part of information returned by @ref nrf_802154_stats_get
  *
- * @param[out] stat_counters    Structure that will be filled with current stats counter values.
+ * @param[out] p_stat_counters    Structure that will be filled with current stats counter values.
  */
-void nrf_802154_stat_counters_get(nrf_802154_stat_counters_t * stat_counters);
+void nrf_802154_stat_counters_get(nrf_802154_stat_counters_t * p_stat_counters);
 
 /**
  * @brief Decreases current statistic counter values by the provided ones.
@@ -1405,17 +1405,17 @@ void nrf_802154_stat_counters_get(nrf_802154_stat_counters_t * stat_counters);
  * This function is intended to be called together with @ref nrf_802154_stats_get
  * to avoid missing any counted events.
  *
- * @param[in] stat_counters Current stat counter values will be decreased by values provided
- *                          behind this pointer.
+ * @param[in] p_stat_counters Current stat counter values will be decreased by values provided
+ *                            behind this pointer.
  */
-void nrf_802154_stat_counters_subtract(const nrf_802154_stat_counters_t * stat_counters);
+void nrf_802154_stat_counters_subtract(const nrf_802154_stat_counters_t * p_stat_counters);
 
 /**
  * @brief Get time stamps of events gathered by the last operation.
  *
- * @param[out] stat_timestamps Structure that will be filled with current time stamps of events.
+ * @param[out] p_stat_timestamps Structure that will be filled with current time stamps of events.
  */
-void nrf_802154_stat_timestamps_get(nrf_802154_stat_timestamps_t * stat_timestamps);
+void nrf_802154_stat_timestamps_get(nrf_802154_stat_timestamps_t * p_stat_timestamps);
 
 /**
  * @brief Resets current stat counters to 0.

@@ -1863,11 +1863,9 @@ void nrf_802154_trx_standalone_cca_finished(bool channel_was_idle)
 
 void nrf_802154_trx_transmit_frame_ccastarted(void)
 {
-    nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
-
+    // This handler provided by trx is never called because parameter notifications_mask
+    // of the nrf_802154_trx_transmit_frame does not contain TRX_TRANSMIT_NOTIFICATION_CCASTARTED.
     assert(false);
-
-    nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
 }
 
 void nrf_802154_trx_transmit_frame_ccaidle(void)
