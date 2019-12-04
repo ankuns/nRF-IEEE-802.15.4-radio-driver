@@ -213,6 +213,7 @@ static uint8_t lqi_get(const uint8_t * p_data)
     return (uint8_t)lqi;
 }
 
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
 /**
  * @brief Get timestamp made by timer coordinator.
  *
@@ -224,7 +225,6 @@ static uint8_t lqi_get(const uint8_t * p_data)
  */
 static uint32_t timer_coord_timestamp_get(void)
 {
-#if NRF_802154_FRAME_TIMESTAMP_ENABLED
     uint32_t timestamp;
     bool     timestamp_received = nrf_802154_timer_coord_timestamp_get(&timestamp);
 
@@ -242,10 +242,8 @@ static uint32_t timer_coord_timestamp_get(void)
     }
 
     return timestamp;
-#else // NRF_802154_FRAME_TIMESTAMP_ENABLED
-    return NRF_802154_NO_TIMESTAMP;
-#endif  // NRF_802154_FRAME_TIMESTAMP_ENABLED
 }
+#endif
 
 static void received_frame_notify(uint8_t * p_data)
 {
@@ -816,10 +814,12 @@ static nrf_802154_trx_transmit_notifications_t make_trx_frame_transmit_notificat
 {
     nrf_802154_trx_transmit_notifications_t result = TRX_TRANSMIT_NOTIFICATION_NONE;
 
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
     if (cca)
     {
         result |= TRX_TRANSMIT_NOTIFICATION_CCAIDLE;
     }
+#endif
 
     if (nrf_802154_wifi_coex_is_enabled())
     {
@@ -867,9 +867,11 @@ static void rx_init(bool disabled_was_triggered)
 
     nrf_802154_trx_receive_frame(BCC_INIT / 8U, m_trx_receive_frame_notifications_mask);
 
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
     // Configure the timer coordinator to get a timestamp of the CRCOK event.
     nrf_802154_timer_coord_timestamp_prepare(
         (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_CRCOK));
+#endif
 
     // Find RX buffer if none available
     if (!free_buffer)
@@ -894,6 +896,7 @@ static bool tx_init(const uint8_t * p_data, bool cca, bool disabled_was_triggere
         return false;
     }
 
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
     if (cca)
     {
         // Configure the timer coordinator to get a time stamp of the READY event.
@@ -908,6 +911,7 @@ static bool tx_init(const uint8_t * p_data, bool cca, bool disabled_was_triggere
         nrf_802154_timer_coord_timestamp_prepare(
             (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_PHYEND));
     }
+#endif
 
     m_flags.tx_with_cca = cca;
     nrf_802154_trx_transmit_frame(p_data,
@@ -1531,9 +1535,11 @@ void nrf_802154_trx_receive_frame_received(void)
     {
         nrf_802154_stat_counter_increment(received_frames);
 
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
         uint32_t ts = timer_coord_timestamp_get();
 
         nrf_802154_stat_timestamp_write(last_rx_end_timestamp, ts);
+#endif
 
         bool send_ack = false;
 
@@ -1672,6 +1678,7 @@ void nrf_802154_trx_transmit_frame_transmitted(void)
 {
     nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
     uint32_t ts = timer_coord_timestamp_get();
 
     // ts holds now timestamp of the PHYEND event
@@ -1684,6 +1691,7 @@ void nrf_802154_trx_transmit_frame_transmitted(void)
 
         nrf_802154_stat_timestamp_write(last_cca_idle_timestamp, ts);
     }
+#endif
 
     if (ack_is_requested(mp_tx_data))
     {
@@ -1693,9 +1701,11 @@ void nrf_802154_trx_transmit_frame_transmitted(void)
 
         nrf_802154_trx_receive_buffer_set(rx_buffer_get());
 
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
         // Configure the timer coordinator to get a timestamp of the CRCOK event.
         nrf_802154_timer_coord_timestamp_prepare(
             (uint32_t)nrf_radio_event_address_get(NRF_RADIO_EVENT_CRCOK));
+#endif
 
         nrf_802154_trx_receive_ack();
 
@@ -1826,9 +1836,11 @@ void nrf_802154_trx_receive_ack_received(void)
 
     if (ack_match_check(mp_tx_data, p_ack_data))
     {
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
         uint32_t ts = timer_coord_timestamp_get();
 
         nrf_802154_stat_timestamp_write(last_ack_end_timestamp, ts);
+#endif
 
         rx_buffer_t * p_ack_buffer = mp_current_rx_buffer;
 
@@ -1875,6 +1887,7 @@ void nrf_802154_trx_transmit_frame_ccaidle(void)
     assert(m_state == RADIO_STATE_CCA_TX);
     assert(m_trx_transmit_frame_notifications_mask & TRX_TRANSMIT_NOTIFICATION_CCAIDLE);
 
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
     uint32_t ts = timer_coord_timestamp_get();
 
     // Configure the timer coordinator to get a timestamp of the PHYEND event.
@@ -1883,6 +1896,7 @@ void nrf_802154_trx_transmit_frame_ccaidle(void)
 
     // Update stat timestamp of CCASTART event
     nrf_802154_stat_timestamp_write(last_cca_start_timestamp, ts);
+#endif
 
     if (m_coex_tx_request_mode == NRF_802154_COEX_TX_REQUEST_MODE_CCA_DONE)
     {

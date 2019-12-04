@@ -263,9 +263,11 @@ void nrf_802154_csma_ca_start(const uint8_t * p_data)
 {
     nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
+#if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
     uint32_t ts = nrf_802154_timer_sched_time_get();
 
     nrf_802154_stat_timestamp_write(last_csmaca_start_timestamp, ts);
+#endif
 
     assert(!procedure_is_running());
 
