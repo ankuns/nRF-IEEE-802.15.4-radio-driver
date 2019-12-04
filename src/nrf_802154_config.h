@@ -208,6 +208,7 @@ extern "C" {
  * Enabling this feature enables the functions @ref nrf_802154_received_timestamp_raw,
  * @ref nrf_802154_received_timestamp, @ref nrf_802154_transmitted_timestamp_raw, and
  * @ref nrf_802154_transmitted_timestamp, which add timestamps to the frames received.
+ * This option also enables timestamping in stats.
  *
  */
 #ifndef NRF_802154_FRAME_TIMESTAMP_ENABLED
