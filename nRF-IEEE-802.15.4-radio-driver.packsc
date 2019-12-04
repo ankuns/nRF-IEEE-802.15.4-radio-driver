@@ -17,6 +17,7 @@
             "src/nrf_802154_request.h",
             "src/nrf_802154_rssi.h",
             "src/nrf_802154_rx_buffer.h",
+            "src/nrf_802154_stats.h",
             "src/nrf_802154_timer_coord.h",
             "src/mac_features/nrf_802154_filter.h",
             "src/mac_features/nrf_802154_frame_parser.h",
@@ -215,6 +216,7 @@
                     "cmock\\mock_nrf_802154_rsch_crit_sect.c",
                     "cmock\\mock_nrf_802154_rssi.c",
                     "cmock\\mock_nrf_802154_rx_buffer.c",
+                    "cmock\\mock_nrf_802154_stats.c",
                     "cmock\\mock_nrf_802154_timer_coord.c",
                     "cmock\\mock_nrf_802154_timer_sched.c"
                 ],
@@ -252,6 +254,7 @@
                     "cmock\\mock_nrf_802154_rsch_crit_sect.c",
                     "cmock\\mock_nrf_802154_rssi.c",
                     "cmock\\mock_nrf_802154_rx_buffer.c",
+                    "cmock\\mock_nrf_802154_stats.c",
                     "cmock\\mock_nrf_802154_timer_coord.c"
                 ],
                 "_includes": [

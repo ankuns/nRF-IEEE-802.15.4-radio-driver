@@ -50,6 +50,7 @@
 #include "mock_nrf_802154_rsch_crit_sect.h"
 #include "mock_nrf_802154_rssi.h"
 #include "mock_nrf_802154_rx_buffer.h"
+#include "mock_nrf_802154_stats.h"
 #include "mock_nrf_802154_timer_coord.h"
 #include "mock_nrf_802154_timer_sched.h"
 
@@ -69,6 +70,8 @@
 #define CSMACA_MAX_BACKOFFS_MAXIMUM 5  ///< The maximum number of the CSMA-CA backoffs allowed by the protocol specification
 
 #define TEST_FRAME_LENGTH           16 ///< Length of the test frame in bytes.
+
+#define CSMACA_START_TIMESTAMP      0xC0C1C2C3U
 
 static const uint8_t mp_test_data[TEST_FRAME_LENGTH] =
 {
@@ -163,6 +166,8 @@ static void mock_last_backoff_failed(void)
 
 static void mock_csma_ca_start(void)
 {
+    nrf_802154_timer_sched_time_get_ExpectAndReturn(CSMACA_START_TIMESTAMP);
+    nrf_802154_stat_timestamp_write_func_Expect(offsetof(nrf_802154_stat_timestamps_t, last_csmaca_start_timestamp), CSMACA_START_TIMESTAMP);
     nrf_802154_pib_csmaca_min_be_get_ExpectAndReturn(m_test_params.min_be);
     mock_random_backoff_start();
     nrf_802154_csma_ca_start(mp_test_data);

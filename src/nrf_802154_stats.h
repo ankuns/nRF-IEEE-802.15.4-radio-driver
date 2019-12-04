@@ -34,6 +34,7 @@
 #include "nrf_802154_types.h"
 #include "nrf_802154_utils.h"
 
+#if !defined(UNIT_TEST)
 // Don't use directly. Use provided nrf_802154_stat_xxxx API macros.
 extern volatile nrf_802154_stats_t g_nrf_802154_stats;
 
@@ -67,5 +68,24 @@ extern volatile nrf_802154_stats_t g_nrf_802154_stats;
 /**@brief Read one of the @ref nrf_802154_stat_timestamps_t fields. */
 #define nrf_802154_stat_timestamp_read(field_name) \
     (g_nrf_802154_stats.timestamps.field_name)
+
+#else // !defined(UNIT_TEST)
+
+#define nrf_802154_stat_counter_increment(field_name) \
+    nrf_802154_stat_counter_increment_func(offsetof(nrf_802154_stat_counters_t, field_name))
+
+#define nrf_802154_stat_timestamp_write(field_name, value)                                   \
+    nrf_802154_stat_timestamp_write_func(offsetof(nrf_802154_stat_timestamps_t, field_name), \
+                                         (value))
+
+#define nrf_802154_stat_timestamp_read(field_name) \
+    nrf_802154_stat_timestamp_read_func(offsetof(nrf_802154_stat_timestamps_t, field_name))
+
+// Functions for which mocks are generated.
+void nrf_802154_stat_counter_increment_func(size_t field_offset);
+void nrf_802154_stat_timestamp_write_func(size_t field_offset, uint32_t value);
+uint32_t nrf_802154_stat_timestamp_read_func(size_t field_offset);
+
+#endif // !defined(UNIT_TEST)
 
 #endif /* NRF_802154_STATS_H_ */
