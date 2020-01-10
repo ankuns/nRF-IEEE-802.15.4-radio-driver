@@ -150,38 +150,6 @@
 #define EVENT_LAT             23       ///< END event latency [us]
 #define MAX_RXRAMPDOWN_CYCLES 32       ///< Maximum number of cycles that RX ramp-down might take
 
-typedef enum
-{
-    TRX_STATE_DISABLED = 0,
-    TRX_STATE_IDLE,
-    TRX_STATE_GOING_IDLE,
-    TRX_STATE_RXFRAME,
-
-    /* PPIS disabled deconfigured
-     * RADIO is DISABLED, RXDISABLE
-     * RADIO shorts are 0
-     * TIMER is running
-     * FEM is going to powered or is powered depending if RADIO reached DISABLED
-     */
-    TRX_STATE_RXFRAME_FINISHED,
-
-    TRX_STATE_RXACK,
-    TRX_STATE_TXFRAME,
-    TRX_STATE_TXACK,
-    TRX_STATE_STANDALONE_CCA,
-    TRX_STATE_CONTINUOUS_CARRIER,
-    TRX_STATE_MODULATED_CARRIER,
-    TRX_STATE_ENERGY_DETECTION,
-
-    /* PPIS disabled deconfigured
-     * RADIO is DISABLED, TXDISABLE, RXDISABLE
-     * RADIO shorts are 0
-     * TIMER is stopped
-     * FEM is going to powered or is powered depending if RADIO reached DISABLED
-     */
-    TRX_STATE_FINISHED
-} trx_state_t;
-
 /// Common parameters for the FAL handling.
 static const nrf_802154_fal_event_t m_deactivate_on_disable =
 {
@@ -1538,6 +1506,11 @@ void nrf_802154_trx_abort(void)
     }
 
     nrf_802154_log_function_exit(NRF_802154_LOG_VERBOSITY_LOW);
+}
+
+trx_state_t nrf_802154_trx_state_get(void)
+{
+    return m_trx_state;
 }
 
 static void go_idle_from_state_finished(void)

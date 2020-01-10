@@ -251,6 +251,8 @@ typedef struct
 
 /**
  * @brief Type of structure holding total times spent in certain states.
+ *
+ * This structure holds fields of @c uint64_t type only.
  */
 typedef struct
 {

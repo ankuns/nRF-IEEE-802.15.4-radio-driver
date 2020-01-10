@@ -216,6 +216,19 @@ extern "C" {
 #endif
 
 /**
+ * @def NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED
+ *
+ * If measurement of total time spent in certain states is to be calculated.
+ *
+ * This option can be enabled when @ref NRF_802154_FRAME_TIMESTAMP_ENABLED is 1
+ * and @ref NRF_802154_DISABLE_BCC_MATCHING is 0.
+ */
+#ifndef NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED
+#define NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED  \
+    (1 && NRF_802154_FRAME_TIMESTAMP_ENABLED && !NRF_802154_DISABLE_BCC_MATCHING)
+#endif
+
+/**
  * @def NRF_802154_DELAYED_TRX_ENABLED
  *
  * If the delayed transmission and the receive window features are available.

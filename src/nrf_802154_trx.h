@@ -47,6 +47,39 @@
 extern "C" {
 #endif
 
+/**@brief States of the FSM of the TRX module. */
+typedef enum
+{
+    TRX_STATE_DISABLED = 0,
+    TRX_STATE_IDLE,
+    TRX_STATE_GOING_IDLE,
+    TRX_STATE_RXFRAME,
+
+    /* PPIS disabled deconfigured
+     * RADIO is DISABLED, RXDISABLE
+     * RADIO shorts are 0
+     * TIMER is running
+     * FEM is going to powered or is powered depending if RADIO reached DISABLED
+     */
+    TRX_STATE_RXFRAME_FINISHED,
+
+    TRX_STATE_RXACK,
+    TRX_STATE_TXFRAME,
+    TRX_STATE_TXACK,
+    TRX_STATE_STANDALONE_CCA,
+    TRX_STATE_CONTINUOUS_CARRIER,
+    TRX_STATE_MODULATED_CARRIER,
+    TRX_STATE_ENERGY_DETECTION,
+
+    /* PPIS disabled deconfigured
+     * RADIO is DISABLED, TXDISABLE, RXDISABLE
+     * RADIO shorts are 0
+     * TIMER is stopped
+     * FEM is going to powered or is powered depending if RADIO reached DISABLED
+     */
+    TRX_STATE_FINISHED
+} trx_state_t;
+
 /**@brief Notifications that can be enabled for @ref nrf_802154_trx_receive_frame operation. */
 typedef enum
 {
@@ -384,6 +417,11 @@ void nrf_802154_trx_energy_detection(uint32_t ed_count);
  * commencement of a next operation.
  */
 void nrf_802154_trx_abort(void);
+
+/**@brief Gets current state of the TRX module.
+ *
+ * @return Current state of the TRX module.*/
+trx_state_t nrf_802154_trx_state_get(void);
 
 /**@brief Handler called at the beginning of a ACK reception.
  *
