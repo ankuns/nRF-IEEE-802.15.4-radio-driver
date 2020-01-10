@@ -80,7 +80,7 @@ extern volatile nrf_802154_stat_totals_t g_nrf_802154_stat_totals;
         (g_nrf_802154_stat_totals.field_name) += (value);   \
         nrf_802154_mcu_critical_exit(mcu_cs);               \
     }                                                       \
-    while(0)
+    while (0)
 
 extern void nrf_802154_stat_totals_get_notify(void);
 

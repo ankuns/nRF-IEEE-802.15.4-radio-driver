@@ -64,8 +64,9 @@
                                            IMM_ACK_SYMBOLS)
 
 /**@brief Time (in microseconds) necessary to send the longest possible 802.15.4 frame */
-#define MAX_PHY_FRAME_TIME_US             PHY_US_TIME_FROM_SYMBOLS(PHY_SHR_SYMBOLS + \
-                                          PHY_SYMBOLS_FROM_OCTETS(PHR_SIZE + MAX_PACKET_SIZE))
+#define MAX_PHY_FRAME_TIME_US \
+    PHY_US_TIME_FROM_SYMBOLS( \
+        PHY_SHR_SYMBOLS + PHY_SYMBOLS_FROM_OCTETS(PHR_SIZE + MAX_PACKET_SIZE))
 
 __STATIC_INLINE uint16_t nrf_802154_tx_duration_get(uint8_t psdu_length,
                                                     bool    cca,

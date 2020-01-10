@@ -36,7 +36,6 @@
 #define NUMBER_OF_STAT_COUNTERS (sizeof(nrf_802154_stat_counters_t) / sizeof(uint32_t))
 #define NUMBER_OF_STAT_TOTALS   (sizeof(nrf_802154_stat_totals_t) / sizeof(uint64_t))
 
-
 /**@brief Structure holding statistics about the Radio Driver behavior. */
 volatile nrf_802154_stats_t g_nrf_802154_stats;
 
