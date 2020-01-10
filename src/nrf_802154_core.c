@@ -1860,6 +1860,12 @@ void nrf_802154_trx_transmit_ack_transmitted(void)
 
     assert(m_state == RADIO_STATE_TX_ACK);
 
+#if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
+    uint32_t t_transmit = TX_RAMP_UP_TIME + nrf_802154_frame_duration_get(mp_ack[PHR_OFFSET], true, true);
+
+    nrf_802154_stat_totals_increment(total_transmit_time, t_transmit);
+#endif
+
     uint8_t * p_received_data = mp_current_rx_buffer->data;
 
     // Current buffer used for receive operation will be passed to the application
@@ -1878,6 +1884,11 @@ void nrf_802154_trx_transmit_frame_transmitted(void)
 {
     nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
+#if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
+    uint32_t t_listening = 0U;
+    uint32_t t_transmit  = 0U;
+#endif
+
 #if (NRF_802154_FRAME_TIMESTAMP_ENABLED)
     uint32_t ts = timer_coord_timestamp_get();
 
@@ -1892,7 +1903,25 @@ void nrf_802154_trx_transmit_frame_transmitted(void)
         ts -= nrf_802154_frame_duration_get(mp_tx_data[0], true, true) + RX_TX_TURNAROUND_TIME;
 
         nrf_802154_stat_timestamp_write(last_cca_idle_timestamp, ts);
+
+#if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
+        t_listening += RX_RAMP_UP_TIME + (ts - nrf_802154_stat_timestamp_read(last_cca_start_timestamp));
+        t_transmit  += RX_TX_TURNAROUND_TIME;
+#endif
     }
+    else
+    {
+#if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
+        t_transmit += TX_RAMP_UP_TIME;
+#endif
+    }
+
+#if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
+    t_transmit += nrf_802154_frame_duration_get(mp_tx_data[PHR_OFFSET], true, true);
+
+    nrf_802154_stat_totals_increment(total_listening_time, t_listening);
+    nrf_802154_stat_totals_increment(total_transmit_time, t_transmit);
+#endif
 #endif
 
     if (ack_is_requested(mp_tx_data))
@@ -2134,6 +2163,18 @@ void nrf_802154_trx_transmit_frame_ccabusy(void)
     nrf_802154_log_function_enter(NRF_802154_LOG_VERBOSITY_LOW);
 
     nrf_802154_stat_counter_increment(cca_failed_attempts);
+
+    /* In case of sliding window cca, where time taken by cca can be variable,
+     * there is no possibility that this handler is called, as the cca is restarted automatically.
+     * Sliding window cca is ended either by success or by trx_abort.
+     *
+     * In case of ordinary cca, the time of cca is constant. */
+
+#if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
+    uint32_t t_listening = RX_RAMP_UP_TIME + PHY_US_TIME_FROM_SYMBOLS(A_CCA_DURATION_SYMBOLS);
+
+    nrf_802154_stat_totals_increment(total_listening_time, t_listening);
+#endif
 
     state_set(RADIO_STATE_RX);
     rx_init(true);
