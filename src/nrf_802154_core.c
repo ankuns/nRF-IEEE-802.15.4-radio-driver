@@ -738,6 +738,7 @@ static bool operation_terminated_update_total_times_is_required(trx_state_t trx_
             return false;
     }
 }
+
 #endif
 
 static void trx_abort(void)
@@ -745,6 +746,7 @@ static void trx_abort(void)
 #if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
     trx_state_t trx_state       = nrf_802154_trx_state_get();
     bool        update_required = operation_terminated_update_total_times_is_required(trx_state);
+
 #endif
 
     nrf_802154_trx_abort();
@@ -764,6 +766,7 @@ static void trx_disable(void)
 #if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
     trx_state_t trx_state       = nrf_802154_trx_state_get();
     bool        update_required = operation_terminated_update_total_times_is_required(trx_state);
+
 #endif
 
     nrf_802154_trx_disable();
