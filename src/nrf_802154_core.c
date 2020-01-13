@@ -723,37 +723,61 @@ static void operation_terminated_update_total_times(trx_state_t trx_state, uint3
     }
 }
 
+static bool operation_terminated_update_total_times_is_required(trx_state_t trx_state)
+{
+    switch (trx_state)
+    {
+        case TRX_STATE_RXFRAME:
+        case TRX_STATE_RXACK:
+            /* These cases must be in-sync with implementation of
+             * operation_terminated_update_total_times
+             */
+            return true;
+
+        default:
+            return false;
+    }
+}
+
 #endif
 
 static void trx_abort(void)
 {
 #if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
-    trx_state_t trx_state = nrf_802154_trx_state_get();
+    trx_state_t trx_state       = nrf_802154_trx_state_get();
+    bool        update_required = operation_terminated_update_total_times_is_required(trx_state);
 
 #endif
 
     nrf_802154_trx_abort();
 
 #if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
-    uint32_t timestamp = nrf_802154_hp_timer_current_time_get();
+    if (update_required)
+    {
+        uint32_t timestamp = nrf_802154_hp_timer_current_time_get();
 
-    operation_terminated_update_total_times(trx_state, timestamp);
+        operation_terminated_update_total_times(trx_state, timestamp);
+    }
 #endif
 }
 
 static void trx_disable(void)
 {
 #if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
-    trx_state_t trx_state = nrf_802154_trx_state_get();
+    trx_state_t trx_state       = nrf_802154_trx_state_get();
+    bool        update_required = operation_terminated_update_total_times_is_required(trx_state);
 
 #endif
 
     nrf_802154_trx_disable();
 
 #if (NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED)
-    uint32_t timestamp = nrf_802154_hp_timer_current_time_get();
+    if (update_required)
+    {
+        uint32_t timestamp = nrf_802154_hp_timer_current_time_get();
 
-    operation_terminated_update_total_times(trx_state, timestamp);
+        operation_terminated_update_total_times(trx_state, timestamp);
+    }
 #endif
 }
 
