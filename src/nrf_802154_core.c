@@ -147,7 +147,7 @@ static nrf_802154_coex_tx_request_mode_t m_coex_tx_request_mode;
 #if NRF_802154_DISABLE_BCC_MATCHING
 #error NRF_802154_DISABLE_BCC_MATCHING != 0 when NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED != 0
 #endif
-#endif
+#endif // NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED
 
 #if NRF_802154_TOTAL_TIMES_MEASUREMENT_ENABLED
 static uint32_t m_listening_start_hp_timestamp;
@@ -1627,7 +1627,7 @@ void nrf_802154_stat_totals_get_notify(void)
         }
         else
         {
-            /* To little time passed since m_listening_start_hp_timestamp, we don't know
+            /* Too little time passed since m_listening_start_hp_timestamp, we don't know
              * if frame is being received now until it is received. */
         }
     }

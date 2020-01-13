@@ -1429,7 +1429,7 @@ void nrf_802154_stat_counters_reset(void);
 /**
  * @brief Get total times spent in certain states.
  *
- * @param[out] p_stat_totals Structure than will be filled with times spent in certain states
+ * @param[out] p_stat_totals Structure that will be filled with times spent in certain states
  *                           until now.
  */
 void nrf_802154_stat_totals_get(nrf_802154_stat_totals_t * p_stat_totals);
