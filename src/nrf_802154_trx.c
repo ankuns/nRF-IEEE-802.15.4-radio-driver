@@ -1554,7 +1554,7 @@ bool nrf_802154_trx_go_idle(void)
 
         case TRX_STATE_RXFRAME_FINISHED:
             nrf_timer_task_trigger(NRF_802154_TIMER_INSTANCE, NRF_TIMER_TASK_SHUTDOWN);
-        /* fallthrough */
+        /* Fallthrough */
 
         case TRX_STATE_FINISHED:
             go_idle_from_state_finished();

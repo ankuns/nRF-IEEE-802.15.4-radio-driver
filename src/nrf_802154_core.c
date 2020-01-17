@@ -1461,7 +1461,7 @@ void nrf_802154_trx_receive_frame_started(void)
     {
         case NRF_802154_COEX_RX_REQUEST_MODE_ENERGY_DETECTION:
             nrf_802154_timer_sched_remove(&m_rx_prestarted_timer, NULL);
-        /* no break */
+        /* Fallthrough */
 
         case NRF_802154_COEX_RX_REQUEST_MODE_PREAMBLE:
             /* Request boosted preconditions */
